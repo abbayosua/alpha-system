@@ -1,0 +1,231 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SAKSI
+  ADMIN
+  ADMIN_KEUANGAN
+}
+
+enum AssignmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum CheckInType {
+  MORNING
+  FINAL
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  DISMISSED
+}
+
+enum PaymentStatus {
+  PENDING
+  READY_FOR_PAYMENT
+  APPROVED
+  DISBURSED
+  FAILED
+  CANCELLED
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  phone          String?
+  password       String
+  name           String
+  role           Role      @default(SAKSI)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Saksi-specific fields
+  ktpNumber      String?   @unique
+  ktpPhoto       String?
+  bankName       String?
+  bankAccount    String?
+  bankHolderName String?
+  eWalletType    String?
+  eWalletNumber  String?
+
+  // Relations
+  assignments    TPSAssignment[]
+  checkIns       CheckIn[]
+  voteInputs     VoteInput[]
+  fraudReports   FraudReport[]
+  payments       Payment[]
+  auditLogs      AuditLog[]
+
+  @@map("users")
+}
+
+model TPS {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  address     String
+  latitude    Float
+  longitude   Float
+  kelurahan   String?
+  kecamatan   String?
+  kota        String?
+  province    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  assignments TPSAssignment[]
+  checkIns    CheckIn[]
+
+  @@map("tps")
+}
+
+model TPSAssignment {
+  id         String            @id @default(cuid())
+  userId     String
+  tpsId      String
+  status     AssignmentStatus  @default(ACTIVE)
+  assignedBy String?
+  assignedAt DateTime          @default(now())
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  user       User              @relation(fields: [userId], references: [id])
+  tps        TPS               @relation(fields: [tpsId], references: [id])
+
+  @@unique([userId, tpsId])
+  @@map("tps_assignments")
+}
+
+model CheckIn {
+  id          String      @id @default(cuid())
+  userId      String
+  tpsId       String
+  type        CheckInType
+  selfiePhoto String
+  latitude    Float
+  longitude   Float
+  gpsVerified Boolean     @default(false)
+  distance    Float?
+  timestamp   DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  tps         TPS         @relation(fields: [tpsId], references: [id])
+
+  @@map("check_ins")
+}
+
+model VoteInput {
+  id                String    @id @default(cuid())
+  userId            String
+  tpsId             String
+  candidate1Votes   Int       @default(0)
+  candidate2Votes   Int       @default(0)
+  candidate3Votes   Int       @default(0)
+  totalValidVotes   Int       @default(0)
+  totalInvalidVotes Int       @default(0)
+  totalVotes        Int       @default(0)
+
+  // C1 Document
+  c1Photo           String?
+  c1Verified        Boolean   @default(false)
+
+  submittedAt       DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id])
+
+  @@map("vote_inputs")
+}
+
+model FraudReport {
+  id          String       @id @default(cuid())
+  userId      String
+  tpsId       String?
+  title       String
+  description String
+  videoPath   String?
+  status      ReportStatus @default(PENDING)
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  reviewNotes String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+
+  @@map("fraud_reports")
+}
+
+model Payment {
+  id              String         @id @default(cuid())
+  userId          String
+  amount          Float
+  status          PaymentStatus  @default(PENDING)
+
+  // Validation checklist
+  c1Uploaded      Boolean        @default(false)
+  gpsVerified     Boolean        @default(false)
+  dataInputted    Boolean        @default(false)
+  validationScore Int            @default(0)
+
+  // Payment details
+  paymentMethod   String?
+  accountNumber   String?
+  accountName     String?
+  transferProof   String?
+
+  approvedBy      String?
+  approvedAt      DateTime?
+  disbursedAt     DateTime?
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user            User           @relation(fields: [userId], references: [id])
+
+  @@map("payments")
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  oldValue   String?
+  newValue   String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+
+  user       User?     @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model SystemConfig {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  value       String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("system_configs")
+}
