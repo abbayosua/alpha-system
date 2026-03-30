@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { Footer } from '@/components/layout/Footer';
 import { 
-  ClipboardList, 
   Users, 
   MapPin, 
   Camera, 
@@ -20,42 +19,42 @@ const features = [
   {
     icon: MapPin,
     title: 'GPS Verification',
-    description: 'Verifikasi lokasi real-time untuk memastikan kehadiran di TPS yang tepat',
+    description: 'Real-time location verification to ensure presence at the correct TPS',
   },
   {
     icon: Camera,
     title: 'Selfie Check-in',
-    description: 'Sistem check-in dengan foto selfie untuk validasi kehadiran',
-  },
-  {
-    icon: ClipboardList,
-    title: 'Input Suara',
-    description: 'Input hasil perhitungan suara dengan upload dokumen C1',
+    description: 'Check-in system with selfie photo for attendance validation',
   },
   {
     icon: Shield,
-    title: 'Laporan Pelanggaran',
-    description: 'Laporkan kecurangan atau pelanggaran dengan bukti video',
+    title: 'Vote Input',
+    description: 'Input vote count results with C1 document upload',
+  },
+  {
+    icon: Shield,
+    title: 'Fraud Reporting',
+    description: 'Report violations or fraud with video evidence',
   },
   {
     icon: Wallet,
-    title: 'Pembayaran Otomatis',
-    description: 'Sistem pembayaran berbasis kinerja dengan validasi otomatis',
+    title: 'Automatic Payment',
+    description: 'Performance-based payment system with automatic validation',
   },
   {
     icon: Users,
     title: 'Multi-Role System',
-    description: 'Sistem dengan peran Admin, Admin Keuangan, dan Saksi',
+    description: 'System with Admin, Finance Admin, and Witness roles',
   },
 ];
 
 const benefits = [
-  'Verifikasi kehadiran dengan GPS dan foto',
-  'Input data suara secara real-time',
-  'Laporan pelanggaran dengan bukti video',
-  'Pembayaran transparan berdasarkan kinerja',
-  'Dashboard monitoring untuk admin',
-  'Audit trail lengkap semua aktivitas',
+  'GPS and photo verified attendance',
+  'Real-time vote data input',
+  'Video evidence fraud reporting',
+  'Transparent performance-based payment',
+  'Admin monitoring dashboard',
+  'Complete activity audit trail',
 ];
 
 export default function HomePage() {
@@ -68,24 +67,27 @@ export default function HomePage() {
             <div className="flex-1 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
                 <Shield className="h-4 w-4" />
-                Sistem Manajemen Saksi Terpercaya
+                Trusted Election Witness Management
               </div>
-              <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6">
-                SAKSI APP
-              </h1>
+              <div className="flex items-center justify-center lg:justify-start gap-4 mb-6">
+                <img src="/logo.png" alt="Alpha System v5" className="w-16 h-16 object-contain" />
+                <h1 className="text-4xl lg:text-6xl font-bold tracking-tight">
+                  Alpha System v5
+                </h1>
+              </div>
               <p className="text-xl text-muted-foreground mb-8 max-w-xl">
-                Platform terintegrasi untuk manajemen saksi pemilu dengan sistem verifikasi GPS, 
-                input suara real-time, dan pembayaran berbasis kinerja.
+                Integrated platform for election witness management with GPS verification, 
+                real-time vote input, and performance-based payment system.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button asChild size="lg" className="gap-2">
                   <Link href="/auth/register">
-                    Daftar sebagai Saksi
+                    Register as Witness
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <Link href="/auth/login">Masuk ke Akun</Link>
+                  <Link href="/auth/login">Sign In</Link>
                 </Button>
               </div>
             </div>
@@ -95,20 +97,20 @@ export default function HomePage() {
                 <Card className="relative bg-card/80 backdrop-blur-sm border-0 shadow-xl">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <ClipboardList className="h-5 w-5 text-primary" />
-                      Statistik Sistem
+                      <img src="/logo.png" alt="" className="w-5 h-5 object-contain" />
+                      System Statistics
                     </CardTitle>
-                    <CardDescription>Data real-time sistem SAKSI APP</CardDescription>
+                    <CardDescription>Alpha System v5 real-time data</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 rounded-lg bg-muted">
                         <p className="text-2xl font-bold">1,234</p>
-                        <p className="text-sm text-muted-foreground">Total Saksi</p>
+                        <p className="text-sm text-muted-foreground">Total Witnesses</p>
                       </div>
                       <div className="p-4 rounded-lg bg-muted">
                         <p className="text-2xl font-bold">567</p>
-                        <p className="text-sm text-muted-foreground">TPS Aktif</p>
+                        <p className="text-sm text-muted-foreground">Active TPS</p>
                       </div>
                       <div className="p-4 rounded-lg bg-muted">
                         <p className="text-2xl font-bold">89%</p>
@@ -116,7 +118,7 @@ export default function HomePage() {
                       </div>
                       <div className="p-4 rounded-lg bg-muted">
                         <p className="text-2xl font-bold">456</p>
-                        <p className="text-sm text-muted-foreground">Data Terinput</p>
+                        <p className="text-sm text-muted-foreground">Data Submitted</p>
                       </div>
                     </div>
                   </CardContent>
@@ -131,9 +133,9 @@ export default function HomePage() {
       <section className="py-20 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Fitur Unggulan</h2>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Key Features</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Sistem lengkap untuk mengelola saksi pemilu dengan transparansi dan akuntabilitas tinggi
+              Complete system for managing election witnesses with high transparency and accountability
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -163,7 +165,7 @@ export default function HomePage() {
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="flex-1">
               <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-                Mengapa Memilih SAKSI APP?
+                Why Choose Alpha System v5?
               </h2>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
@@ -178,15 +180,15 @@ export default function HomePage() {
               <div className="grid grid-cols-2 gap-4">
                 <Card className="p-6 text-center">
                   <p className="text-4xl font-bold text-primary mb-2">99%</p>
-                  <p className="text-sm text-muted-foreground">Akurasi Data</p>
+                  <p className="text-sm text-muted-foreground">Data Accuracy</p>
                 </Card>
                 <Card className="p-6 text-center">
                   <p className="text-4xl font-bold text-primary mb-2">24/7</p>
-                  <p className="text-sm text-muted-foreground">Akses Sistem</p>
+                  <p className="text-sm text-muted-foreground">System Access</p>
                 </Card>
                 <Card className="p-6 text-center">
                   <p className="text-4xl font-bold text-primary mb-2">100%</p>
-                  <p className="text-sm text-muted-foreground">Transparansi</p>
+                  <p className="text-sm text-muted-foreground">Transparency</p>
                 </Card>
                 <Card className="p-6 text-center">
                   <p className="text-4xl font-bold text-primary mb-2">Real-time</p>
@@ -202,20 +204,20 @@ export default function HomePage() {
       <section className="py-20 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">
-            Siap Bergabung sebagai Saksi?
+            Ready to Join as a Witness?
           </h2>
           <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Daftarkan diri Anda sekarang dan berkontribusi dalam menjaga transparansi pemilu
+            Register now and contribute to maintaining election transparency
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" variant="secondary" className="gap-2">
               <Link href="/auth/register">
-                Daftar Sekarang
+                Register Now
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-              <Link href="/auth/login">Sudah Punya Akun? Masuk</Link>
+              <Link href="/auth/login">Already Have an Account? Sign In</Link>
             </Button>
           </div>
         </div>

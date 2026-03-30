@@ -1,7 +1,7 @@
 // App constants
 
-export const APP_NAME = 'SAKSI APP';
-export const APP_DESCRIPTION = 'Sistem Manajemen Saksi Pemilu';
+export const APP_NAME = 'Alpha System v5';
+export const APP_DESCRIPTION = 'Election Witness Management System';
 
 // Payment constants
 export const BASE_PAYMENT_AMOUNT = 150000; // Rp 150.000

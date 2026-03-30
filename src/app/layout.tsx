@@ -14,24 +14,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  title: "Alpha System v5 - Election Witness Management",
+  description: "Comprehensive election witness management system with performance-based payment module. Manage saksi, TPS, check-ins, vote input, and payments.",
+  keywords: ["Alpha System", "Election", "Saksi", "TPS", "Vote Management", "Payment System"],
+  authors: [{ name: "Alpha System Team" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/logo.png",
   },
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "Alpha System v5",
+    description: "Election Witness Management System",
+    url: "https://alpha-system.vercel.app",
+    siteName: "Alpha System v5",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "Alpha System v5",
+    description: "Election Witness Management System",
   },
 };
 

@@ -120,13 +120,11 @@ export function Sidebar() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 border-b">
-            <Link href={user ? getDashboardRoute(user.role) : '/'} className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                <ClipboardList className="h-6 w-6 text-primary-foreground" />
-              </div>
+            <Link href={user ? getDashboardRoute(user.role) : '/'} className="flex items-center gap-3">
+              <img src="/logo.png" alt="Alpha System v5" className="w-10 h-10 rounded-lg object-contain" />
               <div>
-                <h1 className="font-bold text-lg">SAKSI APP</h1>
-                <p className="text-xs text-muted-foreground">Sistem Manajemen Saksi</p>
+                <h1 className="font-bold text-lg">Alpha System v5</h1>
+                <p className="text-xs text-muted-foreground">Election Management</p>
               </div>
             </Link>
           </div>

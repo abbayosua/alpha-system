@@ -10,15 +10,47 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useAuthStore } from '@/store/authStore';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, User, Shield, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
+import { Separator } from '@/components/ui/separator';
 
 const loginSchema = z.object({
-  email: z.string().email('Email tidak valid'),
-  password: z.string().min(6, 'Password minimal 6 karakter'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
+
+// Demo users for testing
+const DEMO_USERS = {
+  'saksi@demo.com': {
+    id: 'demo-saksi-1',
+    name: 'Ahmad Subekti',
+    email: 'saksi@demo.com',
+    role: 'SAKSI' as const,
+    phone: '081234567890',
+    ktpNumber: '3171234567890001',
+    bankName: 'bca',
+    bankAccount: '1234567890',
+    bankHolderName: 'Ahmad Subekti',
+  },
+  'admin@demo.com': {
+    id: 'demo-admin-1',
+    name: 'Admin User',
+    email: 'admin@demo.com',
+    role: 'ADMIN' as const,
+    phone: '081234567891',
+  },
+  'finance@demo.com': {
+    id: 'demo-finance-1',
+    name: 'Finance Admin',
+    email: 'finance@demo.com',
+    role: 'ADMIN_KEUANGAN' as const,
+    phone: '081234567892',
+  },
+};
+
+const DEMO_PASSWORD = 'demo123';
 
 export function LoginForm() {
   const router = useRouter();
@@ -34,9 +66,34 @@ export function LoginForm() {
     },
   });
 
+  const handleDemoLogin = (email: string) => {
+    const user = DEMO_USERS[email as keyof typeof DEMO_USERS];
+    if (user) {
+      login(user, 'demo-token-' + user.role.toLowerCase());
+      toast.success(`Logged in as ${user.role === 'SAKSI' ? 'Witness' : user.role === 'ADMIN' ? 'Admin' : 'Finance Admin'}!`);
+      
+      // Redirect based on role
+      if (user.role === 'ADMIN') {
+        router.push('/admin/dashboard');
+      } else if (user.role === 'ADMIN_KEUANGAN') {
+        router.push('/keuangan/dashboard');
+      } else {
+        router.push('/saksi/dashboard');
+      }
+    }
+  };
+
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
+      // Check for demo login
+      const demoUser = DEMO_USERS[data.email as keyof typeof DEMO_USERS];
+      if (demoUser && data.password === DEMO_PASSWORD) {
+        handleDemoLogin(data.email);
+        return;
+      }
+
+      // Try actual API call
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,7 +104,7 @@ export function LoginForm() {
 
       if (result.success) {
         login(result.user, result.token);
-        toast.success('Login berhasil!');
+        toast.success('Login successful!');
         
         // Redirect based on role
         const role = result.user.role;
@@ -59,10 +116,10 @@ export function LoginForm() {
           router.push('/saksi/dashboard');
         }
       } else {
-        toast.error(result.error || 'Login gagal');
+        toast.error(result.error || 'Login failed');
       }
     } catch (error) {
-      toast.error('Terjadi kesalahan. Silakan coba lagi.');
+      toast.error('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -71,8 +128,8 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Masuk</CardTitle>
-        <CardDescription>Masuk ke akun SAKSI APP Anda</CardDescription>
+        <CardTitle className="text-2xl">Sign In</CardTitle>
+        <CardDescription>Sign in to your Alpha System v5 account</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -86,7 +143,7 @@ export function LoginForm() {
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="nama@email.com"
+                      placeholder="name@email.com"
                       {...field}
                     />
                   </FormControl>
@@ -104,7 +161,7 @@ export function LoginForm() {
                     <div className="relative">
                       <Input
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Masukkan password"
+                        placeholder="Enter password"
                         {...field}
                       />
                       <button
@@ -122,10 +179,64 @@ export function LoginForm() {
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Masuk
+              Sign In
             </Button>
           </form>
         </Form>
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Demo Accounts</span>
+            </div>
+          </div>
+          
+          <p className="text-xs text-center text-muted-foreground mt-2 mb-4">
+            Password for all demo accounts: <code className="bg-muted px-1 rounded">demo123</code>
+          </p>
+
+          <div className="grid gap-2">
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => {
+                form.setValue('email', 'saksi@demo.com');
+                form.setValue('password', 'demo123');
+              }}
+            >
+              <User className="mr-2 h-4 w-4 text-blue-500" />
+              <span className="flex-1 text-left">Witness (Saksi)</span>
+              <span className="text-xs text-muted-foreground">saksi@demo.com</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => {
+                form.setValue('email', 'admin@demo.com');
+                form.setValue('password', 'demo123');
+              }}
+            >
+              <Shield className="mr-2 h-4 w-4 text-red-500" />
+              <span className="flex-1 text-left">Admin</span>
+              <span className="text-xs text-muted-foreground">admin@demo.com</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => {
+                form.setValue('email', 'finance@demo.com');
+                form.setValue('password', 'demo123');
+              }}
+            >
+              <Wallet className="mr-2 h-4 w-4 text-green-500" />
+              <span className="flex-1 text-left">Finance Admin</span>
+              <span className="text-xs text-muted-foreground">finance@demo.com</span>
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
