@@ -198,7 +198,7 @@ export default function SaksiCheckInPage() {
                   </div>
                   <div className="p-3 rounded-lg bg-muted">
                     <p className="text-sm text-muted-foreground">Longitude</p>
-                    <p className="font-medium">{location.longitude.toFixed(6)}</p>
+                    <p className="font-medium">{(location.longitude ?? 0).toFixed(6)}</p>
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted">
