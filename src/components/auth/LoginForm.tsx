@@ -22,6 +22,8 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 // Demo users for testing
+const now = new Date().toISOString();
+
 const DEMO_USERS = {
   'saksi@demo.com': {
     id: 'demo-saksi-1',
@@ -33,6 +35,8 @@ const DEMO_USERS = {
     bankName: 'bca',
     bankAccount: '1234567890',
     bankHolderName: 'Ahmad Subekti',
+    createdAt: now,
+    updatedAt: now,
   },
   'admin@demo.com': {
     id: 'demo-admin-1',
@@ -40,6 +44,8 @@ const DEMO_USERS = {
     email: 'admin@demo.com',
     role: 'ADMIN' as const,
     phone: '081234567891',
+    createdAt: now,
+    updatedAt: now,
   },
   'finance@demo.com': {
     id: 'demo-finance-1',
@@ -47,6 +53,8 @@ const DEMO_USERS = {
     email: 'finance@demo.com',
     role: 'ADMIN_KEUANGAN' as const,
     phone: '081234567892',
+    createdAt: now,
+    updatedAt: now,
   },
 };
 
