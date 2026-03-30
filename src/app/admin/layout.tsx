@@ -2,13 +2,12 @@
 
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Footer } from '@/components/layout/Footer';
-import { cn } from '@/lib/utils';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function AdminLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen flex">
       <Sidebar />
