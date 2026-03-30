@@ -5,6 +5,7 @@ import { StatsCard } from '@/components/common/StatsCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { TPSMap } from '@/components/admin/TPSMap';
 import {
   Table,
   TableBody,
@@ -14,20 +15,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   Users,
   Building2,
   Camera,
   FileText,
   AlertTriangle,
-  Wallet,
   Plus,
   Eye,
   Edit,
@@ -40,7 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Mock data
 const stats = {
@@ -117,155 +109,170 @@ export default function AdminDashboardPage() {
         </Button>
       </div>
 
-      {/* Recent Saksi */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Saksi Terbaru</CardTitle>
-            <CardDescription>Daftar saksi yang baru terdaftar</CardDescription>
-          </div>
-          <Button variant="outline" size="sm">
-            Lihat Semua
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nama</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telepon</TableHead>
-                <TableHead>TPS</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentSaksi.map((saksi) => (
-                <TableRow key={saksi.id}>
-                  <TableCell className="font-medium">{saksi.name}</TableCell>
-                  <TableCell>{saksi.email}</TableCell>
-                  <TableCell>{saksi.phone}</TableCell>
-                  <TableCell>{saksi.tps}</TableCell>
-                  <TableCell>
-                    <StatusBadge variant={saksi.status === 'ACTIVE' ? 'success' : 'warning'}>
-                      {saksi.status === 'ACTIVE' ? 'Aktif' : 'Pending'}
-                    </StatusBadge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
+      {/* TPS Progress Map */}
+      <TPSMap />
+
+      {/* Tabs for Recent Data */}
+      <Tabs defaultValue="saksi" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="saksi">Saksi Terbaru</TabsTrigger>
+          <TabsTrigger value="reports">Laporan Terbaru</TabsTrigger>
+          <TabsTrigger value="payments">Pembayaran</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="saksi">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Saksi Terbaru</CardTitle>
+                <CardDescription>Daftar saksi yang baru terdaftar</CardDescription>
+              </div>
+              <Button variant="outline" size="sm">
+                Lihat Semua
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nama</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Telepon</TableHead>
+                    <TableHead>TPS</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentSaksi.map((saksi) => (
+                    <TableRow key={saksi.id}>
+                      <TableCell className="font-medium">{saksi.name}</TableCell>
+                      <TableCell>{saksi.email}</TableCell>
+                      <TableCell>{saksi.phone}</TableCell>
+                      <TableCell>{saksi.tps}</TableCell>
+                      <TableCell>
+                        <StatusBadge variant={saksi.status === 'ACTIVE' ? 'success' : 'warning'}>
+                          {saksi.status === 'ACTIVE' ? 'Aktif' : 'Pending'}
+                        </StatusBadge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Hapus
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  Laporan Terbaru
+                </CardTitle>
+                <CardDescription>Laporan pelanggaran dari saksi</CardDescription>
+              </div>
+              <Button variant="outline" size="sm">
+                Lihat Semua
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Judul</TableHead>
+                    <TableHead>Pelapor</TableHead>
+                    <TableHead>Tanggal</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentReports.map((report) => (
+                    <TableRow key={report.id}>
+                      <TableCell className="font-medium">{report.title}</TableCell>
+                      <TableCell>{report.reporter}</TableCell>
+                      <TableCell>{report.date}</TableCell>
+                      <TableCell>
+                        <StatusBadge variant={report.status === 'PENDING' ? 'warning' : 'info'}>
+                          {report.status === 'PENDING' ? 'Menunggu' : 'Ditinjau'}
+                        </StatusBadge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Lihat Detail
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Hapus
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Recent Reports */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              Laporan Terbaru
-            </CardTitle>
-            <CardDescription>Laporan pelanggaran dari saksi</CardDescription>
+        <TabsContent value="payments">
+          <div className="grid md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Menunggu Pembayaran
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">245</p>
+                <p className="text-sm text-muted-foreground">Saksi</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Pembayaran
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">Rp 36.750.000</p>
+                <p className="text-sm text-muted-foreground">245 x Rp 150.000</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Sudah Dibayar
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">989</p>
+                <p className="text-sm text-muted-foreground">Saksi</p>
+              </CardContent>
+            </Card>
           </div>
-          <Button variant="outline" size="sm">
-            Lihat Semua
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Judul</TableHead>
-                <TableHead>Pelapor</TableHead>
-                <TableHead>Tanggal</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentReports.map((report) => (
-                <TableRow key={report.id}>
-                  <TableCell className="font-medium">{report.title}</TableCell>
-                  <TableCell>{report.reporter}</TableCell>
-                  <TableCell>{report.date}</TableCell>
-                  <TableCell>
-                    <StatusBadge variant={report.status === 'PENDING' ? 'warning' : 'info'}>
-                      {report.status === 'PENDING' ? 'Menunggu' : 'Ditinjau'}
-                    </StatusBadge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Payment Summary */}
-      <div className="grid md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Menunggu Pembayaran
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">245</p>
-            <p className="text-sm text-muted-foreground">Saksi</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Pembayaran
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">Rp 36.750.000</p>
-            <p className="text-sm text-muted-foreground">245 x Rp 150.000</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Sudah Dibayar
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">989</p>
-            <p className="text-sm text-muted-foreground">Saksi</p>
-          </CardContent>
-        </Card>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
