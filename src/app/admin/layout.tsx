@@ -1,0 +1,26 @@
+'use client'
+
+import { useState } from 'react'
+import { AppSidebar } from '@/components/layout/Sidebar'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
+import { PageWrapper } from '@/components/layout/PageWrapper'
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  return (
+    <PageWrapper>
+      <AppSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <div className="flex flex-1 flex-col lg:ml-64 min-h-screen">
+        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        <main className="flex-1">
+          <div className="p-4 md:p-6 lg:p-8">
+            {children}
+          </div>
+        </main>
+        <Footer />
+      </div>
+    </PageWrapper>
+  )
+}

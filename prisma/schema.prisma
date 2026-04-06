@@ -1,32 +1,220 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum Role {
+  SAKSI
+  ADMIN
+  ADMIN_KEUANGAN
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum AssignmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum CheckInType {
+  MORNING
+  FINAL
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  DISMISSED
+}
+
+enum PaymentStatus {
+  PENDING
+  READY_FOR_PAYMENT
+  APPROVED
+  DISBURSED
+  FAILED
+  CANCELLED
+}
+
+model Profile {
+  id             String    @id @db.Text
+  email          String    @unique @db.Text
+  name           String    @db.Text
+  role           Role      @default(SAKSI)
+  phone          String?   @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+  ktpNumber      String?   @unique @map("ktp_number") @db.Text
+  ktpPhoto       String?   @map("ktp_photo") @db.Text
+  bankName       String?   @map("bank_name") @db.Text
+  bankAccount    String?   @map("bank_account") @db.Text
+  bankHolderName String?   @map("bank_holder_name") @db.Text
+  eWalletType    String?   @map("e_wallet_type") @db.Text
+  eWalletNumber  String?   @map("e_wallet_number") @db.Text
+
+  assignments    TPSAssignment[]
+  checkIns       CheckIn[]
+  voteInputs     VoteInput[]
+  fraudReports   FraudReport[]
+  payments       Payment[]
+  auditLogs      AuditLog[]
+
+  @@map("profiles")
+}
+
+model TPS {
+  id          String    @id @default(cuid()) @db.Text
+  code        String    @unique @db.Text
+  name        String    @db.Text
+  address     String    @db.Text
+  latitude    Float     @db.DoublePrecision
+  longitude   Float     @db.DoublePrecision
+  kelurahan   String?   @db.Text
+  kecamatan   String?   @db.Text
+  kota        String?   @db.Text
+  province    String?   @db.Text
+  totalDpt    Int       @default(0) @map("total_dpt")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  assignments TPSAssignment[]
+  checkIns    CheckIn[]
+  voteInputs  VoteInput[]
+
+  @@map("tps")
+}
+
+model TPSAssignment {
+  id         String           @id @default(cuid()) @db.Text
+  userId     String           @map("user_id") @db.Text
+  tpsId      String           @map("tps_id") @db.Text
+  status     AssignmentStatus @default(ACTIVE)
+  assignedBy String?          @map("assigned_by") @db.Text
+  assignedAt DateTime         @default(now()) @map("assigned_at") @db.Timestamp(6)
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  user       Profile          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tps        TPS              @relation(fields: [tpsId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tpsId])
+  @@map("tps_assignments")
+}
+
+model CheckIn {
+  id          String      @id @default(cuid()) @db.Text
+  userId      String      @map("user_id") @db.Text
+  tpsId       String      @map("tps_id") @db.Text
+  type        CheckInType
+  selfiePhoto String      @map("selfie_photo") @db.Text
+  latitude    Float       @db.DoublePrecision
+  longitude   Float       @db.DoublePrecision
+  gpsVerified Boolean     @default(false) @map("gps_verified")
+  distance    Float?      @db.DoublePrecision
+  timestamp   DateTime    @default(now()) @db.Timestamp(6)
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user        Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tps         TPS         @relation(fields: [tpsId], references: [id], onDelete: Cascade)
+
+  @@map("check_ins")
+}
+
+model VoteInput {
+  id                String    @id @default(cuid()) @db.Text
+  userId            String    @map("user_id") @db.Text
+  tpsId             String    @map("tps_id") @db.Text
+  candidate1Votes   Int       @default(0) @map("candidate1_votes")
+  candidate2Votes   Int       @default(0) @map("candidate2_votes")
+  candidate3Votes   Int       @default(0) @map("candidate3_votes")
+  totalValidVotes   Int       @default(0) @map("total_valid_votes")
+  totalInvalidVotes Int       @default(0) @map("total_invalid_votes")
+  totalVotes        Int       @default(0) @map("total_votes")
+  c1Photo           String?   @map("c1_photo") @db.Text
+  c1Verified        Boolean   @default(false) @map("c1_verified")
+  submittedAt       DateTime  @default(now()) @map("submitted_at") @db.Timestamp(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  user              Profile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tps               TPS       @relation(fields: [tpsId], references: [id], onDelete: Cascade)
+
+  @@map("vote_inputs")
+}
+
+model FraudReport {
+  id          String       @id @default(cuid()) @db.Text
+  userId      String       @map("user_id") @db.Text
+  tpsId       String?      @map("tps_id") @db.Text
+  title       String       @db.Text
+  description String       @db.Text
+  category    String?      @default("LAINNYA") @db.Text
+  videoPath   String?      @map("video_path") @db.Text
+  status      ReportStatus @default(PENDING)
+  reviewedBy  String?      @map("reviewed_by") @db.Text
+  reviewedAt  DateTime?    @map("reviewed_at") @db.Timestamp(6)
+  reviewNotes String?      @map("review_notes") @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  user        Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("fraud_reports")
+}
+
+model Payment {
+  id              String        @id @default(cuid()) @db.Text
+  userId          String        @map("user_id") @db.Text
+  amount          Float         @default(150000) @db.DoublePrecision
+  status          PaymentStatus @default(PENDING)
+  c1Uploaded      Boolean       @default(false) @map("c1_uploaded")
+  gpsVerified     Boolean       @default(false) @map("gps_verified")
+  dataInputted    Boolean       @default(false) @map("data_inputted")
+  validationScore Int           @default(0) @map("validation_score")
+  paymentMethod   String?       @map("payment_method") @db.Text
+  accountNumber   String?       @map("account_number") @db.Text
+  accountName     String?       @map("account_name") @db.Text
+  transferProof   String?       @map("transfer_proof") @db.Text
+  approvedBy      String?       @map("approved_by") @db.Text
+  approvedAt      DateTime?     @map("approved_at") @db.Timestamp(6)
+  disbursedAt     DateTime?     @map("disbursed_at") @db.Timestamp(6)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  user            Profile       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model AuditLog {
+  id         String    @id @default(cuid()) @db.Text
+  userId     String?   @map("user_id") @db.Text
+  action     String    @db.Text
+  entityType String    @map("entity_type") @db.Text
+  entityId   String?   @map("entity_id") @db.Text
+  oldValue   String?   @map("old_value") @db.Text
+  newValue   String?   @map("new_value") @db.Text
+  ipAddress  String?   @map("ip_address") @db.Text
+  userAgent  String?   @map("user_agent") @db.Text
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user       Profile?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+model SystemConfig {
+  id          String    @id @default(cuid()) @db.Text
+  key         String    @unique @db.Text
+  value       String    @db.Text
+  description String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@map("system_configs")
 }
