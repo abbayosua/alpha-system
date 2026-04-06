@@ -12,10 +12,10 @@ import { ErrorState } from '@/components/common/ErrorState'
 import { EmptyState } from '@/components/common/EmptyState'
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string }> = {
-  PENDING: { color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
-  READY_FOR_PAYMENT: { color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+  PENDING: { color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', dot: 'bg-amber-500' },
+  READY_FOR_PAYMENT: { color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300', dot: 'bg-emerald-500' },
   APPROVED: { color: 'bg-teal-100 text-teal-700', dot: 'bg-teal-500' },
-  DISBURSED: { color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+  DISBURSED: { color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300', dot: 'bg-emerald-500' },
   CANCELLED: { color: 'bg-rose-100 text-rose-700', dot: 'bg-rose-500' },
   FAILED: { color: 'bg-rose-100 text-rose-700', dot: 'bg-rose-500' },
 }

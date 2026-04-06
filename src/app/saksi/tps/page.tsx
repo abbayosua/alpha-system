@@ -177,8 +177,8 @@ function StatusCard({ title, status, detail }: { title: string; status: 'done' |
         <Badge
           variant="secondary"
           className={status === 'done'
-            ? 'bg-emerald-100 text-emerald-700 gap-1.5'
-            : 'bg-amber-100 text-amber-700 gap-1.5'
+            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 gap-1.5'
+            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 gap-1.5'
           }
         >
           <span className={`inline-flex h-1.5 w-1.5 rounded-full ${status === 'done' ? 'bg-emerald-500' : 'bg-amber-500'}`} />

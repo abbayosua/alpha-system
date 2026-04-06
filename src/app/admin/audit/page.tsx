@@ -103,8 +103,8 @@ function CheckinEmptyState() {
       className="py-16 px-6 text-center"
     >
       <div className="relative mx-auto w-24 h-24 mb-6">
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100" />
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-200/50 to-teal-200/50 animate-pulse" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-200/50 to-teal-200/50 dark:from-emerald-900/30 dark:to-teal-900/30 animate-pulse" />
         <div className="relative inset-0 flex items-center justify-center">
           <ClipboardCheck className="h-10 w-10 text-emerald-600" />
         </div>
@@ -131,8 +131,8 @@ function VotesEmptyState() {
       className="py-16 px-6 text-center"
     >
       <div className="relative mx-auto w-24 h-24 mb-6">
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-100 to-orange-100" />
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-200/50 to-orange-200/50 animate-pulse" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-200/50 to-orange-200/50 dark:from-amber-900/30 dark:to-orange-900/30 animate-pulse" />
         <div className="relative inset-0 flex items-center justify-center">
           <PenLine className="h-10 w-10 text-amber-600" />
         </div>
@@ -206,13 +206,13 @@ export default function AdminAuditPage() {
     <div className="space-y-6">
       {/* ── Page Title Area ────────────────────────────────── */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent border border-emerald-100/50 px-6 py-5 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent dark:from-slate-800 dark:via-emerald-950/20 dark:to-transparent border border-emerald-100/50 dark:border-emerald-800/50 px-6 py-5 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 rounded-full translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 dark:bg-teal-900/20 rounded-full translate-y-1/2" />
         <div className="relative flex items-center gap-3">
           <Button
             variant="ghost"
@@ -227,7 +227,7 @@ export default function AdminAuditPage() {
               <Shield className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-emerald-900">Audit Log</h1>
+              <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">Audit Log</h1>
               <p className="text-sm text-muted-foreground mt-0.5">
                 Log aktivitas check-in dan input suara
               </p>
@@ -249,7 +249,7 @@ export default function AdminAuditPage() {
           label="Total Check-in"
           value={stats.totalCheckins}
           borderColor="border-l-emerald-500"
-          bgColor="bg-gradient-to-br from-emerald-50/50 to-white"
+          bgColor="bg-gradient-to-br from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800"
           iconBg="bg-emerald-100"
         />
         <AuditStatCard
@@ -257,7 +257,7 @@ export default function AdminAuditPage() {
           label="GPS Valid"
           value={stats.gpsValid}
           borderColor="border-l-teal-500"
-          bgColor="bg-gradient-to-br from-teal-50/50 to-white"
+          bgColor="bg-gradient-to-br from-teal-50/50 to-white dark:from-teal-950/20 dark:to-slate-800"
           iconBg="bg-teal-100"
         />
         <AuditStatCard
@@ -265,7 +265,7 @@ export default function AdminAuditPage() {
           label="Check-in Pagi"
           value={stats.pagi}
           borderColor="border-l-amber-500"
-          bgColor="bg-gradient-to-br from-amber-50/50 to-white"
+          bgColor="bg-gradient-to-br from-amber-50/50 to-white dark:from-amber-950/20 dark:to-slate-800"
           iconBg="bg-amber-100"
         />
         <AuditStatCard
@@ -376,8 +376,8 @@ export default function AdminAuditPage() {
                                   variant="secondary"
                                   className={
                                     isMorning
-                                      ? 'bg-emerald-100 text-emerald-700 gap-1.5'
-                                      : 'bg-amber-100 text-amber-700 gap-1.5'
+                                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 gap-1.5'
+                                      : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 gap-1.5'
                                   }
                                 >
                                   <span
@@ -411,7 +411,7 @@ export default function AdminAuditPage() {
                                   variant="secondary"
                                   className={
                                     c.gpsVerified
-                                      ? 'bg-emerald-100 text-emerald-700 gap-1.5'
+                                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 gap-1.5'
                                       : 'bg-rose-100 text-rose-700 gap-1.5'
                                   }
                                 >
@@ -521,22 +521,22 @@ export default function AdminAuditPage() {
                               {v.tps?.code} - {v.tps?.name}
                             </TableCell>
                             <TableCell className="text-sm text-center">
-                              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium">
+                              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 font-medium">
                                 {v.candidate1Votes}
                               </span>
                             </TableCell>
                             <TableCell className="text-sm text-center">
-                              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-medium">
+                              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 font-medium">
                                 {v.candidate2Votes}
                               </span>
                             </TableCell>
                             <TableCell className="text-sm text-center">
-                              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 font-medium">
+                              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300 font-medium">
                                 {v.candidate3Votes}
                               </span>
                             </TableCell>
                             <TableCell className="text-sm font-semibold text-center">
-                              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold">
+                              <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200 font-bold">
                                 {v.totalVotes}
                               </span>
                             </TableCell>
@@ -545,7 +545,7 @@ export default function AdminAuditPage() {
                                 variant="secondary"
                                 className={
                                   v.c1Photo
-                                    ? 'bg-emerald-100 text-emerald-700 gap-1.5'
+                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 gap-1.5'
                                     : 'bg-gray-100 text-gray-600 gap-1.5'
                                 }
                               >

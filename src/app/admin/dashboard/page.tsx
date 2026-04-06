@@ -68,7 +68,7 @@ function AnimatedStatCard({
     >
       <Card className={`shadow-sm border-l-4 ${borderColor} ${bgClass || ''} transition-shadow hover:shadow-md`}>
         <CardContent className="p-4 flex items-center gap-3">
-          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/70 shadow-sm flex items-center justify-center text-muted-foreground">
+          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/70 dark:bg-slate-700/70 shadow-sm flex items-center justify-center text-muted-foreground">
             {icon}
           </div>
           <div className="flex-1 min-w-0">
@@ -79,8 +79,8 @@ function AnimatedStatCard({
           </div>
           {trend && trendLabel && (
             <div className={`flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full ${
-              trend === 'up' ? 'text-emerald-700 bg-emerald-100' :
-              trend === 'down' ? 'text-rose-700 bg-rose-100' :
+              trend === 'up' ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40' :
+              trend === 'down' ? 'text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/40' :
               'text-muted-foreground bg-muted'
             }`}>
               {trend === 'up' && <TrendingUp className="h-3 w-3" />}
@@ -211,12 +211,12 @@ function PaymentBarChart({ data }: { data: Record<string, { count: number; total
 // ─── Report Status Badge ─────────────────────────────────────────────
 function ReportStatusBadge({ status }: { status: string }) {
   const config: Record<string, { color: string; dot: string }> = {
-    PENDING: { color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
-    UNDER_REVIEW: { color: 'bg-teal-100 text-teal-700', dot: 'bg-teal-500' },
-    VERIFIED: { color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
-    DISMISSED: { color: 'bg-gray-100 text-gray-700', dot: 'bg-gray-500' },
+    PENDING: { color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', dot: 'bg-amber-500' },
+    UNDER_REVIEW: { color: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300', dot: 'bg-teal-500' },
+    VERIFIED: { color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300', dot: 'bg-emerald-500' },
+    DISMISSED: { color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400', dot: 'bg-gray-500' },
   }
-  const c = config[status] || { color: 'bg-gray-100 text-gray-700', dot: 'bg-gray-500' }
+  const c = config[status] || { color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400', dot: 'bg-gray-500' }
   return (
     <Badge variant="secondary" className={`${c.color} gap-1.5`}>
       <span className={`inline-flex h-1.5 w-1.5 rounded-full ${c.dot}`} />
@@ -261,7 +261,7 @@ function timeAgo(dateStr: string): string {
 function TimelineEntry({ item, index, isLast }: { item: { type: 'saksi' | 'report'; id: string; title: string; description: string; timestamp: string }; index: number; isLast: boolean }) {
   const isSaksi = item.type === 'saksi'
   const dotColor = isSaksi ? 'bg-emerald-500' : 'bg-amber-500'
-  const lineColor = isSaksi ? 'border-emerald-300' : 'border-amber-300'
+  const lineColor = isSaksi ? 'border-emerald-300 dark:border-emerald-700' : 'border-amber-300 dark:border-amber-700'
 
   return (
     <motion.div
@@ -271,7 +271,7 @@ function TimelineEntry({ item, index, isLast }: { item: { type: 'saksi' | 'repor
       transition={{ delay: 0.8 + index * 0.06 }}
     >
       <div className="flex flex-col items-center">
-        <div className={`w-2.5 h-2.5 rounded-full ${dotColor} ring-4 ring-white shadow-sm flex-shrink-0 mt-1`} />
+        <div className={`w-2.5 h-2.5 rounded-full ${dotColor} ring-4 ring-white dark:ring-slate-700 shadow-sm flex-shrink-0 mt-1`} />
         {!isLast && <div className={`w-px flex-1 border-l-2 ${lineColor} my-1`} />}
       </div>
       <div className={`pb-4 ${isLast ? 'pb-0' : ''} flex-1 min-w-0`}>
@@ -353,15 +353,15 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       {/* ── Page Title Area ────────────────────────────────── */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent border border-emerald-100/50 px-6 py-5 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent dark:from-slate-800 dark:via-emerald-950/20 dark:to-transparent border border-emerald-100/50 dark:border-emerald-800/50 px-6 py-5 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 rounded-full translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 dark:bg-teal-900/20 rounded-full translate-y-1/2" />
         <div className="relative">
-          <h1 className="text-2xl font-bold text-emerald-900">Dashboard Admin</h1>
+          <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">Dashboard Admin</h1>
           <p className="text-muted-foreground mt-0.5">Selamat datang, {user?.name}</p>
         </div>
       </motion.div>
@@ -373,7 +373,7 @@ export default function AdminDashboardPage() {
           label="Total Saksi"
           value={overview.totalSaksi}
           borderColor="border-l-emerald-500"
-          bgClass="bg-gradient-to-br from-emerald-50 to-teal-50"
+          bgClass="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30"
           index={0}
           trend={overview.totalSaksi > 0 ? 'up' : 'neutral'}
           trendLabel={overview.totalSaksi > 0 ? 'Aktif' : '-'}
@@ -383,7 +383,7 @@ export default function AdminDashboardPage() {
           label="Total TPS"
           value={overview.totalTps}
           borderColor="border-l-amber-500"
-          bgClass="bg-gradient-to-br from-amber-50 to-orange-50"
+          bgClass="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30"
           index={1}
           trend={overview.totalTps > 0 ? 'up' : 'neutral'}
           trendLabel={overview.totalTps > 0 ? 'Terdaftar' : '-'}
@@ -393,7 +393,7 @@ export default function AdminDashboardPage() {
           label="Penugasan Aktif"
           value={overview.activeAssignments}
           borderColor="border-l-teal-500"
-          bgClass="bg-gradient-to-br from-teal-50 to-cyan-50"
+          bgClass="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30"
           index={2}
           trend={overview.activeAssignments > 0 ? 'up' : 'neutral'}
           trendLabel={overview.activeAssignments > 0 ? 'Berjalan' : '-'}
@@ -403,7 +403,7 @@ export default function AdminDashboardPage() {
           label="Laporan Fraud"
           value={overview.totalReports}
           borderColor={overview.totalReports > 0 ? 'border-l-rose-500' : 'border-l-gray-300'}
-          bgClass={overview.totalReports > 0 ? 'bg-gradient-to-br from-rose-50 to-red-50' : ''}
+          bgClass={overview.totalReports > 0 ? 'bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-950/30 dark:to-red-950/30' : ''}
           index={3}
           trend={overview.totalReports > 0 ? 'down' : 'neutral'}
           trendLabel={overview.totalReports > 0 ? 'Perlu review' : 'Aman'}
@@ -428,11 +428,11 @@ export default function AdminDashboardPage() {
             <CardContent className="flex flex-col items-center py-4">
               <ProgressRing percentage={overview.checkInRate} />
               <div className="flex gap-2 mt-3">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-medium">
                   <Clock className="h-3 w-3" />
                   Pagi: {checkInBreakdown?.MORNING || 0}
                 </span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 text-xs font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300 dark:bg-teal-900/40 dark:text-teal-300 text-xs font-medium">
                   <CheckCircle2 className="h-3 w-3" />
                   Akhir: {checkInBreakdown?.FINAL || 0}
                 </span>

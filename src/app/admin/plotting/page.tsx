@@ -153,7 +153,7 @@ export default function AdminPlottingPage() {
     >
       {/* Page Title Area */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 p-6 sm:p-8 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 dark:from-slate-800 dark:to-slate-900 p-6 sm:p-8 overflow-hidden"
         variants={itemVariants}
       >
         {/* Decorative circle */}
@@ -161,7 +161,7 @@ export default function AdminPlottingPage() {
         <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-teal-100/40" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-1">
-            <Button variant="ghost" size="icon" className="bg-white/60 hover:bg-white/80 -ml-2" onClick={() => router.push('/admin/dashboard')}>
+            <Button variant="ghost" size="icon" className="bg-white/60 dark:bg-slate-700/60 hover:bg-white/80 dark:hover:bg-slate-600/80 dark:bg-slate-800/80 -ml-2" onClick={() => router.push('/admin/dashboard')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-2xl font-bold">Plotting Saksi</h1>
@@ -172,7 +172,7 @@ export default function AdminPlottingPage() {
 
       {/* Stats Summary */}
       <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-3" variants={itemVariants}>
-        <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/50 to-white">
+        <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
               <GitBranch className="h-5 w-5" />
@@ -183,7 +183,7 @@ export default function AdminPlottingPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-white">
+        <Card className="shadow-sm border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-white dark:from-amber-950/20 dark:to-slate-800">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
               <Users className="h-5 w-5" />
@@ -194,7 +194,7 @@ export default function AdminPlottingPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/50 to-white">
+        <Card className="shadow-sm border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/50 to-white dark:from-teal-950/20 dark:to-slate-800">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-teal-100 text-teal-600">
               <MapPin className="h-5 w-5" />
@@ -205,7 +205,7 @@ export default function AdminPlottingPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/50 to-white">
+        <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
               <CheckCircle2 className="h-5 w-5" />
@@ -290,7 +290,7 @@ export default function AdminPlottingPage() {
                       <p className="font-medium">{t.code} - {t.name}</p>
                       <p className="text-xs text-muted-foreground">{t.address}</p>
                     </div>
-                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 gap-1.5 shrink-0">
+                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 gap-1.5 shrink-0">
                       <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                       {t.activeAssignmentCount} saksi
                     </Badge>
@@ -349,7 +349,7 @@ export default function AdminPlottingPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className="bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 border-emerald-200 text-xs font-medium">
+                        <Badge className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 text-emerald-700 border-emerald-200 text-xs font-medium">
                           <MapPin className="h-3 w-3 mr-1" />
                           {a.tps?.code} — {a.tps?.name}
                         </Badge>

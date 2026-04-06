@@ -37,7 +37,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                   isCompleted
                     ? 'bg-emerald-500 border-emerald-500 text-white'
                     : isCurrent
-                    ? 'bg-white border-emerald-500 text-emerald-600 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]'
+                    ? 'bg-white border-emerald-500 text-emerald-600 dark:bg-slate-800 dark:border-emerald-600 dark:text-emerald-400 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]'
                     : 'bg-white border-gray-300 text-gray-400'
                 }`}
                 initial={false}
@@ -243,14 +243,14 @@ export default function SaksiCheckInPage() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-sm overflow-hidden relative">
+          <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 shadow-sm overflow-hidden relative">
             {/* Confetti */}
             <ConfettiParticles />
 
             <CardContent className="p-6 text-center space-y-4 relative z-10">
               {/* Animated checkmark */}
               <motion.div
-                className="mx-auto w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center"
+                className="mx-auto w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center"
                 initial={{ scale: 0 }}
                 animate={{ scale: [0, 1.2, 1] }}
                 transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
@@ -332,7 +332,7 @@ export default function SaksiCheckInPage() {
           <Card className="shadow-sm">
             <CardContent className="p-8 text-center space-y-4">
               <motion.div
-                className="mx-auto w-24 h-24 rounded-full bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-dashed border-emerald-200 flex items-center justify-center"
+                className="mx-auto w-24 h-24 rounded-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-2 border-dashed border-emerald-200 flex items-center justify-center"
                 animate={{ scale: [1, 1.04, 1] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               >

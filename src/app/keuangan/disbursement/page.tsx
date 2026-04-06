@@ -67,13 +67,13 @@ function StatCard({
     >
       <Card className={`shadow-sm border-l-4 ${borderColor} ${bgColor} transition-shadow hover:shadow-md`}>
         <CardContent className="p-4 flex items-center gap-3">
-          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/70 shadow-sm flex items-center justify-center text-muted-foreground">
+          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/70 dark:bg-slate-700/70 shadow-sm flex items-center justify-center text-muted-foreground">
             {icon}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-2xl font-bold leading-tight">{value}</p>
             <p className="text-xs text-muted-foreground truncate">{label}</p>
-            {subValue && <p className="text-xs font-medium text-amber-700 mt-0.5">{subValue}</p>}
+            {subValue && <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mt-0.5">{subValue}</p>}
           </div>
         </CardContent>
       </Card>
@@ -139,7 +139,7 @@ export default function KeuanganDisbursementPage() {
     <div className="space-y-6">
       {/* ── Page Title Area ────────────────────────────────── */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent border border-amber-100/50 px-6 py-5 sm:p-8 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent dark:from-slate-800 dark:via-amber-950/20 dark:to-transparent border border-amber-100/50 dark:border-amber-800/50 px-6 py-5 sm:p-8 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -151,15 +151,15 @@ export default function KeuanganDisbursementPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="bg-white/60 hover:bg-white/80 -ml-2"
+              className="bg-white/60 dark:bg-slate-700/60 hover:bg-white/80 dark:hover:bg-slate-600/80 -ml-2"
               onClick={() => router.push('/keuangan/dashboard')}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/20">
               <Send className="h-5 w-5" />
             </div>
-            <h1 className="text-2xl font-bold text-amber-900">Pencairan Dana</h1>
+            <h1 className="text-2xl font-bold text-amber-900 dark:text-amber-100">Pencairan Dana</h1>
           </div>
           <p className="text-sm text-muted-foreground ml-11">Pembayaran yang sudah disetujui, siap dicairkan</p>
         </div>
@@ -175,12 +175,12 @@ export default function KeuanganDisbursementPage() {
           transition={{ delay: 0.1 }}
         >
           <StatCard
-            icon={<Send className="h-5 w-5 text-emerald-600" />}
+            icon={<Send className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />}
             label="Total Siap Cair"
             value={totalSiapCair}
             subValue={`${totalSiapCair} transaksi menunggu`}
             borderColor="border-l-emerald-500"
-            bgColor="bg-gradient-to-br from-emerald-50 to-teal-50"
+            bgColor="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30"
             index={0}
           />
           <StatCard
@@ -188,7 +188,7 @@ export default function KeuanganDisbursementPage() {
             label="Total Dana"
             value={formatCurrency(totalDana)}
             borderColor="border-l-amber-500"
-            bgColor="bg-gradient-to-br from-amber-50/50 to-white"
+            bgColor="bg-gradient-to-br from-amber-50/50 to-white dark:from-amber-950/20 dark:to-slate-800"
             index={1}
           />
           <StatCard
@@ -196,7 +196,7 @@ export default function KeuanganDisbursementPage() {
             label="Rata-rata Per Transaksi"
             value={formatCurrency(rataRata)}
             borderColor="border-l-teal-500"
-            bgColor="bg-gradient-to-br from-teal-50 to-cyan-50"
+            bgColor="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30"
             index={2}
           />
         </motion.div>
@@ -221,8 +221,8 @@ export default function KeuanganDisbursementPage() {
                 description="Semua pembayaran yang disetujui sudah dicairkan"
               />
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead>Saksi</TableHead>
@@ -243,7 +243,7 @@ export default function KeuanganDisbursementPage() {
                         initial="hidden"
                         animate="show"
                         transition={{ delay: 0.05 * i }}
-                        whileHover={{ backgroundColor: 'rgba(241, 245, 249, 0.8)' }}
+                        
                       >
                         <TableCell>
                           <div className="flex items-center gap-3">
@@ -255,7 +255,7 @@ export default function KeuanganDisbursementPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-lg font-semibold text-emerald-600">
+                          <span className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
                             {formatCurrency(p.amount)}
                           </span>
                         </TableCell>

@@ -239,20 +239,20 @@ export default function AdminTpsPage() {
     <div className="space-y-6">
       {/* ── Page Title Area ────────────────────────────────── */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent border border-emerald-100/50 px-6 py-5 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent dark:from-slate-800 dark:via-emerald-950/20 dark:to-transparent border border-emerald-100/50 dark:border-emerald-800/50 px-6 py-5 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 rounded-full translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 dark:bg-teal-900/20 rounded-full translate-y-1/2" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" className="-ml-2" onClick={() => router.push('/admin/dashboard')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-emerald-900">Kelola TPS</h1>
+              <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">Kelola TPS</h1>
               <p className="text-sm text-muted-foreground mt-0.5">Daftar Tempat Pemungutan Suara</p>
             </div>
           </div>
@@ -275,7 +275,7 @@ export default function AdminTpsPage() {
           label="Total TPS"
           value={stats.total}
           borderColor="border-l-emerald-500"
-          bgColor="bg-gradient-to-br from-emerald-50/50 to-white"
+          bgColor="bg-gradient-to-br from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800"
           iconBg="bg-emerald-100"
           index={0}
         />
@@ -284,7 +284,7 @@ export default function AdminTpsPage() {
           label="TPS Aktif (dengan Saksi)"
           value={stats.aktif}
           borderColor="border-l-teal-500"
-          bgColor="bg-gradient-to-br from-teal-50/50 to-white"
+          bgColor="bg-gradient-to-br from-teal-50/50 to-white dark:from-teal-950/20 dark:to-slate-800"
           iconBg="bg-teal-100"
           index={1}
         />
@@ -293,7 +293,7 @@ export default function AdminTpsPage() {
           label="Total DPT"
           value={stats.totalDpt.toLocaleString('id-ID')}
           borderColor="border-l-amber-500"
-          bgColor="bg-gradient-to-br from-amber-50/50 to-white"
+          bgColor="bg-gradient-to-br from-amber-50/50 to-white dark:from-amber-950/20 dark:to-slate-800"
           iconBg="bg-amber-100"
           index={2}
         />
@@ -355,8 +355,8 @@ export default function AdminTpsPage() {
                 description={debouncedSearch ? `Tidak ditemukan TPS untuk "${debouncedSearch}"` : 'Tambahkan TPS baru untuk memulai plotting'}
               />
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead>Kode</TableHead>
@@ -381,7 +381,7 @@ export default function AdminTpsPage() {
                           initial="hidden"
                           animate="visible"
                           transition={{ delay: i * 0.04 }}
-                          whileHover={{ backgroundColor: 'rgba(241, 245, 249, 0.8)' }}
+                          
                         >
                           <TableCell>
                             <div className="flex items-center gap-2.5">
@@ -402,7 +402,7 @@ export default function AdminTpsPage() {
                               variant="secondary"
                               className={
                                 isActive
-                                  ? 'bg-emerald-100 text-emerald-700 gap-1.5'
+                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 gap-1.5'
                                   : 'bg-gray-100 text-gray-600'
                               }
                             >

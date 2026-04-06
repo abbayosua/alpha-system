@@ -73,7 +73,7 @@ export function Header({ onMenuClick }: HeaderProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden h-8 w-8"
+        className="lg:hidden h-10 w-10 touch-feedback active:scale-[0.98]"
         onClick={onMenuClick}
       >
         <Menu className="h-5 w-5" />
@@ -116,7 +116,7 @@ export function Header({ onMenuClick }: HeaderProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 rounded-lg"
+        className="h-10 w-10 rounded-lg touch-feedback active:scale-[0.98]"
         onClick={toggleTheme}
         title={resolvedTheme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
       >

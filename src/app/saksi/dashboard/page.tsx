@@ -227,7 +227,7 @@ export default function SaksiDashboardPage() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className={`p-1.5 rounded-lg ${completionColor === 'emerald' ? 'bg-emerald-100' : completionColor === 'amber' ? 'bg-amber-100' : 'bg-rose-100'}`}>
+                <div className={`p-1.5 rounded-lg ${completionColor === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/40' : completionColor === 'amber' ? 'bg-amber-100 dark:bg-amber-900/40' : 'bg-rose-100 dark:bg-rose-900/40'}`}>
                   <User className={`h-4 w-4 ${completionColor === 'emerald' ? 'text-emerald-600' : completionColor === 'amber' ? 'text-amber-600' : 'text-rose-600'}`} />
                 </div>
                 <span className="font-medium text-sm">Kelengkapan Profil</span>
@@ -243,7 +243,7 @@ export default function SaksiDashboardPage() {
                     ? 'bg-emerald-500'
                     : completionColor === 'amber'
                       ? 'bg-amber-500'
-                      : 'bg-rose-500'
+                      : 'bg-rose-50 dark:bg-rose-950/500'
                 }`}
                 initial={{ width: 0 }}
                 animate={{ width: `${profileCompletion.percentage}%` }}
@@ -258,10 +258,10 @@ export default function SaksiDashboardPage() {
                     variant="outline"
                     className={`text-xs ${
                       completionColor === 'emerald'
-                        ? 'border-emerald-200 text-emerald-600'
+                        ? 'border-emerald-200 text-emerald-600 dark:border-emerald-800 dark:text-emerald-400'
                         : completionColor === 'amber'
-                          ? 'border-amber-200 text-amber-600'
-                          : 'border-rose-200 text-rose-600'
+                          ? 'border-amber-200 text-amber-600 dark:border-amber-800 dark:text-amber-400'
+                          : 'border-rose-200 text-rose-600 dark:border-rose-800 dark:text-rose-400'
                     }`}
                   >
                     {item}
@@ -278,8 +278,8 @@ export default function SaksiDashboardPage() {
         <Card
           className={`overflow-hidden ${
             hasAssignment
-              ? 'border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/80 to-teal-50/80'
-              : 'border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/80 to-orange-50/80'
+              ? 'border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/80 to-teal-50/80 dark:from-emerald-950/20 dark:to-teal-950/20'
+              : 'border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/80 to-orange-50/80 dark:from-amber-950/20 dark:to-orange-950/20'
           }`}
         >
           <CardHeader className="pb-3">
@@ -293,7 +293,7 @@ export default function SaksiDashboardPage() {
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
                   {/* Mini map preview placeholder */}
-                  <div className="shrink-0 w-20 h-20 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center border border-emerald-200">
+                  <div className="shrink-0 w-20 h-20 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40 flex items-center justify-center border border-emerald-200 dark:border-emerald-800">
                     <div className="relative">
                       <Map className="h-8 w-8 text-emerald-600" />
                       <MapPin className="h-4 w-4 text-rose-500 absolute -bottom-1 -right-1 fill-rose-500" />
@@ -301,14 +301,14 @@ export default function SaksiDashboardPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
+                      <Badge variant="secondary" className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700">
                         Aktif
                       </Badge>
-                      <Badge variant="outline" className="text-rose-600 border-rose-200 bg-rose-50">
+                      <Badge variant="outline" className="text-rose-600 border-rose-200 dark:text-rose-400 dark:border-rose-800 bg-rose-50 dark:border-rose-800 dark:bg-rose-950/50 dark:bg-rose-950/50">
                         🗳️ Hari H Pemilu
                       </Badge>
                     </div>
-                    <h3 className="text-xl font-bold text-emerald-900 mt-1">
+                    <h3 className="text-xl font-bold text-emerald-900 dark:text-emerald-100 mt-1">
                       {data.assignment.tps.code}
                     </h3>
                     <p className="text-sm text-emerald-700 font-medium">
@@ -336,7 +336,7 @@ export default function SaksiDashboardPage() {
               </div>
             ) : (
               <div className="flex items-center gap-3 text-amber-600">
-                <div className="p-2 rounded-lg bg-amber-100">
+                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/40">
                   <Clock className="h-5 w-5" />
                 </div>
                 <span>Belum ditugaskan ke TPS. Menunggu plotting dari admin.</span>
@@ -363,7 +363,7 @@ export default function SaksiDashboardPage() {
                     <div
                       className={`flex items-center gap-3 py-3 cursor-pointer group transition-colors rounded-lg px-3 -mx-3 ${
                         step.status === 'next'
-                          ? 'bg-emerald-50 hover:bg-emerald-100'
+                          ? 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 dark:bg-emerald-900/40'
                           : step.status === 'completed'
                             ? 'hover:bg-muted/50'
                             : 'opacity-60'
@@ -377,7 +377,7 @@ export default function SaksiDashboardPage() {
                             step.status === 'completed'
                               ? 'bg-emerald-500 text-white'
                               : step.status === 'next'
-                                ? 'bg-emerald-100 text-emerald-700 ring-4 ring-emerald-100'
+                                ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 ring-4 ring-emerald-100'
                                 : 'bg-muted text-muted-foreground'
                           }`}
                           animate={
@@ -407,7 +407,7 @@ export default function SaksiDashboardPage() {
                             {step.label}
                           </span>
                           {step.status === 'completed' && (
-                            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0">
+                            <Badge variant="secondary" className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 text-[10px] px-1.5 py-0">
                               Selesai
                             </Badge>
                           )}
@@ -486,7 +486,7 @@ export default function SaksiDashboardPage() {
                                   step.status === 'completed'
                                     ? 'bg-emerald-500 text-white'
                                     : step.status === 'active'
-                                      ? 'bg-emerald-100 text-emerald-700 ring-4 ring-emerald-100'
+                                      ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 ring-4 ring-emerald-100'
                                       : 'bg-muted text-muted-foreground'
                                 }`}
                               >
@@ -620,7 +620,7 @@ function CheckItem({ icon, label, done }: { icon: React.ReactNode; label: string
   return (
     <div className={`flex items-center gap-2.5 text-sm py-2 px-3 rounded-lg ${done ? 'bg-emerald-50/50' : ''}`}>
       {done ? (
-        <div className="h-6 w-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 text-emerald-600">
+        <div className="h-6 w-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0 text-emerald-600">
           {icon}
         </div>
       ) : (

@@ -67,13 +67,13 @@ function PaymentStatCard({
     >
       <Card className={`shadow-sm border-l-4 ${borderColor} ${bgColor} transition-shadow hover:shadow-md`}>
         <CardContent className="p-4 flex items-center gap-3">
-          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/70 shadow-sm flex items-center justify-center text-muted-foreground">
+          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/70 dark:bg-slate-700/70 shadow-sm flex items-center justify-center text-muted-foreground">
             {icon}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-2xl font-bold leading-tight">{value}</p>
             <p className="text-xs text-muted-foreground truncate">{label}</p>
-            {subValue && <p className="text-xs font-medium text-amber-700 mt-0.5">{subValue}</p>}
+            {subValue && <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mt-0.5">{subValue}</p>}
           </div>
         </CardContent>
       </Card>
@@ -93,20 +93,20 @@ function ValidationChecklistItem({
 }) {
   return (
     <div className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-      done ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'
+      done ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800' : 'bg-rose-50 border-rose-200 dark:bg-rose-950/50 dark:border-rose-800'
     }`}>
       <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
-        done ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'
+        done ? 'bg-emerald-100 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 text-rose-500'
       }`}>
         {done ? <CheckCircle2 className="h-5 w-5" /> : icon}
       </div>
       <div className="flex-1">
-        <p className={`text-sm font-medium ${done ? 'text-emerald-800' : 'text-rose-700'}`}>{label}</p>
-        <p className={`text-xs ${done ? 'text-emerald-600' : 'text-rose-500'}`}>
+        <p className={`text-sm font-medium ${done ? 'text-emerald-800 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-400'}`}>{label}</p>
+        <p className={`text-xs ${done ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
           {done ? 'Terverifikasi' : 'Belum lengkap'}
         </p>
       </div>
-      <Badge variant="secondary" className={`${done ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'} gap-1.5`}>
+      <Badge variant="secondary" className={`${done ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700 dark:text-rose-400'} gap-1.5`}>
         <span className={`inline-flex h-1.5 w-1.5 rounded-full ${done ? 'bg-emerald-500' : 'bg-rose-500'}`} />
         {done ? '✓' : '✗'}
       </Badge>
@@ -226,19 +226,19 @@ export default function KeuanganPaymentsPage() {
     <div className="space-y-6">
       {/* ── Page Title Area ────────────────────────────────── */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent border border-amber-100/50 px-6 py-5 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent dark:from-slate-800 dark:via-amber-950/20 dark:to-transparent border border-amber-100/50 dark:border-amber-800/50 px-6 py-5 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="absolute top-0 right-0 w-40 h-40 bg-amber-100/30 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-orange-100/20 rounded-full translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-amber-100/30 dark:bg-amber-900/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-orange-100/20 dark:bg-orange-900/20 rounded-full translate-y-1/2" />
         <div className="relative flex items-center gap-3">
           <Button variant="ghost" size="icon" className="-ml-2" onClick={() => router.push('/keuangan/dashboard')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-amber-900">Approval Pembayaran</h1>
+            <h1 className="text-2xl font-bold text-amber-900 dark:text-amber-100">Approval Pembayaran</h1>
             <p className="text-sm text-muted-foreground mt-0.5">Pembayaran siap disetujui</p>
           </div>
         </div>
@@ -248,12 +248,12 @@ export default function KeuanganPaymentsPage() {
       {!loading && payments.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <PaymentStatCard
-            icon={<Wallet className="h-5 w-5 text-emerald-600" />}
+            icon={<Wallet className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />}
             label="Total Siap Bayar"
             value={totalSiapBayar}
             subValue={formatCurrency(totalSiapBayarAmount)}
             borderColor="border-l-emerald-500"
-            bgColor="bg-gradient-to-br from-emerald-50 to-teal-50"
+            bgColor="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30"
             index={0}
           />
           <PaymentStatCard
@@ -261,7 +261,7 @@ export default function KeuanganPaymentsPage() {
             label="Menunggu Review"
             value={menungguReview}
             borderColor="border-l-amber-500"
-            bgColor="bg-gradient-to-br from-amber-50 to-orange-50"
+            bgColor="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30"
             index={1}
           />
           <PaymentStatCard
@@ -269,7 +269,7 @@ export default function KeuanganPaymentsPage() {
             label="Tervalidasi (3/3)"
             value={totalSiapBayar - menungguReview}
             borderColor="border-l-teal-500"
-            bgColor="bg-gradient-to-br from-teal-50 to-cyan-50"
+            bgColor="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30"
             index={2}
           />
         </div>
@@ -294,8 +294,8 @@ export default function KeuanganPaymentsPage() {
                 description="Tidak ada pembayaran yang menunggu approval"
               />
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead>Saksi</TableHead>
@@ -314,7 +314,7 @@ export default function KeuanganPaymentsPage() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: 0.05 * i }}
-                        whileHover={{ backgroundColor: 'rgba(241, 245, 249, 0.8)' }}
+                        
                       >
                         <TableCell>
                           <div className="flex items-center gap-3">
@@ -325,7 +325,7 @@ export default function KeuanganPaymentsPage() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium text-emerald-600">{formatCurrency(p.amount)}</TableCell>
+                        <TableCell className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(p.amount)}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
                             <ValidationBadge label="GPS" done={p.gpsVerified} />
@@ -391,11 +391,11 @@ export default function KeuanganPaymentsPage() {
                 <p className="text-xs text-muted-foreground">{detailPayment.user?.phone}</p>
               </motion.div>
 
-              <Separator className="bg-gradient-to-r from-transparent via-amber-200 to-transparent" />
+              <Separator className="bg-gradient-to-r from-transparent via-amber-200 dark:via-amber-800 to-transparent" />
 
               {/* ── Ringkasan Pembayaran ────────────────── */}
               <motion.div
-                className="text-center p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100"
+                className="text-center p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-100"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
@@ -497,7 +497,7 @@ export default function KeuanganPaymentsPage() {
 
 function ValidationBadge({ label, done }: { label: string; done: boolean }) {
   return (
-    <Badge variant="secondary" className={done ? 'bg-emerald-100 text-emerald-700 gap-1.5' : 'bg-gray-100 text-gray-600 gap-1.5'}>
+    <Badge variant="secondary" className={done ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 gap-1.5' : 'bg-gray-100 text-gray-600 gap-1.5'}>
       <span className={`inline-flex h-1.5 w-1.5 rounded-full ${done ? 'bg-emerald-500' : 'bg-gray-400'}`} />
       {label}
     </Badge>

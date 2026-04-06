@@ -65,11 +65,11 @@ const scaleVariants = {
 
 const CATEGORIES = [
   { value: 'SUARA_SILUMAN', label: 'Suara Siluman', icon: Users, color: 'bg-rose-100 text-rose-700 border-rose-200' },
-  { value: 'PENGHITUNGAN_ULANG', label: 'Penghitungan Ulang', icon: RefreshCw, color: 'bg-amber-100 text-amber-700 border-amber-200' },
+  { value: 'PENGHITUNGAN_ULANG', label: 'Penghitungan Ulang', icon: RefreshCw, color: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800' },
   { value: 'DOKUMEN_PALSU', label: 'Dokumen Palsu', icon: FileX, color: 'bg-orange-100 text-orange-700 border-orange-200' },
   { value: 'INTIMIDASI', label: 'Intimidasi', icon: ShieldAlert, color: 'bg-red-100 text-red-700 border-red-200' },
-  { value: 'MONEY_POLITICS', label: 'Politik Uang', icon: Banknote, color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  { value: 'PELANGGARAN_PROTOKOL', label: 'Pelanggaran Protokol', icon: AlertOctagon, color: 'bg-amber-100 text-amber-800 border-amber-300' },
+  { value: 'MONEY_POLITICS', label: 'Politik Uang', icon: Banknote, color: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800' },
+  { value: 'PELANGGARAN_PROTOKOL', label: 'Pelanggaran Protokol', icon: AlertOctagon, color: 'bg-amber-100 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800' },
   { value: 'LAINNYA', label: 'Lainnya', icon: HelpCircle, color: 'bg-slate-100 text-slate-700 border-slate-200' },
 ]
 
@@ -234,7 +234,7 @@ export default function SaksiLaporPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 15 }}
-                className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-200"
+                className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-200 dark:shadow-emerald-900/20"
               >
                 <CheckCircle2 className="h-10 w-10 text-white" />
               </motion.div>
@@ -252,7 +252,7 @@ export default function SaksiLaporPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white/70 rounded-xl p-4 space-y-3 border border-rose-100"
+                className="bg-white/70 dark:bg-slate-700/70 rounded-xl p-4 space-y-3 border border-rose-100"
               >
                 <div className="bg-rose-50/80 rounded-lg p-3 text-center">
                   <p className="text-xs text-muted-foreground mb-1">Judul Laporan</p>
@@ -262,7 +262,7 @@ export default function SaksiLaporPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-amber-50/80 rounded-lg p-3 text-center">
                     <p className="text-xs text-muted-foreground mb-1">Status</p>
-                    <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">
+                    <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50">
                       <Clock className="h-3 w-3 mr-1" />
                       {result.status.replace(/_/g, ' ')}
                     </Badge>
@@ -463,7 +463,7 @@ export default function SaksiLaporPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-gradient-to-br from-amber-50/50 to-white rounded-xl p-4 border border-amber-200"
+                className="bg-gradient-to-br from-amber-50/50 to-white rounded-xl p-4 border border-amber-200 dark:border-amber-800"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">

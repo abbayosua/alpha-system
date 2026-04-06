@@ -58,14 +58,14 @@ const scaleVariants = {
 const candidateColors = [
   {
     border: 'border-l-emerald-500',
-    bg: 'from-emerald-50/50 to-white',
-    badge: 'bg-emerald-100 text-emerald-700',
+    bg: 'from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800',
+    badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
     inputRing: 'focus:ring-emerald-300',
     gradient: 'from-emerald-500 to-emerald-600',
   },
   {
     border: 'border-l-teal-500',
-    bg: 'from-teal-50/50 to-white',
+    bg: 'from-teal-50/50 to-white dark:from-teal-950/20 dark:to-slate-800',
     badge: 'bg-teal-100 text-teal-700',
     inputRing: 'focus:ring-teal-300',
     gradient: 'from-teal-500 to-teal-600',
@@ -285,7 +285,7 @@ export default function SaksiInputPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 15 }}
-                className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-200"
+                className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-200 dark:shadow-emerald-900/20"
               >
                 <CheckCircle2 className="h-10 w-10 text-white" />
               </motion.div>
@@ -295,7 +295,7 @@ export default function SaksiInputPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <h2 className="text-xl font-bold text-emerald-900">Data Suara Sudah Diinput</h2>
+                <h2 className="text-xl font-bold text-emerald-900 dark:text-emerald-100">Data Suara Sudah Diinput</h2>
                 <p className="text-sm text-muted-foreground mt-1">Penghitungan suara Anda telah tersimpan</p>
               </motion.div>
 
@@ -303,7 +303,7 @@ export default function SaksiInputPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white/70 rounded-xl p-4 space-y-3 border border-emerald-100"
+                className="bg-white/70 dark:bg-slate-700/70 rounded-xl p-4 space-y-3 border border-emerald-100"
               >
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-emerald-50/80 rounded-lg p-3 text-center">
@@ -415,7 +415,7 @@ export default function SaksiInputPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 15 }}
-                className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-200"
+                className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-200 dark:shadow-emerald-900/20"
               >
                 <CheckCircle2 className="h-10 w-10 text-white" />
               </motion.div>
@@ -425,7 +425,7 @@ export default function SaksiInputPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <h2 className="text-xl font-bold text-emerald-900">Data Suara Berhasil Disimpan!</h2>
+                <h2 className="text-xl font-bold text-emerald-900 dark:text-emerald-100">Data Suara Berhasil Disimpan!</h2>
                 <p className="text-sm text-muted-foreground mt-1">Terima kasih atas kontribusi Anda</p>
               </motion.div>
 
@@ -433,7 +433,7 @@ export default function SaksiInputPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white/70 rounded-xl p-4 space-y-3 border border-emerald-100"
+                className="bg-white/70 dark:bg-slate-700/70 rounded-xl p-4 space-y-3 border border-emerald-100"
               >
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-emerald-50/80 rounded-lg p-3 text-center">

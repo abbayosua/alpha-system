@@ -35,7 +35,7 @@ function UserAvatar({ name, size = 'sm', showStatus = false, isOnline = false }:
       </div>
       {showStatus && (
         <span
-          className={`absolute bottom-0 right-0 block rounded-full ring-2 ring-white ${
+          className={`absolute bottom-0 right-0 block rounded-full ring-2 ring-white dark:ring-slate-700 ${
             isOnline ? 'h-2.5 w-2.5 bg-emerald-500' : 'h-2.5 w-2.5 bg-gray-400'
           }`}
         />
@@ -70,7 +70,7 @@ function StatCard({
     >
       <Card className={`shadow-sm border-l-4 ${borderColor} ${bgColor} transition-shadow hover:shadow-md`}>
         <CardContent className="p-4 flex items-center gap-3">
-          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/70 shadow-sm flex items-center justify-center text-muted-foreground">
+          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/70 dark:bg-slate-700/70 shadow-sm flex items-center justify-center text-muted-foreground">
             {icon}
           </div>
           <div className="flex-1 min-w-0">
@@ -186,25 +186,25 @@ export default function AdminSaksiPage() {
     <div className="space-y-6">
       {/* ── Page Title Area ────────────────────────────────── */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent border border-emerald-100/50 px-6 py-5 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent dark:from-slate-800 dark:via-emerald-950/20 dark:to-transparent border border-emerald-100/50 dark:border-emerald-800/50 px-6 py-5 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 rounded-full translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 dark:bg-teal-900/20 rounded-full translate-y-1/2" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" className="-ml-2" onClick={() => router.push('/admin/dashboard')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-emerald-900">Kelola Saksi</h1>
+              <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">Kelola Saksi</h1>
               <p className="text-sm text-muted-foreground mt-0.5">Daftar semua saksi terdaftar</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={exportCSV} disabled={users.length === 0} className="bg-white/80">
+            <Button variant="outline" size="sm" onClick={exportCSV} disabled={users.length === 0} className="bg-white/80 dark:bg-slate-800/80">
               <Download className="h-4 w-4 mr-2" /> Export CSV
             </Button>
             <Button onClick={() => router.push('/auth/register')}>
@@ -249,8 +249,8 @@ export default function AdminSaksiPage() {
                 description={debouncedSearch ? `Tidak ditemukan saksi untuk "${debouncedSearch}"` : 'Belum ada saksi yang terdaftar'}
               />
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead>Nama</TableHead>
@@ -269,7 +269,7 @@ export default function AdminSaksiPage() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: 0.05 * i }}
-                        whileHover={{ backgroundColor: 'rgba(241, 245, 249, 0.8)' }}
+                        
                       >
                         <TableCell>
                           <div className="flex items-center gap-3">
@@ -341,7 +341,7 @@ export default function AdminSaksiPage() {
                 <p className="text-xs text-muted-foreground">{detailUser.phone || '-'}</p>
               </motion.div>
 
-              <Separator className="bg-gradient-to-r from-transparent via-emerald-200 to-transparent" />
+              <Separator className="bg-gradient-to-r from-transparent via-emerald-200 dark:via-emerald-800 to-transparent" />
 
               {/* ── Info Section ─────────────────────────── */}
               <motion.div
@@ -384,7 +384,7 @@ export default function AdminSaksiPage() {
                   label="Check-in"
                   value={detailUser.checkIns?.length || 0}
                   borderColor="border-l-emerald-500"
-                  bgColor="bg-gradient-to-br from-emerald-50 to-teal-50"
+                  bgColor="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30"
                   index={0}
                 />
                 <StatCard
@@ -392,7 +392,7 @@ export default function AdminSaksiPage() {
                   label="Input Suara"
                   value={detailUser.voteInputs?.length || 0}
                   borderColor="border-l-teal-500"
-                  bgColor="bg-gradient-to-br from-teal-50 to-cyan-50"
+                  bgColor="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30"
                   index={1}
                 />
                 <StatCard
@@ -400,7 +400,7 @@ export default function AdminSaksiPage() {
                   label="Laporan"
                   value={detailUser.fraudReports?.length || 0}
                   borderColor="border-l-amber-500"
-                  bgColor="bg-gradient-to-br from-amber-50 to-orange-50"
+                  bgColor="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30"
                   index={2}
                 />
               </motion.div>
@@ -426,7 +426,7 @@ export default function AdminSaksiPage() {
                   <div className="space-y-2">
                     {detailUser.assignments.map((a: any) => (
                       <div key={a.id} className="flex items-center gap-2 text-sm p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
-                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 gap-1.5">
+                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 gap-1.5">
                           <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                           {a.status}
                         </Badge>

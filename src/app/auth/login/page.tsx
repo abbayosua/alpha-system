@@ -39,19 +39,42 @@ export default function LoginPage() {
     }
   }
 
-  const fillDemo = (demoEmail: string) => {
+  const fillDemo = async (demoEmail: string) => {
     setEmail(demoEmail)
     setPassword('demo123')
+    setIsLoading(true)
+    try {
+      const { error } = await login({ email: demoEmail, password: 'demo123' })
+      if (error) {
+        toast.error(error)
+        setIsLoading(false)
+      } else {
+        toast.success('Login berhasil!')
+        // Small delay to let the auth store update
+        await new Promise((r) => setTimeout(r, 500))
+        const user = useAuthStore.getState().user
+        if (user) {
+          const path = user.role === 'ADMIN' ? '/admin/dashboard' : user.role === 'ADMIN_KEUANGAN' ? '/keuangan/dashboard' : '/saksi/dashboard'
+          router.push(path)
+        } else {
+          // Fallback: check role from profile fetch
+          setIsLoading(false)
+        }
+      }
+    } catch {
+      toast.error('Gagal login. Silakan coba lagi.')
+      setIsLoading(false)
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50 dark:from-slate-950 dark:via-emerald-950/20 dark:to-slate-900 p-4 relative overflow-hidden">
       {/* Decorative background elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-200/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-emerald-100/10 rounded-full blur-2xl" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200/20 dark:bg-emerald-900/15 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-200/20 dark:bg-teal-900/15 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-emerald-100/10 dark:bg-emerald-900/10 rounded-full blur-2xl" />
 
-      <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm relative z-10">
+      <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm relative z-10">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-3">
             <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">

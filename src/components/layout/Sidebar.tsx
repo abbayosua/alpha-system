@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   LayoutDashboard,
   MapPin,
@@ -17,6 +17,7 @@ import {
   MapPinned,
   GitBranch,
   FileBarChart,
+  BarChart3,
   ScrollText,
   Receipt,
   Send,
@@ -24,11 +25,18 @@ import {
   ChevronLeft,
   Shield,
   Building2,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet'
 import type { UserRole, LucideIcon } from 'lucide-react'
 
 interface NavItem {
@@ -54,6 +62,7 @@ const navConfigs: Record<UserRole, NavItem[]> = {
     { label: 'Kelola TPS', href: '/admin/tps', icon: MapPinned },
     { label: 'Plotting', href: '/admin/plotting', icon: GitBranch },
     { label: 'Laporan', href: '/admin/reports', icon: FileBarChart, badgeApi: '/api/reports?status=PENDING&limit=1' },
+    { label: 'Analitik', href: '/admin/analytics', icon: BarChart3 },
     { label: 'Audit Log', href: '/admin/audit', icon: ScrollText },
   ],
   ADMIN_KEUANGAN: [
@@ -93,12 +102,124 @@ interface AppSidebarProps {
   onToggle: () => void
 }
 
+// ─── Shared Sidebar Navigation Content ─────────────────────────────
+function SidebarNavContent({
+  pathname,
+  navItems,
+  badgeCounts,
+  onNavigate,
+  user,
+  role,
+  onLogout,
+}: {
+  pathname: string
+  navItems: NavItem[]
+  badgeCounts: Record<string, number>
+  onNavigate: () => void
+  user: any
+  role: UserRole
+  onLogout: () => void
+}) {
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : '??'
+
+  return (
+    <>
+      {/* Navigation */}
+      <ScrollArea className="flex-1 px-3 py-4 custom-scrollbar">
+        <nav className="flex flex-col gap-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            const Icon = item.icon
+            const count = badgeCounts[item.href]
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onNavigate}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group select-none',
+                  isActive
+                    ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25'
+                    : 'text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400'
+                )}
+              >
+                <div className={cn(
+                  'shrink-0 transition-colors duration-200',
+                  isActive ? 'text-white' : 'text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
+                )}>
+                  <Icon className="h-4 w-4" />
+                </div>
+                <span className="flex-1">{item.label}</span>
+                {count !== undefined && count > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className={cn(
+                      'rounded-full px-2 py-0 text-xs font-bold min-w-[20px] text-center transition-colors',
+                      isActive
+                        ? 'bg-white/20 text-white border-0'
+                        : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                    )}
+                  >
+                    {count}
+                  </Badge>
+                )}
+              </Link>
+            )
+          })}
+        </nav>
+      </ScrollArea>
+
+      {/* User info */}
+      <div className="border-t border-border/50 bg-muted/30 px-4 py-3 safe-bottom">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-9 w-9 ring-2 ring-emerald-200 dark:ring-emerald-800">
+            <AvatarFallback className="text-xs font-semibold bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate leading-tight">{user?.name || 'Pengguna'}</p>
+            <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 mt-0.5', roleColors[role])}>
+              {role === 'ADMIN_KEUANGAN' ? (
+                <span className="flex items-center gap-1">
+                  <Building2 className="h-2.5 w-2.5" />
+                  {roleLabels[role]}
+                </span>
+              ) : (
+                roleLabels[role]
+              )}
+            </Badge>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 rounded-lg"
+            onClick={onLogout}
+            title="Keluar"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </>
+  )
+}
+
 export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({})
+  const sheetRef = useRef<HTMLDivElement>(null)
+  const touchStartX = useRef<number | null>(null)
 
   const role = user?.role || 'SAKSI'
   const navItems = navConfigs[role] || []
@@ -143,6 +264,26 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
     router.push('/auth/login')
   }
 
+  const handleNavigate = () => {
+    if (isOpen) onToggle()
+  }
+
+  // Touch gesture support for swiping to close
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const touchEndX = e.changedTouches[0].clientX
+    const diff = touchEndX - touchStartX.current
+    // Swipe right by more than 60px closes the drawer
+    if (diff > 60) {
+      onToggle()
+    }
+    touchStartX.current = null
+  }
+
   const initials = user?.name
     ? user.name
         .split(' ')
@@ -154,21 +295,60 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
 
   return (
     <>
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
-          onClick={onToggle}
-        />
-      )}
+      {/* ─── Mobile Sheet-based Drawer ─── */}
+      <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onToggle() }}>
+        <SheetContent
+          side="left"
+          className="w-72 p-0 bg-card border-r border-border/50 safe-bottom lg:hidden"
+          ref={sheetRef}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Gradient Header */}
+          <div className={cn(
+            'relative flex h-16 items-center justify-between px-4 bg-gradient-to-r shadow-md',
+            roleGradients[role]
+          )}>
+            {/* Decorative circles */}
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-8 w-12 h-12 bg-white/5 rounded-full translate-y-1/2" />
 
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-card border-r border-border/50 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto shadow-lg lg:shadow-none',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        )}
-      >
+            <Link
+              href={`/${role === 'ADMIN_KEUANGAN' ? 'keuangan' : role.toLowerCase()}/dashboard`}
+              className="flex items-center gap-2.5 relative z-10 select-none"
+              onClick={handleNavigate}
+            >
+              <div className={cn('p-1.5 rounded-lg', roleIconBg[role])}>
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-base font-bold text-white leading-tight">SAKSI APP</span>
+                <span className="text-[10px] text-white/70 leading-tight">Manajemen Saksi Pemilu</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* Hidden accessibility titles */}
+          <SheetTitle className="sr-only">Menu Navigasi</SheetTitle>
+          <SheetDescription className="sr-only">Navigasi menu saksi app</SheetDescription>
+
+          {/* Navigation Content */}
+          <div className="flex flex-1 flex-col h-[calc(100%-4rem)]">
+            <SidebarNavContent
+              pathname={pathname}
+              navItems={navItems}
+              badgeCounts={badgeCounts}
+              onNavigate={handleNavigate}
+              user={user}
+              role={role}
+              onLogout={handleLogout}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* ─── Desktop Sidebar ─── */}
+      <aside className="hidden lg:flex w-64 flex-col bg-card border-r border-border/50 shadow-none">
         {/* Logo / Brand Header with Gradient */}
         <div className={cn(
           'relative flex h-16 items-center justify-between px-4 bg-gradient-to-r shadow-md',
@@ -187,94 +367,18 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
               <span className="text-[10px] text-white/70 leading-tight">Manajemen Saksi Pemilu</span>
             </div>
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden h-8 w-8 text-white/80 hover:text-white hover:bg-white/10"
-            onClick={onToggle}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
         </div>
 
-        {/* Navigation */}
-        <ScrollArea className="flex-1 px-3 py-4">
-          <nav className="flex flex-col gap-1">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-              const Icon = item.icon
-              const count = badgeCounts[item.href]
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => {
-                    if (isOpen) onToggle()
-                  }}
-                  className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group',
-                    isActive
-                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25'
-                      : 'text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400'
-                  )}
-                >
-                  <div className={cn(
-                    'shrink-0 transition-colors duration-200',
-                    isActive ? 'text-white' : 'text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
-                  )}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <span className="flex-1">{item.label}</span>
-                  {count !== undefined && count > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className={cn(
-                        'rounded-full px-2 py-0 text-xs font-bold min-w-[20px] text-center transition-colors',
-                        isActive
-                          ? 'bg-white/20 text-white border-0'
-                          : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                      )}
-                    >
-                      {count}
-                    </Badge>
-                  )}
-                </Link>
-              )
-            })}
-          </nav>
-        </ScrollArea>
-
-        {/* User info */}
-        <div className="border-t border-border/50 bg-muted/30 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 ring-2 ring-emerald-200 dark:ring-emerald-800">
-              <AvatarFallback className="text-xs font-semibold bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate leading-tight">{user?.name || 'Pengguna'}</p>
-              <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 mt-0.5', roleColors[role])}>
-                {role === 'ADMIN_KEUANGAN' ? (
-                  <span className="flex items-center gap-1">
-                    <Building2 className="h-2.5 w-2.5" />
-                    {roleLabels[role]}
-                  </span>
-                ) : (
-                  roleLabels[role]
-                )}
-              </Badge>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 rounded-lg"
-              onClick={handleLogout}
-              title="Keluar"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="flex flex-1 flex-col">
+          <SidebarNavContent
+            pathname={pathname}
+            navItems={navItems}
+            badgeCounts={badgeCounts}
+            onNavigate={() => {}}
+            user={user}
+            role={role}
+            onLogout={handleLogout}
+          />
         </div>
       </aside>
     </>

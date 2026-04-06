@@ -115,12 +115,12 @@ export default function Home() {
   }
 
   const features = [
-    { icon: <MapPin className="h-6 w-6" />, title: 'Plotting TPS', description: 'Plotting saksi ke TPS secara sistematis. Koordinat GPS untuk setiap lokasi TPS.', color: 'bg-emerald-100 text-emerald-600' },
-    { icon: <ClipboardCheck className="h-6 w-6" />, title: 'GPS Check-in', description: 'Check-in pagi dan akhir dengan verifikasi GPS. Selfie sebagai bukti kehadiran.', color: 'bg-teal-100 text-teal-600' },
-    { icon: <Camera className="h-6 w-6" />, title: 'Input Suara', description: 'Input hasil perhitungan suara real-time dengan foto C1 sebagai bukti.', color: 'bg-amber-100 text-amber-600' },
-    { icon: <FileText className="h-6 w-6" />, title: 'Laporan Fraud', description: 'Laporkan kecurangan pemilu dengan video dan deskripsi detail.', color: 'bg-rose-100 text-rose-600' },
-    { icon: <Wallet className="h-6 w-6" />, title: 'Pembayaran Transparan', description: 'Tracking pembayaran honor saksi secara transparan dan terverifikasi.', color: 'bg-emerald-100 text-emerald-600' },
-    { icon: <BarChart3 className="h-6 w-6" />, title: 'Dashboard Real-time', description: 'Monitoring dan analitik real-time untuk admin dan tim keuangan.', color: 'bg-teal-100 text-teal-600' },
+    { icon: <MapPin className="h-6 w-6" />, title: 'Plotting TPS', description: 'Plotting saksi ke TPS secara sistematis. Koordinat GPS untuk setiap lokasi TPS.', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400' },
+    { icon: <ClipboardCheck className="h-6 w-6" />, title: 'GPS Check-in', description: 'Check-in pagi dan akhir dengan verifikasi GPS. Selfie sebagai bukti kehadiran.', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400' },
+    { icon: <Camera className="h-6 w-6" />, title: 'Input Suara', description: 'Input hasil perhitungan suara real-time dengan foto C1 sebagai bukti.', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400' },
+    { icon: <FileText className="h-6 w-6" />, title: 'Laporan Fraud', description: 'Laporkan kecurangan pemilu dengan video dan deskripsi detail.', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400' },
+    { icon: <Wallet className="h-6 w-6" />, title: 'Pembayaran Transparan', description: 'Tracking pembayaran honor saksi secara transparan dan terverifikasi.', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400' },
+    { icon: <BarChart3 className="h-6 w-6" />, title: 'Dashboard Real-time', description: 'Monitoring dan analitik real-time untuk admin dan tim keuangan.', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400' },
   ]
 
   const steps = [
@@ -135,32 +135,32 @@ export default function Home() {
       icon: <Users className="h-6 w-6" />,
       title: 'Saksi',
       gradient: 'from-emerald-500 to-emerald-700',
-      bgGradient: 'from-emerald-50 to-emerald-100',
+      bgGradient: 'from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-emerald-950/50',
       items: ['Check-in GPS', 'Input suara', 'Laporan fraud', 'Tracking pembayaran'],
     },
     {
       icon: <Shield className="h-6 w-6" />,
       title: 'Admin',
       gradient: 'from-teal-500 to-teal-700',
-      bgGradient: 'from-teal-50 to-teal-100',
+      bgGradient: 'from-teal-50 to-teal-100 dark:from-teal-950/30 dark:to-teal-950/50',
       items: ['Manajemen saksi', 'Plotting TPS', 'Monitoring check-in', 'Review laporan'],
     },
     {
       icon: <Wallet className="h-6 w-6" />,
       title: 'Keuangan',
       gradient: 'from-amber-500 to-amber-700',
-      bgGradient: 'from-amber-50 to-amber-100',
+      bgGradient: 'from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-950/50',
       items: ['Approval pembayaran', 'Validasi data', 'Pencairan dana', 'Riwayat transaksi'],
     },
   ]
 
   return (
-    <div className="min-h-screen bg-white overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-slate-950 overflow-hidden">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1 rounded-lg bg-emerald-100">
+            <div className="p-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
               <Shield className="h-6 w-6 text-emerald-600" />
             </div>
             <span className="text-xl font-bold">SAKSI APP</span>
@@ -191,7 +191,7 @@ export default function Home() {
         {/* Animated gradient background */}
         <div className="absolute inset-0">
           <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-amber-50"
+            className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-amber-50 dark:from-emerald-950 dark:via-slate-900 dark:to-slate-950"
             animate={{
               backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
             }}
@@ -203,19 +203,19 @@ export default function Home() {
         {/* Floating decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
-            className="absolute w-64 h-64 rounded-full bg-emerald-200/20 blur-3xl"
+            className="absolute w-64 h-64 rounded-full bg-emerald-200/20 dark:bg-emerald-900/15 blur-3xl"
             animate={{ x: [0, 40, -20, 0], y: [0, -30, 20, 0] }}
             transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
             style={{ top: '10%', left: '10%' }}
           />
           <motion.div
-            className="absolute w-48 h-48 rounded-full bg-teal-200/20 blur-3xl"
+            className="absolute w-48 h-48 rounded-full bg-teal-200/20 dark:bg-teal-900/15 blur-3xl"
             animate={{ x: [0, -30, 20, 0], y: [0, 20, -30, 0] }}
             transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
             style={{ top: '60%', right: '10%' }}
           />
           <motion.div
-            className="absolute w-32 h-32 rounded-full bg-amber-200/20 blur-3xl"
+            className="absolute w-32 h-32 rounded-full bg-amber-200/20 dark:bg-amber-900/15 blur-3xl"
             animate={{ x: [0, 20, -10, 0], y: [0, -15, 25, 0] }}
             transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
             style={{ bottom: '15%', left: '40%' }}
@@ -233,7 +233,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Badge variant="outline" className="mb-6 px-4 py-1.5 border-emerald-200 bg-white/80 backdrop-blur-sm text-emerald-700 gap-2">
+            <Badge variant="outline" className="mb-6 px-4 py-1.5 border-emerald-200 dark:border-emerald-800 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-emerald-700 dark:text-emerald-400 gap-2">
               <motion.span
                 className="inline-flex h-2 w-2 rounded-full bg-emerald-500"
                 animate={{ opacity: [1, 0.4, 1] }}
@@ -244,7 +244,7 @@ export default function Home() {
           </motion.div>
 
           <motion.h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -257,7 +257,7 @@ export default function Home() {
           </motion.h1>
 
           <motion.p
-            className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -272,18 +272,18 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             {isAuthenticated && user ? (
-              <Button size="lg" onClick={() => router.push(getDashboardPath())} className="text-lg px-8 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200">
+              <Button size="lg" onClick={() => router.push(getDashboardPath())} className="text-lg px-8 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20">
                 <LayoutDashboard className="mr-2 h-5 w-5" />
                 Buka Dashboard {getRoleLabel()}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             ) : (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" onClick={() => router.push('/auth/register')} className="text-lg px-8 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200">
+                <Button size="lg" onClick={() => router.push('/auth/register')} className="text-lg px-8 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20">
                   Daftar Sebagai Saksi
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => router.push('/auth/login')} className="text-lg px-8 bg-white/80 backdrop-blur-sm">
+                <Button size="lg" variant="outline" onClick={() => router.push('/auth/login')} className="text-lg px-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
                   Masuk ke Akun
                 </Button>
               </div>
@@ -301,7 +301,7 @@ export default function Home() {
         </div>
 
         <FadeInSection className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">Fitur Unggulan</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Fitur Unggulan</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
             Semua yang Anda butuhkan untuk menjalankan tugas sebagai saksi pemilu
           </p>
@@ -310,7 +310,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, i) => (
             <FadeInSection key={feature.title} delay={i * 0.08}>
-              <Card className="shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full border-0 bg-white">
+              <Card className="shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full border-0 bg-white dark:bg-slate-800">
                 <CardHeader>
                   <div className={`mb-3 p-2.5 rounded-xl inline-flex ${feature.color}`}>
                     {feature.icon}
@@ -327,14 +327,14 @@ export default function Home() {
       </section>
 
       {/* ─── How it Works ─── */}
-      <section className="relative bg-emerald-50/50 py-24 overflow-hidden">
+      <section className="relative bg-emerald-50/50 dark:bg-emerald-950/20 py-24 overflow-hidden">
         <div className="absolute inset-0 opacity-[0.02]" style={{
           backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)',
           backgroundSize: '24px 24px',
         }} />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Cara Kerja</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">Cara Kerja</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
               4 langkah sederhana untuk mulai bertugas
             </p>
@@ -342,7 +342,7 @@ export default function Home() {
 
           <div className="relative">
             {/* Connecting line - desktop only */}
-            <div className="hidden lg:block absolute top-6 left-[calc(12.5%+24px)] right-[calc(12.5%+24px)] h-0.5 bg-emerald-200 z-0">
+            <div className="hidden lg:block absolute top-6 left-[calc(12.5%+24px)] right-[calc(12.5%+24px)] h-0.5 bg-emerald-200 dark:bg-emerald-800 z-0">
               <motion.div
                 className="h-full bg-emerald-500"
                 initial={{ scaleX: 0 }}
@@ -357,7 +357,7 @@ export default function Home() {
                 <FadeInSection key={step.number} delay={i * 0.15}>
                   <div className="text-center">
                     <motion.div
-                      className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-5 text-xl font-bold shadow-lg shadow-emerald-200"
+                      className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto mb-5 text-xl font-bold shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ duration: 0.4, delay: 0.6 + i * 0.15, type: 'spring', stiffness: 200 }}
@@ -377,7 +377,7 @@ export default function Home() {
       {/* ─── Roles Section ─── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <FadeInSection className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">Multi-Role System</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Multi-Role System</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
             Dibangun untuk mendukung berbagai peran dalam pengawasan pemilu
           </p>
@@ -414,7 +414,7 @@ export default function Home() {
       {/* ─── Statistics Section ─── */}
       <section className="relative py-24 overflow-hidden">
         {/* Dot pattern background */}
-        <div className="absolute inset-0 bg-slate-50" />
+        <div className="absolute inset-0 bg-slate-50 dark:bg-slate-900" />
         <div className="absolute inset-0 opacity-[0.04]" style={{
           backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)',
           backgroundSize: '20px 20px',
@@ -422,8 +422,8 @@ export default function Home() {
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 border-emerald-200 text-emerald-700">Dipercaya</Badge>
-            <h2 className="text-3xl font-bold mb-4">Pengawasan Pemilu Terpercaya</h2>
+            <Badge variant="outline" className="mb-4 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400">Dipercaya</Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">Pengawasan Pemilu Terpercaya</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
               Saksi App telah digunakan dalam berbagai tahapan pemilu di Indonesia
             </p>
@@ -464,19 +464,19 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
               Siap Berkontribusi?
             </h2>
-            <p className="text-emerald-100 mb-8 text-lg">
+            <p className="text-emerald-100 mb-8 text-base sm:text-lg">
               Bergabunglah sebagai saksi pemilu dan lindungi suara rakyat Indonesia.
             </p>
             {isAuthenticated && user ? (
-              <Button size="lg" variant="secondary" onClick={() => router.push(getDashboardPath())} className="text-lg px-8 bg-white text-emerald-700 hover:bg-emerald-50 shadow-xl">
+              <Button size="lg" variant="secondary" onClick={() => router.push(getDashboardPath())} className="text-lg px-8 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 shadow-xl">
                 <LayoutDashboard className="mr-2 h-5 w-5" />
                 Buka Dashboard
               </Button>
             ) : (
-              <Button size="lg" variant="secondary" onClick={() => router.push('/auth/register')} className="text-lg px-8 bg-white text-emerald-700 hover:bg-emerald-50 shadow-xl">
+              <Button size="lg" variant="secondary" onClick={() => router.push('/auth/register')} className="text-lg px-8 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 shadow-xl">
                 Daftar Sekarang
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -486,13 +486,13 @@ export default function Home() {
       </section>
 
       {/* ─── Footer ─── */}
-      <footer className="border-t bg-white">
+      <footer className="border-t bg-white dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {/* Brand */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="p-1 rounded-lg bg-emerald-100">
+                <div className="p-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
                   <Shield className="h-5 w-5 text-emerald-600" />
                 </div>
                 <span className="text-lg font-bold">SAKSI APP</span>
@@ -508,17 +508,17 @@ export default function Home() {
               <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Tautan Cepat</h4>
               <ul className="space-y-2.5">
                 <li>
-                  <button onClick={() => router.push('/auth/login')} className="text-sm text-muted-foreground hover:text-emerald-600 transition-colors">
+                  <button onClick={() => router.push('/auth/login')} className="text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                     Masuk
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => router.push('/auth/register')} className="text-sm text-muted-foreground hover:text-emerald-600 transition-colors">
+                  <button onClick={() => router.push('/auth/register')} className="text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                     Daftar
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => router.push(isAuthenticated ? getDashboardPath() : '/auth/login')} className="text-sm text-muted-foreground hover:text-emerald-600 transition-colors">
+                  <button onClick={() => router.push(isAuthenticated ? getDashboardPath() : '/auth/login')} className="text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                     Dashboard
                   </button>
                 </li>

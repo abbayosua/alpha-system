@@ -87,12 +87,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50 dark:from-slate-950 dark:via-emerald-950/20 dark:to-slate-900 p-4 relative overflow-hidden">
       {/* Decorative background elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-200/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200/20 dark:bg-emerald-900/15 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-200/20 dark:bg-teal-900/15 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
 
-      <Card className="w-full max-w-lg shadow-xl border-0 bg-white/80 backdrop-blur-sm relative z-10">
+      <Card className="w-full max-w-lg shadow-xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm relative z-10">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-3">
             <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">

@@ -77,7 +77,7 @@ function StatusSummaryCard({
     >
       <Card className={`shadow-sm border-l-4 ${colorClass} transition-shadow hover:shadow-md`}>
         <CardContent className="p-3 sm:p-4 flex items-center gap-3">
-          <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/70 shadow-sm flex items-center justify-center">
+          <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/70 dark:bg-slate-700/70 shadow-sm flex items-center justify-center">
             {icon}
           </div>
           <div className="flex-1 min-w-0">
@@ -144,8 +144,8 @@ function ReportsEmptyState({ isFiltered }: { isFiltered: boolean }) {
       className="py-16 px-6 text-center"
     >
       <div className="relative mx-auto w-24 h-24 mb-6">
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100" />
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-200/50 to-teal-200/50 animate-pulse" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-200/50 to-teal-200/50 dark:from-emerald-900/30 dark:to-teal-900/30 animate-pulse" />
         <div className="relative inset-0 flex items-center justify-center">
           {isFiltered ? (
             <Search className="h-10 w-10 text-emerald-600" />
@@ -291,13 +291,13 @@ export default function AdminReportsPage() {
     <div className="space-y-6">
       {/* ── Page Title Area ────────────────────────────────── */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent border border-emerald-100/50 px-6 py-5 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent dark:from-slate-800 dark:via-emerald-950/20 dark:to-transparent border border-emerald-100/50 dark:border-emerald-800/50 px-6 py-5 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 rounded-full translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-1/2 w-24 h-24 bg-teal-100/20 dark:bg-teal-900/20 rounded-full translate-y-1/2" />
         <div className="relative flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.push('/admin/dashboard')} className="-ml-2 flex-shrink-0">
             <ArrowLeft className="h-5 w-5" />
@@ -307,7 +307,7 @@ export default function AdminReportsPage() {
               <FileBarChart className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-emerald-900">Laporan Kecurangan</h1>
+              <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">Laporan Kecurangan</h1>
               <p className="text-sm text-muted-foreground mt-0.5">Kelola laporan fraud dari saksi</p>
             </div>
           </div>
@@ -333,28 +333,28 @@ export default function AdminReportsPage() {
           icon={<AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />}
           label="Pending"
           count={statusCounts.PENDING}
-          colorClass="border-l-amber-400 bg-gradient-to-br from-amber-50 to-orange-50/50"
+          colorClass="border-l-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30/50"
           index={1}
         />
         <StatusSummaryCard
           icon={<Eye className="h-4 w-4 sm:h-5 sm:w-5 text-teal-500" />}
           label="Under Review"
           count={statusCounts.UNDER_REVIEW}
-          colorClass="border-l-teal-400 bg-gradient-to-br from-teal-50 to-cyan-50/50"
+          colorClass="border-l-teal-400 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30/50"
           index={2}
         />
         <StatusSummaryCard
           icon={<CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />}
           label="Verified"
           count={statusCounts.VERIFIED}
-          colorClass="border-l-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50/50"
+          colorClass="border-l-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30/50"
           index={3}
         />
         <StatusSummaryCard
           icon={<XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-rose-400" />}
           label="Dismissed"
           count={statusCounts.DISMISSED}
-          colorClass="border-l-rose-300 bg-gradient-to-br from-rose-50 to-red-50/50"
+          colorClass="border-l-rose-300 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-950/30 dark:to-red-950/30/50"
           index={4}
         />
       </motion.div>
@@ -411,8 +411,8 @@ export default function AdminReportsPage() {
             ) : reports.length === 0 ? (
               <ReportsEmptyState isFiltered={!!(debouncedSearch || statusFilter !== 'ALL')} />
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead>Judul</TableHead>
@@ -575,7 +575,7 @@ export default function AdminReportsPage() {
                       <ClipboardList className="h-4 w-4 text-amber-600" />
                       <p className="text-sm font-semibold text-foreground">Catatan Review</p>
                     </div>
-                    <p className="text-sm bg-amber-50/50 text-muted-foreground p-3.5 rounded-lg border border-amber-100/50 leading-relaxed">
+                    <p className="text-sm bg-amber-50/50 dark:bg-amber-950/30 text-muted-foreground p-3.5 rounded-lg border border-amber-100/50 leading-relaxed">
                       {detailReport.reviewNotes}
                     </p>
                   </div>

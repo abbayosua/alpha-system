@@ -109,7 +109,7 @@ export default function SaksiProfilePage() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-muted-foreground">Email:</span>
             <span className="text-sm font-medium">{profile?.email}</span>
-            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">{profile?.role}</Badge>
+            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">{profile?.role}</Badge>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Terdaftar:</span>

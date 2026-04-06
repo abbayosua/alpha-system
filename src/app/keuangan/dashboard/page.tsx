@@ -124,7 +124,7 @@ function PaymentStackedBar({ breakdown }: { breakdown: Record<string, { count: n
       {/* Total Amount */}
       <div className="text-center mb-4">
         <p className="text-sm text-muted-foreground">Total Nilai Pembayaran</p>
-        <p className="text-2xl font-bold text-emerald-700 mt-1">
+        <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">
           <AnimatedCurrency value={totalAmount} />
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">{totalAll} transaksi</p>
@@ -192,16 +192,16 @@ function FundFlow({
   const totalBudget = readyAmount + approvedAmount + disbursedAmount
 
   const steps = [
-    { label: 'Siap Bayar', count: readyCount, amount: readyAmount, color: 'text-teal-600', bg: 'bg-teal-50 border-teal-200', icon: <Clock className="h-5 w-5" />, ring: 'ring-teal-100' },
-    { label: 'Disetujui', count: approvedCount, amount: approvedAmount, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200', icon: <CheckCircle2 className="h-5 w-5" />, ring: 'ring-emerald-100' },
-    { label: 'Dicairkan', count: disbursedCount, amount: disbursedAmount, color: 'text-emerald-700', bg: 'bg-emerald-100 border-emerald-300', icon: <Banknote className="h-5 w-5" />, ring: 'ring-emerald-200' },
+    { label: 'Siap Bayar', count: readyCount, amount: readyAmount, color: 'text-teal-600', bg: 'bg-teal-50 border-teal-200 dark:bg-teal-950/30 dark:border-teal-800', icon: <Clock className="h-5 w-5" />, ring: 'ring-teal-100 dark:ring-teal-800' },
+    { label: 'Disetujui', count: approvedCount, amount: approvedAmount, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800', icon: <CheckCircle2 className="h-5 w-5" />, ring: 'ring-emerald-100 dark:ring-emerald-800' },
+    { label: 'Dicairkan', count: disbursedCount, amount: disbursedAmount, color: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-emerald-100 border-emerald-300 dark:bg-emerald-900/40 dark:border-emerald-800', icon: <Banknote className="h-5 w-5" />, ring: 'ring-emerald-200 dark:ring-emerald-800' },
   ]
 
   return (
     <div ref={ref} className="space-y-4">
       <div className="text-center">
         <p className="text-sm text-muted-foreground">Total Alokasi Dana</p>
-        <p className="text-2xl font-bold text-emerald-700 mt-1">
+        <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">
           <AnimatedCurrency value={totalBudget} />
         </p>
       </div>
@@ -216,7 +216,7 @@ function FundFlow({
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.3 + i * 0.15 }}
             >
-              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-white ring-2 ${step.ring} ${step.color} mb-2 shadow-sm`}>
+              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-white ring-2 dark:bg-slate-800 dark:ring-slate-600 ${step.ring} ${step.color} mb-2 shadow-sm`}>
                 {step.icon}
               </div>
               <p className="text-xs text-muted-foreground mb-1">{step.label}</p>
@@ -251,7 +251,7 @@ function DisbursementStatusBadge({ status }: { status: string }) {
   const configs: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
     PENDING: { color: 'bg-amber-100 text-amber-700', icon: <Clock className="h-3 w-3" />, label: 'Menunggu' },
     READY_FOR_PAYMENT: { color: 'bg-teal-100 text-teal-700', icon: <Wallet className="h-3 w-3" />, label: 'Siap Bayar' },
-    APPROVED: { color: 'bg-emerald-100 text-emerald-700', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Disetujui' },
+    APPROVED: { color: 'bg-emerald-100 text-emerald-700 dark:text-emerald-400', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Disetujui' },
     DISBURSED: { color: 'bg-emerald-200 text-emerald-800', icon: <Banknote className="h-3 w-3" />, label: 'Dicairkan' },
     FAILED: { color: 'bg-rose-100 text-rose-700', icon: <AlertCircle className="h-3 w-3" />, label: 'Gagal' },
     CANCELLED: { color: 'bg-gray-100 text-gray-600', icon: <XCircle className="h-3 w-3" />, label: 'Dibatalkan' },
@@ -329,16 +329,16 @@ export default function KeuanganDashboardPage() {
     <div className="space-y-8">
       {/* ── Page Title Area ────────────────────────────────── */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent border border-emerald-100/50 px-6 py-5 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent dark:from-slate-800 dark:via-emerald-950/20 dark:to-transparent border border-emerald-100/50 dark:border-emerald-800/50 px-6 py-5 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-1/3 w-24 h-24 bg-teal-100/20 rounded-full translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-1/3 w-24 h-24 bg-teal-100/20 dark:bg-teal-900/20 rounded-full translate-y-1/2" />
         <div className="relative flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-emerald-900">Dashboard Keuangan</h1>
+            <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">Dashboard Keuangan</h1>
             <p className="text-muted-foreground mt-0.5">Selamat datang, {user?.name}</p>
           </div>
           {lastRefresh && (
@@ -358,7 +358,7 @@ export default function KeuanganDashboardPage() {
           value={summary.pendingCount}
           detail="PENDING"
           borderColor="border-l-amber-500"
-          bgClass="bg-gradient-to-br from-amber-50 to-orange-50"
+          bgClass="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30"
           index={0}
           iconColor="text-amber-500"
         />
@@ -368,7 +368,7 @@ export default function KeuanganDashboardPage() {
           value={summary.readyForPaymentCount}
           detail={formatCurrency(summary.readyForPaymentAmount)}
           borderColor="border-l-teal-500"
-          bgClass="bg-gradient-to-br from-teal-50 to-cyan-50"
+          bgClass="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30"
           index={1}
           iconColor="text-teal-500"
         />
@@ -378,7 +378,7 @@ export default function KeuanganDashboardPage() {
           value={summary.approvedCount}
           detail="Menunggu pencairan"
           borderColor="border-l-emerald-500"
-          bgClass="bg-gradient-to-br from-emerald-50 to-teal-50"
+          bgClass="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30"
           index={2}
           iconColor="text-emerald-500"
         />
@@ -388,7 +388,7 @@ export default function KeuanganDashboardPage() {
           value={summary.disbursedCount}
           detail={formatCurrency(summary.disbursedTotalAmount)}
           borderColor="border-l-emerald-600"
-          bgClass="bg-gradient-to-br from-emerald-100 to-emerald-50"
+          bgClass="bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-950/40 dark:to-emerald-950/30"
           index={3}
           iconColor="text-emerald-600"
         />
@@ -400,14 +400,14 @@ export default function KeuanganDashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35 }}
       >
-        <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100/30 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full -translate-y-1/2 translate-x-1/2" />
           <CardContent className="p-6 text-center relative">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 mb-2">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 mb-2">
               <CircleDollarSign className="h-6 w-6 text-emerald-600" />
             </div>
             <p className="text-sm text-muted-foreground mb-1">Total Dana Dicairkan</p>
-            <p className="text-4xl font-bold text-emerald-700">
+            <p className="text-4xl font-bold text-emerald-700 dark:text-emerald-400">
               <AnimatedCurrency value={summary.disbursedTotalAmount} />
             </p>
             <p className="text-sm text-muted-foreground mt-1">
@@ -506,8 +506,8 @@ export default function KeuanganDashboardPage() {
                       transition={{ delay: 0.75 + i * 0.04 }}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center">
-                          <span className="text-xs font-bold text-emerald-700">
+                        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
                             {(d.user?.name || '?').charAt(0).toUpperCase()}
                           </span>
                         </div>
@@ -523,7 +523,7 @@ export default function KeuanganDashboardPage() {
                             {d.disbursedAt ? new Date(d.disbursedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                           </p>
                         </div>
-                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-[10px] whitespace-nowrap">
+                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:text-emerald-400 text-[10px] whitespace-nowrap">
                           <Banknote className="h-3 w-3 mr-1" />
                           Cair
                         </Badge>

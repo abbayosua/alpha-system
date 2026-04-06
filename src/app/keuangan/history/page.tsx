@@ -136,7 +136,7 @@ export default function KeuanganHistoryPage() {
     <div className="space-y-6">
       {/* ── Page Title Area ────────────────────────────────── */}
       <motion.div
-        className="relative rounded-xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent border border-amber-100/50 px-6 py-5 sm:p-8 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent dark:from-slate-800 dark:via-amber-950/20 dark:to-transparent border border-amber-100/50 dark:border-amber-800/50 px-6 py-5 sm:p-8 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -148,22 +148,22 @@ export default function KeuanganHistoryPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="bg-white/60 hover:bg-white/80 -ml-2"
+              className="bg-white/60 dark:bg-slate-700/60 hover:bg-white/80 dark:hover:bg-slate-600/80 -ml-2"
               onClick={() => router.push('/keuangan/dashboard')}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/20">
               <History className="h-5 w-5" />
             </div>
-            <h1 className="text-2xl font-bold text-amber-900">Riwayat Pembayaran</h1>
+            <h1 className="text-2xl font-bold text-amber-900 dark:text-amber-100">Riwayat Pembayaran</h1>
             <div className="ml-auto">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={exportCSV}
                 disabled={payments.length === 0}
-                className="bg-white/60 hover:bg-white/80 border-amber-200 text-amber-700"
+                className="bg-white/60 dark:bg-slate-700/60 hover:bg-white/80 dark:hover:bg-slate-600/80 border-amber-200 text-amber-700"
               >
                 <Download className="h-4 w-4 mr-2" /> Export CSV
               </Button>
@@ -180,9 +180,9 @@ export default function KeuanganHistoryPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-white overflow-hidden relative">
+          <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-white dark:from-emerald-950/20 dark:via-teal-950/10 dark:to-slate-800 overflow-hidden relative">
             {/* Decorative background circle */}
-            <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-emerald-100/40" />
+            <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-emerald-100/40 dark:bg-emerald-900/20" />
             <CardContent className="p-5 relative">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
@@ -244,8 +244,8 @@ export default function KeuanganHistoryPage() {
                 description="Riwayat pencairan dana akan muncul di sini"
               />
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead>Tanggal Cair</TableHead>
@@ -266,7 +266,7 @@ export default function KeuanganHistoryPage() {
                         initial="hidden"
                         animate="show"
                         transition={{ delay: 0.05 * i }}
-                        whileHover={{ backgroundColor: 'rgba(241, 245, 249, 0.8)' }}
+                        
                       >
                         <TableCell className="text-sm">
                           {p.disbursedAt ? (
@@ -286,7 +286,7 @@ export default function KeuanganHistoryPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-lg font-semibold text-emerald-600">
+                          <span className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
                             {formatCurrency(p.amount)}
                           </span>
                         </TableCell>
