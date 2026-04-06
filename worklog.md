@@ -2409,3 +2409,44 @@ The application is highly mature with 30+ pages, 50+ components, full Supabase a
 3. Add WebSocket mini-service for production deployment
 4. Consider adding a "Help & Support" page with FAQ
 5. Consider adding data validation on the register form (real-time)
+
+---
+## Task ID: 18 - Vercel MIDDLEWARE_INVOCATION_FAILED Fix
+
+### Current Project Status Description/Assessment
+The application has 15+ rounds of development completed with all core features working. However, deploying to Vercel produces a `500: INTERNAL_SERVER_ERROR` with `Code: MIDDLEWARE_INVOCATION_FAILED` on the `/auth/register` and `/auth/login` pages. This error was caused by the middleware attempting to call `createServerClient()` with potentially undefined environment variables, which crashes the Edge Runtime before it can check public paths.
+
+### Completed Modifications / Verification Results
+
+#### Root Cause Analysis
+1. **Missing env var guard**: The middleware called `process.env.NEXT_PUBLIC_SUPABASE_URL!` and `process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!` with non-null assertions, but if these env vars were not set on Vercel, `createServerClient(undefined, undefined, ...)` would throw immediately.
+2. **No error handling**: The entire Supabase middleware logic had no try-catch, so any error (network issue, Supabase down, malformed cookies) would crash the middleware.
+3. **Defensive headers check**: The `headers` parameter in `setAll` callback lacked a null check (though @supabase/ssr v0.10.0 always passes it).
+
+#### Fix Applied (`src/lib/supabase/middleware.ts`)
+1. **Env var guard**: Added early return `if (!supabaseUrl || !supabaseAnonKey) { return supabaseResponse }` — if Supabase env vars are missing, middleware passes through without auth (pages load but auth won't work until env vars are configured).
+2. **Try-catch wrapping**: Wrapped entire Supabase middleware logic in try-catch with `console.error` logging — catches any Supabase/network errors and lets the request pass through gracefully.
+3. **`if (headers)` guard**: Added null check before `Object.entries(headers)` in the `setAll` callback.
+4. **Removed non-null assertions**: Changed from `process.env.NEXT_PUBLIC_SUPABASE_URL!` to stored variables with guard check.
+
+#### Verification
+- ✅ Zero lint errors
+- ✅ Dev server starts successfully (Next.js 16.1.3)
+- ✅ Note: Next.js 16.1.3 shows deprecation warning: "middleware" file convention is deprecated in favor of "proxy". Middleware still works but may need migration in future.
+- ✅ Committed as `430d241` and pushed to GitHub
+
+### Important Note for User
+**Make sure these environment variables are configured on Vercel:**
+- `NEXT_PUBLIC_SUPABASE_URL` = your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Supabase anon/public key
+- `SUPABASE_SERVICE_ROLE_KEY` = your Supabase service role key
+
+Go to: Vercel Dashboard → Project → Settings → Environment Variables
+
+### Unresolved Issues / Risks / Next Phase Recommendations
+1. **Next.js 16 middleware deprecation**: The `middleware.ts` convention is deprecated in Next.js 16 in favor of `proxy.ts`. Should migrate in a future round.
+2. **Supabase env vars**: User must ensure all 3 env vars are set on Vercel for auth to work.
+3. **GPS Check-in**: Still needs real browser testing.
+4. **Real-time notifications**: WebSocket/Socket.io integration pending.
+5. **Dark mode**: Theme toggle exists but may need refinement.
+6. **Mobile responsiveness**: Needs thorough testing.
