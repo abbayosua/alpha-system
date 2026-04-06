@@ -4,12 +4,13 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ArrowLeft, Camera, MapPin, CheckCircle2, XCircle, Loader2, Map } from 'lucide-react'
+import { ArrowLeft, Camera, MapPin, CheckCircle2, XCircle, Loader2, Map, Shield, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { ErrorState } from '@/components/common/ErrorState'
 
 const CheckInMap = dynamic(() => import('@/components/maps/CheckInMap'), { ssr: false })
 
@@ -34,9 +35,9 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
               <motion.div
                 className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-all ${
                   isCompleted
-                    ? 'bg-emerald-500 border-emerald-500 text-white'
+                    ? 'bg-amber-500 border-amber-500 text-white'
                     : isCurrent
-                    ? 'bg-white border-emerald-500 text-emerald-600 dark:bg-slate-800 dark:border-emerald-600 dark:text-emerald-400 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]'
+                    ? 'bg-white border-amber-500 text-amber-600 dark:bg-slate-800 dark:border-amber-600 dark:text-amber-400 shadow-[0_0_0_3px_rgba(245,158,11,0.2)]'
                     : 'bg-white border-gray-300 text-gray-400'
                 }`}
                 initial={false}
@@ -51,7 +52,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
               </motion.div>
               <span
                 className={`text-[11px] mt-1.5 text-center max-w-[72px] leading-tight ${
-                  isCompleted ? 'text-emerald-600 font-medium' : isCurrent ? 'text-emerald-600 font-medium' : 'text-gray-400'
+                  isCompleted ? 'text-amber-600 font-medium' : isCurrent ? 'text-amber-600 font-medium' : 'text-gray-400'
                 }`}
               >
                 {step.label}
@@ -59,7 +60,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
             </div>
             {i < steps.length - 1 && (
               <div className="w-12 sm:w-16 h-0.5 mx-1.5 mt-[-18px]">
-                <div className={`h-full rounded-full transition-all ${isCompleted ? 'bg-emerald-500' : 'bg-gray-200'}`} />
+                <div className={`h-full rounded-full transition-all ${isCompleted ? 'bg-amber-500' : 'bg-gray-200'}`} />
               </div>
             )}
           </div>
@@ -119,6 +120,7 @@ export default function SaksiFinalCheckInPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [assignment, setAssignment] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [gpsError, setGpsError] = useState<string | null>(null)
@@ -132,12 +134,12 @@ export default function SaksiFinalCheckInPage() {
 
   useEffect(() => {
     fetch('/api/assignments/my')
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success && res.data) setAssignment(res.data)
-        else toast.error('Anda belum memiliki penugasan aktif')
+        else setError('Anda belum memiliki penugasan aktif')
       })
-      .catch(() => toast.error('Gagal memuat data penugasan'))
+      .catch(() => setError('Gagal memuat data penugasan'))
       .finally(() => setLoading(false))
 
     return () => {
@@ -222,14 +224,8 @@ export default function SaksiFinalCheckInPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-4 max-w-lg mx-auto space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    )
-  }
+  if (loading) return <DashboardSkeleton variant="detail" />
+  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />
 
   // ─── Success State ───
   if (result) {
@@ -336,11 +332,11 @@ export default function SaksiFinalCheckInPage() {
           <Card className="shadow-sm">
             <CardContent className="p-8 text-center space-y-4">
               <motion.div
-                className="mx-auto w-24 h-24 rounded-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-2 border-dashed border-emerald-200 flex items-center justify-center"
+                className="mx-auto w-24 h-24 rounded-full bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-2 border-dashed border-amber-200 flex items-center justify-center"
                 animate={{ scale: [1, 1.04, 1] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <Map className="h-10 w-10 text-emerald-400" />
+                <Map className="h-10 w-10 text-amber-400" />
               </motion.div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">Belum Ada Penugasan</h3>
@@ -364,20 +360,69 @@ export default function SaksiFinalCheckInPage() {
   // ─── Main Check-in Flow ───
   return (
     <div className="p-4 max-w-lg mx-auto space-y-6">
+      {/* Gradient Title Area */}
       <motion.div
-        className="flex items-center gap-3"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
+        className="relative rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent p-6 pb-5 overflow-hidden"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Check-in Akhir</h1>
-          <p className="text-sm text-muted-foreground">
-            {assignment?.tps?.code} - {assignment?.tps?.name}
-          </p>
+        {/* Decorative circles */}
+        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-amber-100/30" />
+        <div className="absolute bottom-0 left-1/3 w-24 h-24 rounded-full bg-orange-100/20" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              className="bg-white/60 hover:bg-white/80 border-amber-200/50"
+            >
+              <ArrowLeft className="h-5 w-5 text-amber-700" />
+            </Button>
+          </div>
+
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-200/50 flex-shrink-0">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-amber-900">Check-in Akhir</h1>
+              <p className="text-sm text-amber-700/70 mt-0.5">
+                Verifikasi kehadiran akhir setelah penghitungan suara selesai
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {assignment?.tps?.code} - {assignment?.tps?.name}
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Info Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.05 }}
+      >
+        <div className="rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
+              <Clock className="h-4.5 w-4.5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-semibold text-amber-800">Check-in Akhir</span>
+                <Badge className="bg-amber-500/15 text-amber-700 border-amber-300/50 text-[10px] px-1.5 py-0 hover:bg-amber-500/20">
+                  {assignment?.tps?.code}
+                </Badge>
+              </div>
+              <p className="text-xs text-amber-700/70 leading-relaxed">
+                Verifikasi kehadiran akhir setelah penghitungan suara selesai. Pastikan seluruh proses penghitungan telah dilaksanakan sebelum melakukan check-in.
+              </p>
+            </div>
+          </div>
         </div>
       </motion.div>
 
@@ -399,12 +444,12 @@ export default function SaksiFinalCheckInPage() {
         transition={{ duration: 0.5, delay: 0.15 }}
       >
         <Card className="shadow-sm overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">
+          <CardHeader className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
             <CardTitle className="text-lg flex items-center gap-2 text-white">
               <Camera className="h-5 w-5" />
               Foto Selfie
             </CardTitle>
-            <CardDescription className="text-emerald-100">
+            <CardDescription className="text-amber-100">
               Ambil foto selfie sebagai bukti kehadiran akhir
             </CardDescription>
           </CardHeader>
@@ -422,7 +467,7 @@ export default function SaksiFinalCheckInPage() {
               )}
               {selfieBase64 && !cameraActive && (
                 <div className="absolute top-3 right-3">
-                  <Badge className="bg-emerald-500 text-white text-xs gap-1 shadow-sm">
+                  <Badge className="bg-amber-500 text-white text-xs gap-1 shadow-sm">
                     <CheckCircle2 className="h-3 w-3" />
                     Foto Diambil
                   </Badge>
@@ -453,12 +498,12 @@ export default function SaksiFinalCheckInPage() {
         transition={{ duration: 0.5, delay: 0.25 }}
       >
         <Card className="shadow-sm overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-600 text-white">
+          <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
             <CardTitle className="text-lg flex items-center gap-2 text-white">
               <MapPin className="h-5 w-5" />
               Verifikasi GPS
             </CardTitle>
-            <CardDescription className="text-teal-100">
+            <CardDescription className="text-orange-100">
               Aktifkan GPS untuk verifikasi lokasi di TPS
             </CardDescription>
           </CardHeader>
@@ -507,7 +552,7 @@ export default function SaksiFinalCheckInPage() {
         transition={{ duration: 0.5, delay: 0.35 }}
       >
         <Button
-          className="w-full"
+          className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 shadow-md shadow-amber-200/50"
           size="lg"
           onClick={handleSubmit}
           disabled={submitting || !gpsCoords || !selfieBase64}

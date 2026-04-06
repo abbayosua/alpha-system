@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
@@ -47,6 +48,7 @@ function getBreadcrumbSegments(pathname: string) {
       payments: 'Pembayaran',
       disbursement: 'Pencairan',
       history: 'Riwayat',
+      notifications: 'Notifikasi',
     }
 
     crumbs.push({
@@ -63,13 +65,27 @@ export function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname()
   const { setTheme, resolvedTheme } = useTheme()
   const crumbs = getBreadcrumbSegments(pathname)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  // Track scroll position for shadow effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-6">
+    <header
+      className={`sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border/50 bg-background/80 backdrop-blur-md px-4 lg:px-6 transition-shadow duration-200 ${
+        isScrolled ? 'shadow-sm' : ''
+      }`}
+    >
       <Button
         variant="ghost"
         size="icon"

@@ -25,6 +25,7 @@ import {
   ChevronLeft,
   Shield,
   Building2,
+  Settings,
   X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -64,6 +65,7 @@ const navConfigs: Record<UserRole, NavItem[]> = {
     { label: 'Laporan', href: '/admin/reports', icon: FileBarChart, badgeApi: '/api/reports?status=PENDING&limit=1' },
     { label: 'Analitik', href: '/admin/analytics', icon: BarChart3 },
     { label: 'Audit Log', href: '/admin/audit', icon: ScrollText },
+    { label: 'Pengaturan', href: '/admin/settings', icon: Settings },
   ],
   ADMIN_KEUANGAN: [
     { label: 'Dashboard', href: '/keuangan/dashboard', icon: LayoutDashboard },
