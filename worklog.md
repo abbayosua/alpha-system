@@ -448,3 +448,142 @@ All pages tested and working: Landing, Login, Admin Dashboard (3/5/3/2 stats), A
 3. PDF export for dashboard reports
 4. Dark mode toggle
 5. Production Vercel deployment configuration
+
+---
+## Task ID: 10 - Admin Reports Page Enhancement Agent
+### Work Task
+Enhance the admin reports page (`src/app/admin/reports/page.tsx`) with gradient title area, status summary cards, improved table styling, enhanced detail dialog, illustration-style empty state, and framer-motion stagger animations throughout.
+
+### Work Summary
+
+#### A. Gradient Title Area
+- Added emerald gradient background banner matching admin dashboard pattern
+- Gradient icon container with `FileBarChart` icon in white
+- Back navigation button integrated into the gradient area
+- Decorative blurred circles for visual depth
+- `text-emerald-900` for title, muted description below
+
+#### B. Status Summary Cards (5 cards)
+- **Total Laporan** (gray icon - `ClipboardList`)
+- **Pending** (amber icon - `AlertTriangle`)
+- **Under Review** (teal icon - `Eye`)
+- **Verified** (emerald icon - `CheckCircle2`)
+- **Dismissed** (rose icon - `XCircle`)
+- Each card uses `border-l-4` with status-appropriate color and gradient background
+- `motion.div` staggered entry via `containerVariants` + `itemVariants` (0.05s stagger)
+- Compact card design with icon + number + label
+- Responsive grid: 2 cols mobile, 3 cols tablet, 5 cols desktop
+
+#### C. Enhanced Table Styling
+- **Left border color indicator** per status: amber, teal, emerald, gray borders on each row
+- **User avatar**: Gradient circle (emerald-to-teal) showing first letter initial in the Pelapor column
+- **User email** shown below name in muted text
+- **Category badges**: New `CategoryBadge` component with colored borders (rose, amber, orange, teal, gray) and `Tag` icon
+- **Date formatting**: Changed to `day month short year` format (e.g., "12 Jan 2024")
+- **Hover effects**: `hover:bg-muted/50 transition-colors` on all rows
+- **Detail button hover**: Emerald tinted hover state
+
+#### D. Enhanced Detail Dialog
+- **User avatar** (large size, 56px) at the top with name and email
+- **Status + Category badges** displayed as a row below the name
+- **Section headers with icons**: Calendar for date, MessageSquare for description, Eye for video, ClipboardList for review notes, ShieldCheck for update status
+- **Separator** components between each section for visual hierarchy
+- **Enhanced date formatting**: Full Indonesian locale with time
+- **Review notes** in amber-tinted background card
+- **Update status section**: Wrapped in `bg-muted/30` bordered container with smaller labels
+- **Gradient save button**: `from-emerald-600 to-teal-600` with CheckCircle2 icon
+
+#### E. Empty State Enhancement
+- Custom `ReportsEmptyState` component replacing generic `EmptyState`
+- Illustration-style design with:
+  - Gradient circle background (emerald-100 to teal-100)
+  - Pulsing outer ring animation
+  - Decorative floating dots (amber, teal, emerald)
+  - Different icon based on filtered vs unfiltered state (Search vs Inbox)
+- Friendly messaging with contextual descriptions
+- Subtle "Semua laporan akan direview oleh admin" note with ShieldCheck icon
+- Framer-motion fade-in + scale animation
+
+#### F. Framer Motion Animations
+- **Title area**: `initial={{ opacity: 0, y: -10 }}` → `animate={{ opacity: 1, y: 0 }}` (delay 0)
+- **Summary cards**: `containerVariants` with `staggerChildren: 0.05` (delay 0.1s)
+- **Filters**: Fade-in from below with delay 0.2s
+- **Table**: Fade-in with delay 0.3s
+- **Pagination**: Fade-in with delay 0.4s
+
+#### G. Lint Status
+- Zero lint errors after all changes
+
+---
+
+## Task ID: 11 - Admin Saksi & Keuangan Payments Page Enhancement Agent
+### Work Task
+Enhance admin/saksi page and keuangan/payments page with gradient title areas, user avatar initials, status indicators, framer-motion animations, enhanced detail dialogs, and payment summary stats.
+
+### Work Summary
+
+#### A. Admin Saksi Page (`src/app/admin/saksi/page.tsx`)
+
+1. **Gradient Title Area**: Added `bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent` banner with decorative circles (emerald-100/30 top-right, teal-100/20 bottom-center). Back button and action buttons (Export CSV, Tambah) integrated into the gradient area.
+
+2. **UserAvatar Component**: Reusable component with 3 sizes (sm/md/lg). Gradient background `from-emerald-500 to-teal-400`. Shows first letter initial in white bold text.
+
+3. **Status Indicator**: Online/offline dot on avatars with `ring-2 ring-white` styling. Uses random online status (60% online) for demo purposes. Green dot for online, gray for offline.
+
+4. **Table Avatar Integration**: Each user row shows `UserAvatar` before name, replacing plain text.
+
+5. **Enhanced Detail Dialog**:
+   - Centered user avatar (large size) with name, email, phone below
+   - Gradient separator (`from-transparent via-emerald-200 to-transparent`)
+   - Info section with 2-column grid in rounded `bg-muted/50` cells (KTP, Bank, No. Rek, E-Wallet, Terdaftar)
+   - 3 stat cards with colored borders: Check-in (emerald), Input Suara (teal), Laporan (amber) - using new `StatCard` component with `motion.div` stagger
+   - Assignments section with "Lihat Penugasan" badge (outline, emerald border) linking to `/admin/plotting`
+
+6. **Framer Motion Animations**:
+   - Title area: fade-in from top (y: -10 → 0)
+   - Search input: fade-in with 0.15s delay
+   - Table card: fade-in with 0.2s delay
+   - Table rows: staggered fade-in from left (0.05s per row)
+   - Pagination: fade-in with 0.3s delay
+   - Detail dialog sections: scale-in + staggered fade-in (0.15s increments)
+   - Stat cards: opacity + y + scale animation with 0.08s stagger per card
+
+7. **Table Row Hover**: `whileHover={{ backgroundColor: 'rgba(241, 245, 249, 0.8)' }}` on `motion.tr` elements
+
+#### B. Keuangan Payments Page (`src/app/keuangan/payments/page.tsx`)
+
+1. **Gradient Title Area**: `bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent` with amber/orange decorative circles. Back button integrated.
+
+2. **Payment Summary Stats (3 cards)**:
+   - **Total Siap Bayar**: Count + total amount in amber sub-value text. Emerald border, emerald gradient bg.
+   - **Menunggu Review**: Count of payments with validationScore < 3. Amber border, amber gradient bg.
+   - **Tervalidasi (3/3)**: Count of fully validated payments. Teal border, teal gradient bg.
+   - Each card uses `PaymentStatCard` component with staggered `motion.div` entry (0.08s per card) and `whileHover` effect.
+
+3. **UserAvatar Component**: Same pattern as saksi page but with amber gradient (`from-amber-500 to-orange-400`). Shows in both table rows and detail dialog.
+
+4. **Enhanced Detail Dialog**:
+   - Centered user avatar (large, amber gradient) with name, email, phone
+   - Gradient separator (`from-transparent via-amber-200 to-transparent`)
+   - **Ringkasan Pembayaran section**: Prominent emerald gradient card (`from-emerald-50 to-teal-50`) showing total amount in `text-3xl font-bold text-emerald-700` with validation score
+   - **Validation Checklist**: 3 items using `ValidationChecklistItem` component with large icons, colored backgrounds (emerald for done, rose for incomplete), descriptive labels ("Terverifikasi"/"Belum lengkap"), and status badges
+   - **Payment Form**: Wrapped in bordered `bg-muted/50` section with uppercase tracking-wider header, smaller labels, and cleaner spacing
+   - **Action Buttons**: Emerald-colored approve button (`bg-emerald-600 hover:bg-emerald-700`)
+
+5. **Framer Motion Animations**:
+   - Title area: fade-in from top
+   - Summary stat cards: staggered entry (0.08s per card)
+   - Table card: fade-in with 0.2s delay
+   - Table rows: staggered fade-in from left (0.05s per row)
+   - Dialog avatar: scale-in animation
+   - Dialog sections: staggered fade-in (0.15s increments)
+   - Action buttons: fade-in with 0.4s delay
+
+6. **Table Row Hover**: Same pattern as saksi page
+
+#### C. Shared Patterns
+- All existing functionality preserved (search, pagination, CRUD, dialogs)
+- `'use client'` directive on both pages
+- `motion` imported from `'framer-motion'`
+- No blue/indigo colors - emerald/teal/amber/rose palette only
+- Zero lint errors after all changes

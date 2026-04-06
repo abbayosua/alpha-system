@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { Menu, Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Breadcrumb,
@@ -59,7 +60,12 @@ function getBreadcrumbSegments(pathname: string) {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname()
+  const { setTheme, resolvedTheme } = useTheme()
   const crumbs = getBreadcrumbSegments(pathname)
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-6">
@@ -101,6 +107,21 @@ export function Header({ onMenuClick }: HeaderProps) {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
+
+      {/* Dark mode toggle */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 rounded-lg"
+        onClick={toggleTheme}
+        title={resolvedTheme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+      >
+        {resolvedTheme === 'dark' ? (
+          <Sun className="h-4 w-4 text-amber-400" />
+        ) : (
+          <Moon className="h-4 w-4 text-slate-500" />
+        )}
+      </Button>
     </header>
   )
 }
