@@ -1,8 +1,16 @@
 export function Footer() {
   return (
-    <footer className="mt-auto border-t py-4 px-6">
-      <div className="flex flex-col items-center justify-center gap-1 text-sm text-muted-foreground">
-        <p>&copy; 2024 SAKSI APP. All rights reserved.</p>
+    <footer className="mt-auto border-t bg-muted/20">
+      <div className="flex items-center justify-between px-6 py-3 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span>&copy; {new Date().getFullYear()} SAKSI APP</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-muted-foreground/60">v1.0.0</span>
+          <span className="text-muted-foreground/40">•</span>
+          <span className="text-muted-foreground/60">Sistem Manajemen Saksi Pemilu</span>
+        </div>
       </div>
     </footer>
   )

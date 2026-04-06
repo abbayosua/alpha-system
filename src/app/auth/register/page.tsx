@@ -87,14 +87,20 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 p-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-2">
-            <Shield className="h-10 w-10 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50 p-4 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-200/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
+
+      <Card className="w-full max-w-lg shadow-xl border-0 bg-white/80 backdrop-blur-sm relative z-10">
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-center mb-3">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">
+              <Shield className="h-8 w-8 text-white" />
+            </div>
           </div>
-          <CardTitle className="text-2xl">Daftar Sebagai Saksi</CardTitle>
-          <CardDescription>Lengkapi data diri Anda untuk mendaftar sebagai saksi pemilu</CardDescription>
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">Daftar Sebagai Saksi</CardTitle>
+          <CardDescription className="text-muted-foreground mt-1">Lengkapi data diri Anda untuk mendaftar sebagai saksi pemilu</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4 max-h-[60vh] overflow-y-auto">

@@ -26,7 +26,6 @@ import {
   Building2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -75,6 +74,18 @@ const roleColors: Record<UserRole, string> = {
   SAKSI: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
   ADMIN: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
   ADMIN_KEUANGAN: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+}
+
+const roleGradients: Record<UserRole, string> = {
+  SAKSI: 'from-emerald-700 via-emerald-600 to-teal-600',
+  ADMIN: 'from-emerald-700 via-emerald-600 to-teal-600',
+  ADMIN_KEUANGAN: 'from-amber-700 via-amber-600 to-orange-600',
+}
+
+const roleIconBg: Record<UserRole, string> = {
+  SAKSI: 'bg-white/20',
+  ADMIN: 'bg-white/20',
+  ADMIN_KEUANGAN: 'bg-white/20',
 }
 
 interface AppSidebarProps {
@@ -146,7 +157,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={onToggle}
         />
       )}
@@ -154,20 +165,32 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-card border-r transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-card border-r border-border/50 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto shadow-lg lg:shadow-none',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        {/* Logo / Brand */}
-        <div className="flex h-16 items-center justify-between px-4 border-b">
-          <Link href={`/${role === 'ADMIN_KEUANGAN' ? 'keuangan' : role.toLowerCase()}/dashboard`} className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-emerald-600" />
-            <span className="text-lg font-bold">SAKSI APP</span>
+        {/* Logo / Brand Header with Gradient */}
+        <div className={cn(
+          'relative flex h-16 items-center justify-between px-4 bg-gradient-to-r shadow-md',
+          roleGradients[role]
+        )}>
+          {/* Decorative circles */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-8 w-12 h-12 bg-white/5 rounded-full translate-y-1/2" />
+
+          <Link href={`/${role === 'ADMIN_KEUANGAN' ? 'keuangan' : role.toLowerCase()}/dashboard`} className="flex items-center gap-2.5 relative z-10">
+            <div className={cn('p-1.5 rounded-lg', roleIconBg[role])}>
+              <Shield className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-base font-bold text-white leading-tight">SAKSI APP</span>
+              <span className="text-[10px] text-white/70 leading-tight">Manajemen Saksi Pemilu</span>
+            </div>
           </Link>
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden h-8 w-8"
+            className="lg:hidden h-8 w-8 text-white/80 hover:text-white hover:bg-white/10"
             onClick={onToggle}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -189,22 +212,27 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                     if (isOpen) onToggle()
                   }}
                   className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group',
                     isActive
-                      ? 'bg-emerald-600 text-white'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25'
+                      : 'text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400'
                   )}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
+                  <div className={cn(
+                    'shrink-0 transition-colors duration-200',
+                    isActive ? 'text-white' : 'text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
+                  )}>
+                    <Icon className="h-4 w-4" />
+                  </div>
                   <span className="flex-1">{item.label}</span>
                   {count !== undefined && count > 0 && (
                     <Badge
                       variant="secondary"
                       className={cn(
-                        'rounded-full px-2 py-0 text-xs font-semibold min-w-[20px] text-center',
+                        'rounded-full px-2 py-0 text-xs font-bold min-w-[20px] text-center transition-colors',
                         isActive
                           ? 'bg-white/20 text-white border-0'
-                          : 'bg-amber-100 text-amber-700'
+                          : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
                       )}
                     >
                       {count}
@@ -217,17 +245,16 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
         </ScrollArea>
 
         {/* User info */}
-        <Separator />
-        <div className="p-4">
+        <div className="border-t border-border/50 bg-muted/30 px-4 py-3">
           <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
-              <AvatarFallback className="text-xs font-medium bg-emerald-100 text-emerald-700">
+            <Avatar className="h-9 w-9 ring-2 ring-emerald-200 dark:ring-emerald-800">
+              <AvatarFallback className="text-xs font-semibold bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.name || 'Pengguna'}</p>
-              <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0', roleColors[role])}>
+              <p className="text-sm font-medium truncate leading-tight">{user?.name || 'Pengguna'}</p>
+              <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 mt-0.5', roleColors[role])}>
                 {role === 'ADMIN_KEUANGAN' ? (
                   <span className="flex items-center gap-1">
                     <Building2 className="h-2.5 w-2.5" />
@@ -241,7 +268,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 rounded-lg"
               onClick={handleLogout}
               title="Keluar"
             >
