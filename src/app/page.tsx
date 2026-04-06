@@ -10,8 +10,9 @@ import { motion } from 'framer-motion'
 import {
   Shield, MapPin, ClipboardCheck, Camera, FileText, Wallet,
   Users, BarChart3, ArrowRight, CheckCircle2, LayoutDashboard,
-  Phone, Mail, Heart, Eye
+  Phone, Mail, Heart, Eye, AlertTriangle, UserPlus
 } from 'lucide-react'
+import { ActivityTimeline } from '@/components/charts/ActivityTimeline'
 
 /* ─── Animated Counter ─── */
 function useAnimatedCounter(end: number, duration = 2000, startOnView = true) {
@@ -372,6 +373,44 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* ─── Aktivitas Terkini Section ─── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <FadeInSection className="text-center mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Aktivitas Terkini</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Pantau aktivitas terbaru dalam sistem pengawasan pemilu secara real-time
+          </p>
+        </FadeInSection>
+
+        <FadeInSection delay={0.1}>
+          <Card className="shadow-sm rounded-xl overflow-hidden border-0">
+            {/* Gradient title area */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
+                  <Eye className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Aktivitas Terbaru</h3>
+                  <p className="text-sm text-emerald-100">Update real-time dari seluruh sistem</p>
+                </div>
+              </div>
+            </div>
+            <CardContent className="p-6">
+              <ActivityTimeline
+                items={[
+                  { id: '1', title: 'Admin menambahkan TPS baru', description: 'TPS-006 telah ditambahkan di Kecamatan Menteng', time: '2 menit lalu', icon: <MapPin className="h-4 w-4" />, color: '#10b981' },
+                  { id: '2', title: 'Check-in pagi berhasil', description: 'Saksi Budi menyelesaikan check-in di TPS-003', time: '15 menit lalu', icon: <ClipboardCheck className="h-4 w-4" />, color: '#14b8a6' },
+                  { id: '3', title: 'Laporan kecurangan masuk', description: 'Dugaan kecurangan di TPS-001 sedang direview', time: '30 menit lalu', icon: <AlertTriangle className="h-4 w-4" />, color: '#f43f5e' },
+                  { id: '4', title: 'Pembayaran disetujui', description: 'Pembayaran untuk Saksi Ahmad telah disetujui', time: '1 jam lalu', icon: <Wallet className="h-4 w-4" />, color: '#10b981' },
+                  { id: '5', title: '5 saksi baru terdaftar', description: 'Registrasi saksi baru dari Kecamatan Menteng', time: '2 jam lalu', icon: <UserPlus className="h-4 w-4" />, color: '#14b8a6' },
+                ]}
+              />
+            </CardContent>
+          </Card>
+        </FadeInSection>
       </section>
 
       {/* ─── Roles Section ─── */}

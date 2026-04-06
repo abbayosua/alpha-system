@@ -362,41 +362,26 @@ export default function SaksiFinalCheckInPage() {
     <div className="p-4 max-w-lg mx-auto space-y-6">
       {/* Gradient Title Area */}
       <motion.div
-        className="relative rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent p-6 pb-5 overflow-hidden"
+        className="relative rounded-xl bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent p-6 sm:p-8 overflow-hidden"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        {/* Decorative circles */}
-        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-amber-100/30" />
-        <div className="absolute bottom-0 left-1/3 w-24 h-24 rounded-full bg-orange-100/20" />
-
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.back()}
-              className="bg-white/60 hover:bg-white/80 border-amber-200/50"
-            >
-              <ArrowLeft className="h-5 w-5 text-amber-700" />
+        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-amber-100/60" />
+        <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-orange-100/40" />
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-1">
+            <Button variant="ghost" size="icon" className="bg-white/60 hover:bg-white/80 -ml-2" onClick={() => router.back()}>
+              <ArrowLeft className="h-5 w-5" />
             </Button>
-          </div>
-
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-200/50 flex-shrink-0">
-              <Shield className="h-6 w-6 text-white" />
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200">
+              <Shield className="h-5 w-5" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-amber-900">Check-in Akhir</h1>
-              <p className="text-sm text-amber-700/70 mt-0.5">
-                Verifikasi kehadiran akhir setelah penghitungan suara selesai
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {assignment?.tps?.code} - {assignment?.tps?.name}
-              </p>
-            </div>
+            <h1 className="text-2xl font-bold">Check-in Akhir</h1>
           </div>
+          <p className="text-sm text-muted-foreground ml-11">
+            Verifikasi kehadiran akhir setelah penghitungan suara selesai di {assignment?.tps?.code} - {assignment?.tps?.name}
+          </p>
         </div>
       </motion.div>
 

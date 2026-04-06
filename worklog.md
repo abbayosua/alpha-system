@@ -1354,3 +1354,95 @@ The application is fully stable and production-ready after 21 task rounds of ite
 5. **End-to-end Testing**: Payment disbursement flow needs full testing
 6. **Accessibility Audit**: WCAG 2.1 compliance check recommended
 7. **Performance Optimization**: Bundle size analysis, lazy loading for charts/maps
+---
+## Task ID: 14 - Landing Page Activity Feed
+Agent: Landing Page Agent
+Task: Add "Aktivitas Terkini" activity feed section to landing page
+
+Work Log:
+- Read ActivityTimeline component to understand props format (icon: React.ReactNode, not string)
+- Added AlertTriangle and UserPlus to lucide-react imports
+- Imported ActivityTimeline as named export from @/components/charts/ActivityTimeline
+- Added "Aktivitas Terkini" section with demo activity data between "How it Works" and "Roles" sections
+- Section includes gradient title area with Eye icon and emerald-to-teal gradient
+- Card wrapper with shadow-sm, rounded-xl, border-0, overflow-hidden
+- 5 demo activities with proper Lucide icon components as ReactNode: MapPin, ClipboardCheck, AlertTriangle, Wallet, UserPlus
+- Wrapped in FadeInSection for scroll animation with 0.1s delay
+- Run lint: zero errors
+- Dev server compiled successfully
+
+Stage Summary:
+- Activity feed shows 5 demo activities on landing page
+- Positioned between "How it Works" and "Roles" sections for social proof
+- Zero lint errors
+
+---
+Task ID: 13 - WebSocket Real-time Notification Service
+Agent: WebSocket Agent
+Task: Create WebSocket real-time notification mini-service for real-time event broadcasting
+
+Work Log:
+- Created mini-services/notification-service directory
+- Installed socket.io dependency (v4.8.3) via bun
+- Built Socket.io server with CORS support on port 3004
+- Added HTTP REST API for posting events from main Next.js app
+- Implemented event broadcasting and in-memory history (last 50 events)
+- Started the service successfully
+- Verified all endpoints: POST /events, GET /events, GET /health
+
+Stage Summary:
+- WebSocket service running on port 3004
+- REST API: POST /events to push events, GET /events for history, GET /health for health check
+- Event types: new_report, payment_update, check_in, new_user
+- Connected to main app via gateway port 3004
+- Socket.IO rooms supported: user-specific (join:user) and role-specific (join:role)
+- Graceful shutdown on SIGINT/SIGTERM
+
+---
+## Task ID: 14 - Check-in Pages Gradient Title Enhancement
+### Work Task
+Enhance the main check-in flow section of saksi/check-in and saksi/final-check-in pages with polished gradient title areas matching the pattern used across the rest of the app (saksi/input, saksi/lapor, etc.).
+
+### Work Summary
+
+#### A. Check-in Page (`src/app/saksi/check-in/page.tsx`)
+
+1. **Added Shield icon import**: Added `Shield` to the lucide-react import statement.
+
+2. **Replaced simple header with gradient title area**:
+   - Old: Plain `flex items-center gap-3` with back button, title, and TPS code text
+   - New: `rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent` gradient background
+   - Two decorative circles: `bg-emerald-100/60` top-right, `bg-teal-100/40` bottom-center
+   - Back button with `bg-white/60 hover:bg-white/80 -ml-2` glassmorphism styling
+   - Gradient icon container: `from-emerald-500 to-teal-600` with Shield icon in white and `shadow-lg shadow-emerald-200`
+   - Title "Check-in Pagi" in `text-2xl font-bold`
+   - Description with TPS code/name: "Verifikasi kehadiran pagi melalui GPS dan foto selfie di {tps code} - {tps name}"
+   - `ml-11` offset on description to align with title
+   - Framer-motion fade-in from top animation (y: -10 → 0)
+
+#### B. Final Check-in Page (`src/app/saksi/final-check-in/page.tsx`)
+
+1. **Updated existing gradient title area** to match the exact saksi/input pattern:
+   - Changed `rounded-2xl` to `rounded-xl` for consistency
+   - Changed `p-6 pb-5` to `p-6 sm:p-8` for responsive padding
+   - Updated decorative circle opacity: `bg-amber-100/30` → `bg-amber-100/60`, `bg-orange-100/20` (w-24) → `bg-orange-100/40` (w-20)
+   - Restructured layout from separate back button row + `flex items-start gap-4` to unified `flex items-center gap-3 mb-1` pattern
+   - Changed icon container from `w-12 h-12 rounded-xl` to `p-2.5 rounded-xl` matching the standard pattern
+   - Changed icon size from `h-6 w-6` to `h-5 w-5` for consistency
+   - Changed shadow from `shadow-amber-200/50` to `shadow-amber-200`
+   - Removed `z-10` from inner container (unnecessary)
+   - Removed `border-amber-200/50` and `text-amber-700` from back button (standardized)
+   - Combined title and description into single layout matching saksi/input pattern
+   - Description now includes TPS code/name: "Verifikasi kehadiran akhir setelah penghitungan suara selesai di {tps code} - {tps name}"
+   - Preserved the Info Banner below the gradient area (not part of the header section)
+
+#### C. Preserved Functionality
+- All camera, GPS, map, and submit functionality intact
+- StepIndicator component untouched
+- Success and no-assignment states unchanged
+- All other sections below the header unchanged
+- Framer-motion animations on subsequent elements preserved
+
+#### D. Lint Status
+- Zero lint errors after all changes
+

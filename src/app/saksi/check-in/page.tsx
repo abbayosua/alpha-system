@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ArrowLeft, Camera, MapPin, CheckCircle2, XCircle, Loader2, Map } from 'lucide-react'
+import { ArrowLeft, Camera, MapPin, CheckCircle2, XCircle, Loader2, Map, Shield } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
@@ -360,19 +360,27 @@ export default function SaksiCheckInPage() {
   // ─── Main Check-in Flow ───
   return (
     <div className="space-y-6 max-w-lg mx-auto">
+      {/* Gradient Title Area */}
       <motion.div
-        className="flex items-center gap-3"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
+        className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent p-6 sm:p-8 overflow-hidden"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Check-in Pagi</h1>
-          <p className="text-sm text-muted-foreground">
-            {assignment?.tps?.code} - {assignment?.tps?.name}
+        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-emerald-100/60" />
+        <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-teal-100/40" />
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-1">
+            <Button variant="ghost" size="icon" className="bg-white/60 hover:bg-white/80 -ml-2" onClick={() => router.back()}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200">
+              <Shield className="h-5 w-5" />
+            </div>
+            <h1 className="text-2xl font-bold">Check-in Pagi</h1>
+          </div>
+          <p className="text-sm text-muted-foreground ml-11">
+            Verifikasi kehadiran pagi melalui GPS dan foto selfie di {assignment?.tps?.code} - {assignment?.tps?.name}
           </p>
         </div>
       </motion.div>
