@@ -97,7 +97,7 @@ export default function RegisterPage() {
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-3">
             <div className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/20">
-              <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
+              <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" priority />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">Daftar Akun Baru</CardTitle>

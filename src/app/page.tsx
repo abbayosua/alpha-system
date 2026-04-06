@@ -163,7 +163,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative h-8 w-8 rounded-lg overflow-hidden">
-              <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
+              <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" priority />
             </div>
             <span className="text-xl font-bold">Alpha System v5</span>
           </div>
@@ -571,7 +571,7 @@ export default function Home() {
               <ul className="space-y-2.5">
                 <li className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Mail className="h-4 w-4 text-emerald-500" />
-                  support@saksiapp.id
+                  support@alphasystem.id
                 </li>
                 <li className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Phone className="h-4 w-4 text-emerald-500" />

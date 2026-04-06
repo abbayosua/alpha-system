@@ -322,7 +322,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
               onClick={handleNavigate}
             >
               <div className="relative h-7 w-7 rounded-lg overflow-hidden flex-shrink-0">
-                <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
+                <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" priority />
               </div>
               <div className="flex flex-col">
                 <span className="text-base font-bold text-white leading-tight">Alpha System v5</span>
@@ -363,7 +363,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
 
           <Link href={`/${role === 'ADMIN_KEUANGAN' ? 'keuangan' : role.toLowerCase()}/dashboard`} className="flex items-center gap-2.5 relative z-10">
             <div className="relative h-7 w-7 rounded-lg overflow-hidden flex-shrink-0">
-              <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
+              <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" priority />
             </div>
             <div className="flex flex-col">
               <span className="text-base font-bold text-white leading-tight">Alpha System v5</span>

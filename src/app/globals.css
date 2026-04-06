@@ -122,23 +122,53 @@
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar — Webkit */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
+  border-radius: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: oklch(0.7 0 0);
-  border-radius: 3px;
+  background: oklch(0.75 0.08 160);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background 0.2s ease;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.5 0 0);
+  background: oklch(0.6 0.15 160);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: oklch(0.55 0.18 160);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+/* Custom scrollbar — Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.75 0.08 160) transparent;
+}
+.custom-scrollbar:hover {
+  scrollbar-color: oklch(0.6 0.15 160) transparent;
+}
+/* Custom scrollbar — Dark mode */
+.dark .custom-scrollbar {
+  scrollbar-color: oklch(0.35 0.1 160) transparent;
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: oklch(0.4 0 0);
+  background: oklch(0.35 0.1 160);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.45 0.14 160);
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 /* Safe area padding for iOS */
@@ -146,7 +176,7 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Page enter animation */
+/* Page enter & transition animation */
 @keyframes pageEnter {
   from {
     opacity: 0;
@@ -157,17 +187,39 @@
     transform: translateY(0);
   }
 }
+@keyframes pageContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .page-enter {
   animation: pageEnter 0.3s ease-out;
 }
+.page-content-fade-in {
+  animation: pageContentFadeIn 0.4s ease-out 0.1s both;
+}
 
-/* Touch optimization */
+/* Touch feedback — mobile tap effects */
+.touch-feedback {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.touch-feedback:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
 @media (pointer: coarse) {
   .touch-feedback {
-    transition: transform 0.1s ease;
+    transition: transform 0.1s ease, opacity 0.1s ease;
   }
   .touch-feedback:active {
-    transform: scale(0.98);
+    transform: scale(0.95);
+    opacity: 0.8;
   }
 }
 
@@ -177,28 +229,71 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: backdrop-filter 0.3s ease, background 0.3s ease;
 }
 .dark .glass {
   background: rgba(15, 23, 42, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+/* Backdrop blur enhancement — smooth transitions */
+.backdrop-blur-smooth {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease;
+}
+.backdrop-blur-smooth:hover,
+.backdrop-blur-smooth:focus-within {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
 
-/* Gradient text utility */
+/* Gradient text utilities */
 .gradient-text {
   background: linear-gradient(135deg, #10b981, #14b8a6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+.gradient-text-emerald {
+  background: linear-gradient(135deg, #059669, #10b981, #14b8a6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-text-amber {
+  background: linear-gradient(135deg, #d97706, #f59e0b, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-/* Focus ring utility */
+/* Focus ring utility — enhanced emerald ring */
 .focus-ring {
   outline: none;
 }
 .focus-ring:focus-visible {
-  outline: 2px solid #10b981;
-  outline-offset: 2px;
-  border-radius: 4px;
+ outline: none;
+ box-shadow: 0 0 0 2px oklch(1 0 0), 0 0 0 4px oklch(0.696 0.17 162.48);
+ border-radius: 6px;
+}
+/* Consistent focus-visible for all interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+ outline: none;
+ box-shadow: 0 0 0 2px oklch(1 0 0), 0 0 0 4px oklch(0.696 0.17 162.48);
+ border-radius: 6px;
+}
+.dark button:focus-visible,
+.dark a:focus-visible,
+.dark input:focus-visible,
+.dark textarea:focus-visible,
+.dark select:focus-visible,
+.dark [tabindex]:focus-visible {
+ box-shadow: 0 0 0 2px oklch(0.145 0 0), 0 0 0 4px oklch(0.696 0.17 162.48);
 }
 
 /* ─── Print Styles ─────────────────────────────────────────────────────── */
@@ -213,7 +308,15 @@
   button[data-slot="command"],
   [data-radix-toast],
   [data-sonner-toaster],
-  .custom-scrollbar::-webkit-scrollbar-thumb {
+  .custom-scrollbar::-webkit-scrollbar-thumb,
+  nav,
+  header,
+  footer,
+  aside,
+  [role="navigation"],
+  [role="banner"],
+  [role="complementary"],
+  .sidebar {
     display: none !important;
   }
 
@@ -289,9 +392,14 @@
   }
 }
 
-/* ─── Smooth Scrolling ─────────────────────────────────────────────────── */
+/* ─── Smooth Scrolling & Scroll Padding ─────────────────────────────────── */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem; /* account for sticky header */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+[id] {
+  scroll-margin-top: 5rem;
 }
 
 /* ─── Selection Colors ──────────────────────────────────────────────────── */
@@ -319,6 +427,9 @@ html {
 /* ─── Improved Tooltip Styling ─────────────────────────────────────────────── */
 [data-state="open"][data-side] {
   animation: tooltipEnter 0.15s ease-out;
+  box-shadow: 0 4px 12px oklch(0 0 0 / 15%),
+              0 2px 4px oklch(0 0 0 / 8%);
+  border-radius: 8px;
 }
 
 @keyframes tooltipEnter {
@@ -332,17 +443,77 @@ html {
   }
 }
 
+/* ─── Toast / Notification Animation ──────────────────────────────────────── */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+}
+[data-radix-toast][data-state="open"],
+[data-sonner-toast][data-state="open"] {
+  animation: toastSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+[data-radix-toast][data-state="closed"],
+[data-sonner-toast][data-state="closed"] {
+  animation: toastSlideOut 0.25s cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+/* ─── Card Hover Effect Utility ──────────────────────────────────────────── */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px oklch(0 0 0 / 8%),
+              0 4px 10px oklch(0 0 0 / 4%);
+}
+.dark .card-hover:hover {
+  box-shadow: 0 8px 25px oklch(0 0 0 / 30%),
+              0 4px 10px oklch(0 0 0 / 20%);
+}
+
 /* ─── Number Tabular Figures ───────────────────────────────────────────── */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
 /* ─── RTL Support ─────────────────────────────────────────────────────── */
-[dir="rtl"] .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: oklch(0.7 0 0);
+[dir="rtl"] .custom-scrollbar {
+  scrollbar-color: oklch(0.75 0.08 160) transparent;
 }
 
-/* ─── Animations for Reduced Motion Preference ──────────────────────────── */
+/* ─── Dark Mode Transition Enhancement ──────────────────────────────────── */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color;
+  transition-duration: 0s;
+  transition-timing-function: ease;
+}
+.dark *,
+.dark *::before,
+.dark *::after {
+  transition-property: background-color, border-color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+/* ─── Reduced Motion Preference ──────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -352,13 +523,25 @@ html {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .page-enter,
+  .page-content-fade-in,
+  .card-hover,
+  .touch-feedback,
+  .backdrop-blur-smooth {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
 }
 
-/* ─── Custom Focus Visible ────────────────────────────────────────────────── */
+/* ─── Custom Focus Visible (emerald ring) ────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid oklch(0.708 0 0);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: none;
+  box-shadow: 0 0 0 2px oklch(1 0 0), 0 0 0 4px oklch(0.696 0.17 162.48);
+  border-radius: 6px;
+}
+.dark :focus-visible {
+  box-shadow: 0 0 0 2px oklch(0.145 0 0), 0 0 0 4px oklch(0.696 0.17 162.48);
 }
 
 /* ─── Utility: Hide scrollbar but allow scrolling ───────────────────────── */
@@ -382,12 +565,22 @@ html {
 .skeleton-shimmer {
   background: linear-gradient(
     90deg,
-    oklch(0.97 0 0) 25%,
-    oklch(0.93 0 0) 50%,
-    oklch(0.97 0 0) 75%
+    oklch(0.96 0.01 155) 25%,
+    oklch(0.92 0.03 155) 50%,
+    oklch(0.96 0.01 155) 75%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(0.25 0.02 155) 25%,
+    oklch(0.3 0.04 155) 50%,
+    oklch(0.25 0.02 155) 75%
+  );
+  background-size: 200% 100%;
 }
 
 /* ─── Pulse Ring Animation ─────────────────────────────────────────────────── */

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/store/authStore'
 import { Bell, Check, CheckCircle2, AlertTriangle, Info, XCircle, Wallet, LogIn, MapPin, Smartphone, Banknote, Clock, Receipt, Send, UserPlus, TrendingDown, GitBranch, MapPinned, ScrollText, FileBarChart } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
@@ -82,6 +83,7 @@ function formatRelativeTime(dateStr: string): string {
 
 export function NotificationBell() {
   const router = useRouter()
+  const user = useAuthStore((s) => s.user)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -256,7 +258,14 @@ export function NotificationBell() {
                 className="text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors"
                 onClick={() => {
                   setOpen(false)
-                  router.push('/notifications')
+                  const role = user?.role
+                  if (role === 'ADMIN_KEUANGAN') {
+                    router.push('/keuangan/notifications')
+                  } else if (role === 'ADMIN') {
+                    router.push('/admin/notifications')
+                  } else {
+                    router.push('/saksi/notifications')
+                  }
                 }}
               >
                 Lihat Semua Notifikasi
