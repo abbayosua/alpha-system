@@ -2273,3 +2273,39 @@ Application is production-ready with 100% QA pass rate across all tested pages. 
 4. Performance optimization (bundle size, code splitting)
 5. E2E testing with Playwright
 6. Vercel deployment configuration with env variables
+
+---
+Task ID: 16
+Agent: Main
+Task: Fix Vercel prerender build error on /auth/register page
+
+Work Log:
+- User reported Vercel build error: "Error occurred prerendering page /auth/register"
+- Investigated auth pages: register page had `useSearchParams()` imported and called but never used
+- In Next.js, `useSearchParams()` causes prerender errors during static generation because search params aren't available at build time
+- Removed unused `useSearchParams` import and call from register page
+- Removed unused `Shield` icon import
+- Scanned all other pages for similar prerender-risky patterns (useSearchParams, cookies(), headers(), getServerSession) - none found
+- Verified settings page localStorage usage is SSR-safe (has typeof window guard)
+- All layouts are `'use client'` components - safe
+- Added `.env.example` documenting required Vercel env vars (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY)
+- Updated .gitignore to allow committing `.env.example`
+- Ran lint - zero errors
+- Committed and pushed 2 commits: fix (0b488c9) + env.example (de426b6)
+
+Stage Summary:
+- Root cause: unused `useSearchParams()` hook in register page causing Vercel static prerendering to fail
+- Fix: removed the unused import and call
+- All other 27+ pages verified clean - no similar issues
+- `.env.example` added for deployment reference
+- Commits pushed to GitHub
+
+### Current Project Status
+- Build: should now succeed on Vercel (removed prerender-blocking useSearchParams)
+- Lint: zero errors
+- All 3 roles functional with Supabase Auth
+- 22+ API routes, 27+ pages, full feature set
+
+### Unresolved Issues
+- Verify Vercel build succeeds after this fix (user to confirm)
+- If other pages fail prerendering, may need `export const dynamic = 'force-dynamic'` on their route segments
