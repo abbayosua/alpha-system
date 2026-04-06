@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import {
   Select,
   SelectContent,
@@ -17,16 +18,59 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { ArrowLeft, Upload, CheckCircle2, Loader2, AlertTriangle } from 'lucide-react'
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Loader2,
+  AlertTriangle,
+  Video,
+  X,
+  Users,
+  RefreshCw,
+  FileX,
+  ShieldAlert,
+  Banknote,
+  AlertOctagon,
+  HelpCircle,
+  Send,
+  Clock,
+  Tag,
+} from 'lucide-react'
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+  },
+}
+
+const scaleVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  show: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+  },
+}
 
 const CATEGORIES = [
-  { value: 'SUARA_SILUMAN', label: 'Suara Siluman' },
-  { value: 'PENGHITUNGAN_ULANG', label: 'Penghitungan Ulang' },
-  { value: 'DOKUMEN_PALSU', label: 'Dokumen Palsu' },
-  { value: 'INTIMIDASI', label: 'Intimidasi' },
-  { value: 'MONEY_POLITICS', label: 'Politik Uang' },
-  { value: 'PELANGGARAN_PROTOKOL', label: 'Pelanggaran Protokol' },
-  { value: 'LAINNYA', label: 'Lainnya' },
+  { value: 'SUARA_SILUMAN', label: 'Suara Siluman', icon: Users, color: 'bg-rose-100 text-rose-700 border-rose-200' },
+  { value: 'PENGHITUNGAN_ULANG', label: 'Penghitungan Ulang', icon: RefreshCw, color: 'bg-amber-100 text-amber-700 border-amber-200' },
+  { value: 'DOKUMEN_PALSU', label: 'Dokumen Palsu', icon: FileX, color: 'bg-orange-100 text-orange-700 border-orange-200' },
+  { value: 'INTIMIDASI', label: 'Intimidasi', icon: ShieldAlert, color: 'bg-red-100 text-red-700 border-red-200' },
+  { value: 'MONEY_POLITICS', label: 'Politik Uang', icon: Banknote, color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  { value: 'PELANGGARAN_PROTOKOL', label: 'Pelanggaran Protokol', icon: AlertOctagon, color: 'bg-amber-100 text-amber-800 border-amber-300' },
+  { value: 'LAINNYA', label: 'Lainnya', icon: HelpCircle, color: 'bg-slate-100 text-slate-700 border-slate-200' },
 ]
 
 export default function SaksiLaporPage() {
@@ -35,6 +79,7 @@ export default function SaksiLaporPage() {
   const [submitting, setSubmitting] = useState(false)
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [result, setResult] = useState<any>(null)
+  const [dragOver, setDragOver] = useState(false)
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -50,6 +95,23 @@ export default function SaksiLaporPage() {
     }
     if (!file.type.startsWith('video/')) {
       toast.error('Hanya file video yang diperbolehkan')
+      return
+    }
+    setVideoFile(file)
+    toast.success('Video dipilih')
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('video/')) {
+      toast.error('Hanya file video yang diperbolehkan')
+      return
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Ukuran video maksimal 50MB')
       return
     }
     setVideoFile(file)
@@ -102,120 +164,406 @@ export default function SaksiLaporPage() {
     }
   }
 
+  const selectedCategory = CATEGORIES.find((c) => c.value === form.category)
+
+  // Success state
   if (result) {
     return (
-      <div className="p-4 max-w-lg mx-auto space-y-6">
-        <Card className="border-green-200 bg-green-50/50">
-          <CardContent className="p-6 text-center space-y-3">
-            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
-            <p className="font-semibold text-lg">Laporan Terkirim!</p>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>{result.title}</p>
-              <p className="flex items-center justify-center gap-1">
-                <AlertTriangle className="h-4 w-4" />
-                Status: {result.status.replace(/_/g, ' ')}
-              </p>
-            </div>
-            <div className="flex gap-3 justify-center">
-              <Button onClick={() => { setResult(null); setForm({ title: '', description: '', category: 'LAINNYA' }); setVideoFile(null) }}>
-                Buat Laporan Lagi
+      <motion.div
+        className="p-4 max-w-lg mx-auto space-y-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div
+          variants={itemVariants}
+          className="relative rounded-xl bg-gradient-to-br from-rose-50 via-amber-50/60 to-transparent p-6 sm:p-8 overflow-hidden"
+        >
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-rose-100/60" />
+          <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-amber-100/40" />
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="bg-white/60 hover:bg-white/80 -ml-2"
+                onClick={() => router.push('/saksi/dashboard')}
+              >
+                <ArrowLeft className="h-5 w-5" />
               </Button>
-              <Button variant="outline" onClick={() => router.push('/saksi/dashboard')}>
-                Dashboard
-              </Button>
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-rose-500 to-amber-600 text-white shadow-lg shadow-rose-200">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <h1 className="text-2xl font-bold">Lapor Kecurangan</h1>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <p className="text-sm text-muted-foreground ml-11">Laporkan dugaan kecurangan pemilu</p>
+          </div>
+        </motion.div>
+
+        <motion.div variants={scaleVariants}>
+          <Card className="border-rose-200 bg-gradient-to-br from-rose-50/80 via-amber-50/40 to-white overflow-hidden relative">
+            <motion.div
+              className="absolute top-4 right-4"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+            >
+              <div className="p-2 rounded-full bg-rose-100">
+                <Send className="h-5 w-5 text-rose-600" />
+              </div>
+            </motion.div>
+            <motion.div
+              className="absolute top-14 right-14"
+              initial={{ scale: 0, rotate: 180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+            >
+              <div className="w-3 h-3 rounded-full bg-amber-400" />
+            </motion.div>
+            <motion.div
+              className="absolute bottom-12 right-10"
+              initial={{ scale: 0, rotate: 90 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.7, type: 'spring', stiffness: 200 }}
+            >
+              <div className="w-2 h-2 rounded-full bg-rose-400" />
+            </motion.div>
+
+            <CardContent className="p-6 sm:p-8 text-center space-y-4">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 15 }}
+                className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-200"
+              >
+                <CheckCircle2 className="h-10 w-10 text-white" />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <h2 className="text-xl font-bold text-rose-900">Laporan Terkirim!</h2>
+                <p className="text-sm text-muted-foreground mt-1">Laporan Anda akan segera ditinjau oleh admin</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-white/70 rounded-xl p-4 space-y-3 border border-rose-100"
+              >
+                <div className="bg-rose-50/80 rounded-lg p-3 text-center">
+                  <p className="text-xs text-muted-foreground mb-1">Judul Laporan</p>
+                  <p className="font-semibold text-rose-900">{result.title}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-amber-50/80 rounded-lg p-3 text-center">
+                    <p className="text-xs text-muted-foreground mb-1">Status</p>
+                    <Badge className="bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {result.status.replace(/_/g, ' ')}
+                    </Badge>
+                  </div>
+                  <div className="bg-slate-50/80 rounded-lg p-3 text-center">
+                    <p className="text-xs text-muted-foreground mb-1">Kategori</p>
+                    <Badge variant="secondary">
+                      <Tag className="h-3 w-3 mr-1" />
+                      {result.category.replace(/_/g, ' ')}
+                    </Badge>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="flex gap-3"
+              >
+                <Button
+                  className="flex-1 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white shadow-lg shadow-rose-200"
+                  onClick={() => {
+                    setResult(null)
+                    setForm({ title: '', description: '', category: 'LAINNYA' })
+                    setVideoFile(null)
+                  }}
+                >
+                  <Send className="h-4 w-4 mr-1" />
+                  Buat Laporan Lagi
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => router.push('/saksi/dashboard')}
+                >
+                  Dashboard
+                </Button>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     )
   }
 
+  // Main form
   return (
-    <div className="p-4 max-w-lg mx-auto space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Lapor Kecurangan</h1>
-          <p className="text-sm text-muted-foreground">Laporkan dugaan kecurangan pemilu</p>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Detail Laporan</CardTitle>
-          <CardDescription>Isi informasi kecurangan yang Anda temui</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="category">Kategori</Label>
-            <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="title">Judul *</Label>
-            <Input id="title" placeholder="Judul singkat kecurangan" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Deskripsi *</Label>
-            <Textarea
-              id="description"
-              placeholder="Jelaskan detail kecurangan yang Anda temui..."
-              rows={5}
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            Video Bukti (Opsional)
-          </CardTitle>
-          <CardDescription>Upload video sebagai bukti kecurangan</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {videoFile ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <Badge variant="secondary">{videoFile.name}</Badge>
-                <span className="text-muted-foreground">{(videoFile.size / 1024 / 1024).toFixed(1)}MB</span>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => setVideoFile(null)}>Ganti Video</Button>
-            </div>
-          ) : (
-            <div
-              className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => fileInputRef.current?.click()}
+    <motion.div
+      className="p-4 max-w-lg mx-auto space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
+      {/* Gradient Title Area */}
+      <motion.div
+        variants={itemVariants}
+        className="relative rounded-xl bg-gradient-to-br from-rose-50 via-amber-50/60 to-transparent p-6 sm:p-8 overflow-hidden"
+      >
+        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-rose-100/60" />
+        <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-amber-100/40" />
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-white/60 hover:bg-white/80 -ml-2"
+              onClick={() => router.back()}
             >
-              <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Klik untuk upload video</p>
-              <p className="text-xs text-muted-foreground">MP4, WebM, maks 50MB</p>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-rose-500 to-amber-600 text-white shadow-lg shadow-rose-200">
+              <AlertTriangle className="h-5 w-5" />
             </div>
-          )}
-          <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
-        </CardContent>
-      </Card>
+            <h1 className="text-2xl font-bold">Lapor Kecurangan</h1>
+          </div>
+          <p className="text-sm text-muted-foreground ml-11">Laporkan dugaan kecurangan pemilu yang Anda temui</p>
+        </div>
+      </motion.div>
 
-      <Button className="w-full" size="lg" onClick={handleSubmit} disabled={submitting}>
-        {submitting ? (
-          <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Mengirim...</>
-        ) : (
-          'Kirim Laporan'
-        )}
-      </Button>
-    </div>
+      {/* Detail Laporan Card */}
+      <motion.div variants={itemVariants}>
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-muted/50 pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-rose-100">
+                <AlertTriangle className="h-4 w-4 text-rose-700" />
+              </div>
+              Detail Laporan
+            </CardTitle>
+            <CardDescription>Isi informasi kecurangan yang Anda temui</CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 space-y-5">
+            {/* Category Select */}
+            <div className="space-y-2.5">
+              <Label htmlFor="category" className="text-sm font-medium">
+                Kategori Pelanggaran
+              </Label>
+              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                <SelectTrigger className="border-rose-200 focus:ring-rose-300 focus:border-rose-400">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>
+                      <div className="flex items-center gap-2">
+                        <c.icon className="h-4 w-4 text-muted-foreground" />
+                        {c.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Visual Category Indicators */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {CATEGORIES.map((cat) => {
+                  const Icon = cat.icon
+                  const isSelected = form.category === cat.value
+                  return (
+                    <motion.button
+                      key={cat.value}
+                      type="button"
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setForm({ ...form, category: cat.value })}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 ${
+                        isSelected
+                          ? cat.color + ' shadow-sm'
+                          : 'border-transparent bg-muted/50 hover:bg-muted/80'
+                      }`}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                          isSelected ? 'bg-current/10' : 'bg-muted'
+                        }`}
+                      >
+                        <Icon className={`h-4 w-4 ${isSelected ? 'currentColor' : 'text-muted-foreground'}`} />
+                      </div>
+                      <span className={`text-xs font-medium ${isSelected ? 'text-current' : 'text-muted-foreground'}`}>
+                        {cat.label}
+                      </span>
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-sm font-medium">
+                Judul Laporan <span className="text-rose-500">*</span>
+              </Label>
+              <Input
+                id="title"
+                placeholder="Judul singkat kecurangan yang ditemui"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="border-rose-200 focus:ring-rose-300 focus:border-rose-400"
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium">
+                Deskripsi Laporan <span className="text-rose-500">*</span>
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Jelaskan secara detail kecurangan yang Anda temui, termasuk waktu, tempat, dan pihak terkait..."
+                rows={5}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="border-rose-200 focus:ring-rose-300 focus:border-rose-400 resize-none"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Video Upload */}
+      <motion.div variants={itemVariants}>
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-muted/50 pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-amber-100">
+                <Video className="h-4 w-4 text-amber-700" />
+              </div>
+              Video Bukti
+              <Badge variant="secondary" className="ml-auto text-xs">Opsional</Badge>
+            </CardTitle>
+            <CardDescription>Upload video sebagai bukti kecurangan</CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 space-y-3">
+            {videoFile ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-gradient-to-br from-amber-50/50 to-white rounded-xl p-4 border border-amber-200"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
+                    <Video className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{videoFile.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(videoFile.size / 1024 / 1024).toFixed(1)}MB
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-rose-500 hover:text-rose-700 hover:bg-rose-50"
+                    onClick={() => setVideoFile(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="mt-2 flex items-center gap-1.5">
+                  <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Video siap upload
+                  </Badge>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ${
+                  dragOver
+                    ? 'border-amber-400 bg-amber-50/80 scale-[1.02]'
+                    : 'border-muted-foreground/25 hover:border-amber-300 hover:bg-amber-50/30'
+                }`}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleDrop}
+              >
+                <motion.div
+                  className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center mb-3"
+                  animate={dragOver ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  <Video className="h-7 w-7 text-amber-600" />
+                </motion.div>
+                <p className="text-sm font-medium text-slate-700">Klik atau seret video ke sini</p>
+                <p className="text-xs text-muted-foreground mt-1">MP4, WebM, maks 50MB</p>
+              </motion.div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Selected Category Summary */}
+      {selectedCategory && (
+        <motion.div
+          variants={itemVariants}
+          className="flex items-center gap-3 p-3 rounded-xl bg-rose-50/60 border border-rose-100"
+        >
+          <div className={`p-2 rounded-lg ${selectedCategory.color.split(' ').slice(0, 2).join(' ')}`}>
+            <selectedCategory.icon className="h-4 w-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground">Kategori Terpilih</p>
+            <p className="text-sm font-medium">{selectedCategory.label}</p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Submit Button */}
+      <motion.div variants={itemVariants}>
+        <Button
+          className="w-full h-12 text-base bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white shadow-lg shadow-rose-200 transition-all duration-200"
+          size="lg"
+          onClick={handleSubmit}
+          disabled={submitting}
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              Mengirim Laporan...
+            </>
+          ) : (
+            <>
+              <Send className="h-5 w-5 mr-2" />
+              Kirim Laporan
+            </>
+          )}
+        </Button>
+      </motion.div>
+    </motion.div>
   )
 }

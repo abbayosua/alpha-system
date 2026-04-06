@@ -5,6 +5,7 @@ import { AppSidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { PageWrapper } from '@/components/layout/PageWrapper'
+import { CommandPalette } from '@/components/common/CommandPalette'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -21,6 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </main>
         <Footer />
       </div>
+      <CommandPalette />
     </PageWrapper>
   )
 }

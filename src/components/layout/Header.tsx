@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { Menu, Moon, Sun } from 'lucide-react'
+import { NotificationBell } from '@/components/common/NotificationBell'
 import { Button } from '@/components/ui/button'
 import {
   Breadcrumb,
@@ -107,6 +108,9 @@ export function Header({ onMenuClick }: HeaderProps) {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
+
+      {/* Notification Bell */}
+      <NotificationBell />
 
       {/* Dark mode toggle */}
       <Button

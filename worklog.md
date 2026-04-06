@@ -587,3 +587,206 @@ Enhance admin/saksi page and keuangan/payments page with gradient title areas, u
 - `motion` imported from `'framer-motion'`
 - No blue/indigo colors - emerald/teal/amber/rose palette only
 - Zero lint errors after all changes
+
+---
+## Task ID: 12-c - Keuangan Disbursement & History Enhancement
+### Work Task
+Enhance keuangan/disbursement and keuangan/history pages with amber gradient title areas, summary stat cards, user avatar initials, enhanced table styling, framer-motion animations, and enhanced validation badges.
+
+### Work Summary
+
+#### A. Keuangan Disbursement Page (`src/app/keuangan/disbursement/page.tsx`)
+
+1. **Gradient Title Area**: Added `bg-gradient-to-br from-amber-50 via-orange-50/60 to-transparent` banner with decorative amber circles (-top-8 -right-8, bottom-0 left-1/3). Gradient icon container with Send icon in white (`from-amber-500 to-orange-600`). Back button with `bg-white/60 hover:bg-white/80` styling integrated into gradient area.
+
+2. **Animation Variants**: Added `containerVariants` (stagger 0.08s), `itemVariants` (y:20→0 with ease [0.22, 1, 0.36, 1]), `rowVariants` (x:-10→0 with 0.3s duration).
+
+3. **Summary Stat Cards (3 cards)**:
+   - **Total Siap Cair**: Count + sub-value text. Emerald border, emerald gradient bg. Send icon.
+   - **Total Dana**: Formatted currency total. Amber border, amber gradient bg. Wallet icon.
+   - **Rata-rata Per Transaksi**: Average amount. Teal border, teal gradient bg. Calculator icon.
+   - Each card uses `StatCard` component with staggered `motion.div` entry and `whileHover` effect.
+
+4. **Enhanced Table**:
+   - User avatar initials with amber gradient (`from-amber-500 to-orange-400`) in Saksi column
+   - Amount in prominent `text-lg font-semibold text-emerald-600`
+   - Left border `border-l-4 border-l-amber-400` on each row
+   - `motion.tr` with `whileHover` effect and staggered row entry
+   - Date formatted as `day month short year`
+   - Account number in `font-mono`
+
+5. **Enhanced Disburse Button**: Gradient `from-emerald-600 to-teal-600` with `shadow-emerald-200`, Send icon. `motion.div` wrapper with `whileHover={{ scale: 1.05 }}` and `whileTap={{ scale: 0.95 }}`.
+
+6. **Enhanced Pagination**: Added numbered page buttons with active state gradient (`from-amber-500 to-orange-500`).
+
+#### B. Keuangan History Page (`src/app/keuangan/history/page.tsx`)
+
+1. **Gradient Title Area**: Same amber gradient pattern as disbursement page. History icon in gradient container. Export CSV button moved into the gradient area with `bg-white/60 hover:bg-white/80 border-amber-200 text-amber-700` styling.
+
+2. **Framer Motion Animations**: Same `containerVariants`, `itemVariants`, `rowVariants` pattern as disbursement page.
+
+3. **Enhanced Summary Card**:
+   - Animated currency display using `motion.p` with scale animation (delay 0.3s)
+   - Wallet icon with emerald color in the header
+   - Date range info with Calendar icon showing earliest to latest disbursement dates
+   - Transaction count badge with pulsing emerald dot animation
+   - Page indicator badge with TrendingUp icon
+   - Decorative background circle in top-right
+   - Border-l-4 emerald with gradient background
+
+4. **Enhanced Table**:
+   - User avatar initials with amber gradient
+   - Alternating row colors (`bg-muted/30` for odd rows via `i % 2 === 1`)
+   - Enhanced ValidationBadge component with icons: Shield for GPS, FileText for Data, Camera for C1
+   - Animated pulsing dot on validated badges
+   - Left border `border-l-4 border-l-amber-300` on each row
+   - Calendar icon with date in Tanggal Cair column
+   - Amount in `text-lg font-semibold text-emerald-600`
+   - Account number in `font-mono`
+   - `motion.tr` with staggered entry and `whileHover` effect
+
+5. **Enhanced Pagination**: Same numbered page buttons with active state gradient.
+
+#### C. Shared Patterns
+- All existing functionality preserved (pagination, confirm dialog, fetch, CSV export)
+- `'use client'` directive on both pages
+- `motion` imported from `'framer-motion'`
+- No blue/indigo colors - emerald/teal/amber/rose palette only
+- Zero lint errors after all changes
+
+---
+## Task ID: 12-a - Admin TPS & Audit Enhancement
+### Work Task
+Enhance admin/tps and admin/audit pages with gradient titles, animations, stat cards, enhanced tables, and animated tab switching.
+
+### Work Summary
+
+#### A. Admin TPS Page (`src/app/admin/tps/page.tsx`)
+
+1. **Gradient Title Area**: Added `bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent` banner with decorative circles. Back button and "Tambah TPS" action button integrated. `text-emerald-900` for title.
+
+2. **Animation Variants**: Added `containerVariants` (staggerChildren: 0.08), `itemVariants` (y:20→0 with ease [0.22, 1, 0.36, 1]), `rowVariants` (x:-10→0 with 0.3s duration).
+
+3. **Summary Stat Cards (3 cards)**:
+   - **Total TPS**: Emerald border, emerald gradient bg, Map icon
+   - **TPS Aktif (dengan Saksi)**: Teal border, teal gradient bg, Users icon
+   - **Total DPT**: Amber border, amber gradient bg, Vote icon - values formatted with `toLocaleString('id-ID')`
+   - Stats derived via `useMemo` from tpsList
+   - Each card uses `TpsStatCard` component with staggered `motion.div` entry
+
+4. **Enhanced Search**: Animated fade-in with delay 0.2s, same debounced search with spinner indicator
+
+5. **Enhanced Map Card**: Animated fade-in with delay 0.25s
+
+6. **Enhanced Table**:
+   - Left border color indicator: emerald-400 for active TPS (with saksi), gray-300 for inactive
+   - User avatar initials: gradient circle (`from-emerald-500 to-teal-400`) in Kode column showing first char
+   - `motion.tr` with `rowVariants` staggered entry (0.04s per row) and `whileHover` effect
+   - All existing functionality preserved (search, CRUD, map preview)
+
+7. **Enhanced Add/Edit Dialog**:
+   - Labels use `text-xs text-muted-foreground font-medium` for cleaner look
+   - Gradient save button: `bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700` with shadow
+   - All existing functionality preserved (form, validation, map preview, reset)
+
+#### B. Admin Audit Page (`src/app/admin/audit/page.tsx`)
+
+1. **Gradient Title Area**: Added emerald gradient banner with Shield icon in gradient container (`from-emerald-500 to-teal-600`). Back button integrated. Decorative circles.
+
+2. **Summary Stat Cards (4 cards)**:
+   - **Total Check-in**: Emerald border, ClipboardCheck icon
+   - **GPS Valid**: Teal border, MapPin icon
+   - **Check-in Pagi**: Amber border, Shield icon
+   - **Check-in Akhir**: Rose border, Shield icon
+   - Stats derived via `useMemo` from checkIns array
+
+3. **Framer Motion Animations**:
+   - Title area: fade-in from top (y: -10 → 0)
+   - Summary cards: `containerVariants` with staggerChildren: 0.08 (delay 0.1s)
+   - Tabs: fade-in with delay 0.2s
+
+4. **Animated Tab Switching**: `AnimatePresence mode="wait"` with `motion.div` key-based transitions (`tabContentVariants`: enter y:12, center y:0, exit y:-12). Smooth crossfade when switching between Check-ins and Input Suara tabs.
+
+5. **Enhanced Check-ins Table**:
+   - Left border per check-in type: `border-l-emerald-400` for Pagi, `border-l-amber-400` for Akhir
+   - User avatar initials in Saksi column with name/email below
+   - `motion.tr` with staggered row entry and `whileHover` effect
+   - Custom `CheckinEmptyState` illustration-style empty state with gradient circle, pulsing ring, decorative dots
+
+6. **Enhanced Votes Table**:
+   - Left border `border-l-teal-400` on all rows
+   - Candidate column headers with color indicator dots (emerald for K1, amber for K2, teal for K3)
+   - Color-coded vote cells: `bg-emerald-50 text-emerald-700`, `bg-amber-50 text-amber-700`, `bg-teal-50 text-teal-700` with rounded padding
+   - Total votes in bold `bg-slate-100 text-slate-800` cell
+   - User avatar initials in Saksi column
+   - `motion.tr` with staggered row entry and `whileHover` effect
+   - Custom `VotesEmptyState` illustration-style empty state with amber gradient
+
+#### C. Shared Patterns
+- All existing functionality preserved (CRUD, search, data fetching, tabs)
+- `'use client'` directive on both pages
+- `motion` and `AnimatePresence` imported from `'framer-motion'`
+- No blue/indigo colors - emerald/teal/amber/rose palette only
+- Dynamic import of map components preserved in TPS page
+- Zero lint errors after all changes
+
+---
+## Task ID: 12-d
+Agent: Notification Center & Command Palette Feature Agent
+Task: Add notification bell and Cmd+K command palette
+
+Work Log:
+- Created `/api/notifications` route with role-based mock notifications (SAKSI: 7, ADMIN: 7, ADMIN_KEUANGAN: 8)
+- Created `NotificationBell` component at `src/components/common/NotificationBell.tsx` with popover, unread count badge, auto-refresh every 30s, mark all read, framer-motion animations
+- Created `CommandPalette` component at `src/components/common/CommandPalette.tsx` with cmdk dialog, role-based navigation items and quick actions, Cmd+K/Ctrl+K keyboard shortcut
+- Updated `Header.tsx` with NotificationBell placed between breadcrumb area and dark mode toggle
+- Added CommandPalette to all 3 dashboard layouts (saksi, admin, keuangan)
+- Zero lint errors
+
+Stage Summary:
+- New notification center with bell icon, unread count badge, real-time auto-refresh (30s), role-based notifications, mark all read, empty state, type-colored icons (info/success/warning/error)
+- New command palette (Cmd+K/Ctrl+K) with role-based navigation items and quick actions, search filtering, keyboard navigation, styled footer hint
+- Both features fully functional and integrated across all 3 role dashboards
+
+---
+## Task ID: 12-b - Saksi Input & Lapor Enhancement
+### Work Task
+Enhance saksi/input and saksi/lapor pages with gradient titles, framer-motion animations, colored vote cards, visual category indicators, enhanced upload areas, and improved success states.
+
+### Work Summary
+
+#### A. Saksi Input Page (`src/app/saksi/input/page.tsx`)
+
+1. **Gradient Title Area**: `bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent` with decorative circles. PenLine icon in gradient container (`from-emerald-500 to-teal-600`).
+
+2. **Framer Motion Animations**: containerVariants (stagger 0.1s), itemVariants (y:20→0, ease [0.22, 1, 0.36, 1]), scaleVariants, AnimatePresence for animated total counter.
+
+3. **Colored Vote Input Cards**: Kandidat 1 (emerald border-l/bg/ring), Kandidat 2 (teal), Kandidat 3 (amber), Tidak Sah (rose). Each with `text-2xl font-bold text-center h-14` input and numbered circle badge. whileFocus scale animation.
+
+4. **Total Suara Sah Card**: Full gradient card (`from-emerald-600 via-teal-600 to-emerald-700`) with 3-column grid of animated candidate values, Separator, AnimatePresence total counter (`text-3xl`), breakdown line.
+
+5. **Enhanced C1 Photo Upload**: Drag-and-drop with onDragOver/onDragLeave/onDrop, gradient border animation on drag, hover overlay with Ganti/Hapus buttons, ShieldCheck badge for uploaded files.
+
+6. **Enhanced Already Submitted State**: Gradient success card with confetti-like spring-animated decorative elements (PartyPopper, dots), animated checkmark in gradient circle, stats summary grid, Clock icon with Indonesian date.
+
+7. **Submit Button**: Gradient `from-emerald-600 to-teal-600` with Vote icon, h-12, shadow.
+
+#### B. Saksi Lapor Page (`src/app/saksi/lapor/page.tsx`)
+
+1. **Gradient Title Area**: `bg-gradient-to-br from-rose-50 via-amber-50/60 to-transparent` with AlertTriangle icon in gradient container (`from-rose-500 to-amber-600`).
+
+2. **Visual Category Indicators**: 2x3/3-column grid of clickable category cards below Select. Category icons: SUARA_SILUMAN→Users, PENGHITUNGAN_ULANG→RefreshCw, DOKUMEN_PALSU→FileX, INTIMIDASI→ShieldAlert, MONEY_POLITICS→Banknote, PELANGGARAN_PROTOKOL→AlertOctagon, LAINNYA→HelpCircle. Unique colors per category. whileHover/whileTap animations.
+
+3. **Enhanced Form**: Rose-tinted inputs, required field indicators, enhanced textarea.
+
+4. **Enhanced Video Upload**: Drag-and-drop with amber-tinted animation, Video icon, file info card, CheckCircle2 "Video siap upload" badge.
+
+5. **Enhanced Success State**: Animated checkmark, stats summary with status/category badges, two action buttons (gradient rose→amber + outline).
+
+6. **Submit Button**: Gradient `from-rose-600 to-amber-600` with Send icon.
+
+#### C. Shared Patterns
+- All existing functionality preserved (form validation, file upload, API calls, navigation)
+- `'use client'` directive, `motion`/`AnimatePresence` from framer-motion
+- No blue/indigo colors - emerald/teal/amber/rose palette only
+- Zero lint errors after all changes
