@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { Bell, Check, CheckCircle2, AlertTriangle, Info, XCircle, Wallet, LogIn, MapPin, Smartphone, Banknote, Clock, Receipt, Send, UserPlus, TrendingDown, GitBranch, MapPinned, ScrollText, FileBarChart } from 'lucide-react'
@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
+import { useSocketContext } from '@/components/providers/SocketProvider'
 
 type NotificationType = 'info' | 'success' | 'warning' | 'error'
 
@@ -42,6 +43,14 @@ const iconMap: Record<string, LucideIcon> = {
   MapPinned,
   ScrollText,
   FileBarChart,
+}
+
+// Map socket event types to NotificationBell display format
+const socketEventToNotification: Record<string, { title: string; description: string; type: NotificationType; iconName: string }> = {
+  new_report: { title: 'Laporan Baru', description: 'Laporan baru telah diterima dari saksi', type: 'warning', iconName: 'FileBarChart' },
+  payment_update: { title: 'Update Pembayaran', description: 'Status pembayaran telah diperbarui', type: 'success', iconName: 'Wallet' },
+  check_in: { title: 'Check-in Baru', description: 'Saksi berhasil melakukan check-in', type: 'info', iconName: 'MapPin' },
+  new_user: { title: 'Pengguna Baru', description: 'Pengguna baru terdaftar dalam sistem', type: 'info', iconName: 'UserPlus' },
 }
 
 const typeStyles: Record<NotificationType, { bg: string; text: string; iconBg: string }> = {
@@ -84,10 +93,36 @@ function formatRelativeTime(dateStr: string): string {
 export function NotificationBell() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
+  const { lastNotification, isConnected } = useSocketContext()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
+  const lastSocketTimestampRef = useRef<string | null>(null)
+
+  // Handle real-time socket notifications – add to top of list with animation
+  useEffect(() => {
+    if (!lastNotification) return
+    // Avoid processing duplicate notifications
+    if (lastSocketTimestampRef.current === lastNotification.timestamp) return
+    lastSocketTimestampRef.current = lastNotification.timestamp
+
+    const mapping = socketEventToNotification[lastNotification.type]
+    if (!mapping) return
+
+    const socketNotification: Notification = {
+      id: `socket-${lastNotification.timestamp}-${Math.random().toString(36).slice(2, 8)}`,
+      title: (lastNotification.data.message as string) || mapping.title,
+      description: mapping.description,
+      type: mapping.type,
+      read: false,
+      createdAt: lastNotification.timestamp,
+      iconName: mapping.iconName,
+    }
+
+    setNotifications((prev) => [socketNotification, ...prev])
+    setUnreadCount((prev) => prev + 1)
+  }, [lastNotification])
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -127,6 +162,9 @@ export function NotificationBell() {
           title="Notifikasi"
         >
           <Bell className="h-4 w-4" />
+          {isConnected && (
+            <span className="absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-2 ring-background" title="Realtime aktif" />
+          )}
           {unreadCount > 0 && (
             <motion.span
               initial={{ scale: 0 }}

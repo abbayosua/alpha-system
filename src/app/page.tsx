@@ -11,7 +11,8 @@ import Image from 'next/image'
 import {
   Shield, MapPin, ClipboardCheck, Camera, FileText, Wallet,
   Users, BarChart3, ArrowRight, CheckCircle2, LayoutDashboard,
-  Phone, Mail, Heart, Eye, AlertTriangle, UserPlus
+  Phone, Mail, Heart, Eye, AlertTriangle, UserPlus,
+  Github, Twitter, Send, Bell, BarChart2, MapPinned
 } from 'lucide-react'
 import { ActivityTimeline } from '@/components/charts/ActivityTimeline'
 
@@ -525,70 +526,173 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── Hubungi Kami / Newsletter CTA Section ─── */}
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700" />
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }} />
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/5 blur-2xl" />
+        <div className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full bg-white/5 blur-2xl" />
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <FadeInSection>
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6">
+              <Mail className="h-4 w-4 text-emerald-200" />
+              <span className="text-sm text-emerald-100 font-medium">Hubungi Kami</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+              Butuh Bantuan atau Informasi?
+            </h2>
+            <p className="text-emerald-100/80 mb-8 max-w-xl mx-auto">
+              Tim kami siap membantu Anda. Kirimkan pesan dan kami akan merespons dalam 24 jam.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Email Anda..."
+                className="flex-1 px-4 py-3 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 text-white placeholder:text-emerald-200/60 text-sm focus:outline-none focus:ring-2 focus:ring-white/30 transition-all"
+              />
+              <Button className="bg-white text-emerald-700 hover:bg-emerald-50 rounded-xl px-6 font-semibold shadow-lg shadow-emerald-900/20">
+                <Send className="h-4 w-4 mr-2" />
+                Kirim
+              </Button>
+            </div>
+          </FadeInSection>
+        </div>
+      </section>
+
       {/* ─── Footer ─── */}
       <footer className="border-t bg-white dark:bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {/* Brand */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="relative h-7 w-7 rounded-lg overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            {/* Column 1: Brand + Description + Social Links */}
+            <div className="space-y-5">
+              <div className="flex items-center gap-2.5">
+                <div className="relative h-8 w-8 rounded-lg overflow-hidden">
                   <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
                 </div>
-                <span className="text-lg font-bold">Alpha System v5</span>
+                <div>
+                  <span className="text-lg font-bold leading-tight block">Alpha System v5</span>
+                  <span className="text-[10px] text-muted-foreground leading-tight">Management System</span>
+                </div>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Comprehensive management system terpadu. Lindungi integritas data 
-                dengan teknologi modern dan transparansi penuh.
+                Comprehensive management system terpadu untuk pengawasan pemilu.
+                Lindungi integritas data dengan teknologi modern dan transparansi penuh.
               </p>
+              {/* Social Links */}
+              <div className="flex items-center gap-3 pt-1">
+                <button
+                  className="h-9 w-9 rounded-lg bg-muted hover:bg-emerald-100 dark:hover:bg-emerald-900/30 flex items-center justify-center text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  aria-label="GitHub"
+                >
+                  <Github className="h-4 w-4" />
+                </button>
+                <button
+                  className="h-9 w-9 rounded-lg bg-muted hover:bg-emerald-100 dark:hover:bg-emerald-900/30 flex items-center justify-center text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  aria-label="Twitter"
+                >
+                  <Twitter className="h-4 w-4" />
+                </button>
+                <button
+                  className="h-9 w-9 rounded-lg bg-muted hover:bg-emerald-100 dark:hover:bg-emerald-900/30 flex items-center justify-center text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  aria-label="Email"
+                >
+                  <Mail className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
-            {/* Quick Links */}
+            {/* Column 2: Fitur Links */}
             <div className="space-y-4">
-              <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Tautan Cepat</h4>
+              <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Fitur</h4>
               <ul className="space-y-2.5">
                 <li>
-                  <button onClick={() => router.push('/auth/login')} className="text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                    Masuk
+                  <button onClick={() => router.push(isAuthenticated ? getDashboardPath() : '/auth/login')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => router.push('/auth/register')} className="text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                    Daftar
+                  <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Eye className="h-3.5 w-3.5" /> Monitoring
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => router.push(isAuthenticated ? getDashboardPath() : '/auth/login')} className="text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                    Dashboard
+                  <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <BarChart2 className="h-3.5 w-3.5" /> Analitik
+                  </button>
+                </li>
+                <li>
+                  <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Bell className="h-3.5 w-3.5" /> Notifikasi
                   </button>
                 </li>
               </ul>
             </div>
 
-            {/* Contact */}
+            {/* Column 3: Peran Links */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Peran</h4>
+              <ul className="space-y-2.5">
+                <li>
+                  <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Users className="h-3.5 w-3.5" /> Saksi
+                  </button>
+                </li>
+                <li>
+                  <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                    <Shield className="h-3.5 w-3.5" /> Admin
+                  </button>
+                </li>
+                <li>
+                  <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                    <Wallet className="h-3.5 w-3.5" /> Keuangan
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: Kontak */}
             <div className="space-y-4">
               <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Kontak</h4>
-              <ul className="space-y-2.5">
-                <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="h-4 w-4 text-emerald-500" />
-                  support@alphasystem.id
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <span>support@alphasystem.id</span>
                 </li>
-                <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="h-4 w-4 text-emerald-500" />
-                  +62 812-XXXX-XXXX
+                <li className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                  <Phone className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <span>+62 812-XXXX-XXXX</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                  <MapPinned className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <span>Jakarta, Indonesia</span>
                 </li>
               </ul>
             </div>
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-10 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} Alpha System v5 — Comprehensive Management System
-            </p>
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
-              Dibuat dengan <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" /> untuk Indonesia
-            </p>
+          <div className="mt-12 pt-8 border-t">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>&copy; {new Date().getFullYear()} Alpha System v5</span>
+                <span className="text-muted-foreground/40">|</span>
+                <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-medium">v5.0.0</span>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <button className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Privacy Policy</button>
+                <span className="text-muted-foreground/40">·</span>
+                <button className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Terms of Service</button>
+                <span className="text-muted-foreground/40">·</span>
+                <button className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Contact</button>
+              </div>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                Built with <Heart className="h-3 w-3 text-rose-500 fill-rose-500" /> using Next.js
+              </p>
+            </div>
           </div>
         </div>
       </footer>

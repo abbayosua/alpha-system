@@ -26,7 +26,9 @@ import {
   Shield,
   Building2,
   Settings,
+  HelpCircle,
   X,
+  Mail,
 } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -39,6 +41,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import type { UserRole, LucideIcon } from 'lucide-react'
 
 interface NavItem {
@@ -179,36 +182,75 @@ function SidebarNavContent({
         </nav>
       </ScrollArea>
 
-      {/* User info */}
-      <div className="border-t border-border/50 bg-muted/30 px-4 py-3 safe-bottom">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 ring-2 ring-emerald-200 dark:ring-emerald-800">
-            <AvatarFallback className="text-xs font-semibold bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate leading-tight">{user?.name || 'Pengguna'}</p>
-            <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 mt-0.5', roleColors[role])}>
-              {role === 'ADMIN_KEUANGAN' ? (
-                <span className="flex items-center gap-1">
-                  <Building2 className="h-2.5 w-2.5" />
-                  {roleLabels[role]}
-                </span>
-              ) : (
-                roleLabels[role]
-              )}
-            </Badge>
+      {/* Help link */}
+      <div className="px-3 py-2 border-t border-border/30">
+        <Link
+          href="#"
+          onClick={onNavigate}
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 transition-all duration-200 group select-none"
+        >
+          <HelpCircle className="h-4 w-4 shrink-0 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
+          <span>Bantuan</span>
+        </Link>
+      </div>
+
+      {/* User info - collapsible */}
+      <Collapsible className="border-t border-border/50 bg-muted/30">
+        <CollapsibleTrigger className="w-full px-4 py-3 safe-bottom">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9 ring-2 ring-emerald-200 dark:ring-emerald-800">
+              <AvatarFallback className="text-xs font-semibold bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-medium truncate leading-tight">{user?.name || 'Pengguna'}</p>
+              <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 mt-0.5', roleColors[role])}>
+                {role === 'ADMIN_KEUANGAN' ? (
+                  <span className="flex items-center gap-1">
+                    <Building2 className="h-2.5 w-2.5" />
+                    {roleLabels[role]}
+                  </span>
+                ) : (
+                  roleLabels[role]
+                )}
+              </Badge>
+            </div>
+            <ChevronLeft className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 [[data-state=open]>&]:rotate-90" />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 rounded-lg"
-            onClick={onLogout}
-            title="Keluar"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="px-4 pb-3 space-y-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              {user?.email && (
+                <>
+                  <Mail className="h-3 w-3 shrink-0" />
+                  <span className="truncate">{user.email}</span>
+                </>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 gap-1.5"
+              onClick={onLogout}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Keluar
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Bottom branding */}
+      <div className="border-t border-border/30 px-4 py-2">
+        <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/60">
+          <div className="relative h-3.5 w-3.5 rounded overflow-hidden shrink-0">
+            <Image src="/logo.png" alt="" fill className="object-cover" />
+          </div>
+          <span className="font-medium">Alpha System v5</span>
+          <span className="text-muted-foreground/30">·</span>
+          <span>v5.0.0</span>
         </div>
       </div>
     </>

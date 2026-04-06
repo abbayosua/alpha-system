@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { SplashProvider } from "@/components/providers/SplashProvider";
+import { SocketProvider } from "@/components/providers/SocketProvider";
 import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
@@ -35,7 +37,11 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem storageKey="alpha-system-theme">
           <AuthProvider>
-            {children}
+            <SocketProvider>
+              <SplashProvider>
+                {children}
+              </SplashProvider>
+            </SocketProvider>
           </AuthProvider>
         </ThemeProvider>
         <Toaster richColors position="top-right" />

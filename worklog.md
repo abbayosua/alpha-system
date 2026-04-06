@@ -1970,3 +1970,239 @@ Application is highly stable and feature-rich. QA testing of 13 pages showed 100
 4. Dark mode polish on Recharts charts
 5. Performance optimization (admin dashboard is heavier than other pages)
 6. Consider adding activity feed to saksi dashboard
+
+---
+## Task ID: 16-b - Admin Settings Enhancement Agent
+### Work Task
+Enhance the Admin Settings page with system health monitoring, activity log, notification settings, security section, enhanced appearance, data management improvements, and enhanced brand card.
+
+### Work Summary
+
+#### A. System Health Dashboard (new section at top)
+- 3 mini stat cards in emerald/teal gradient backgrounds with white text:
+  - **API Status**: Animated check with green dot + "Online" (uses `useSystemHealth` hook with simulated health check timing)
+  - **Database**: Green dot + "Connected" (simulated with delayed resolution)
+  - **Uptime**: Green dot + "99.9%"
+- Cards use `miniCardVariants` for scale-in animation with decorative background circles
+- Emerald gradient card header with Activity icon
+
+#### B. Activity Log Section
+- Mock data: 10 recent activities with action types (create/update/delete)
+- Vertical timeline with colored dot indicators and connecting lines
+- Each entry: icon, action text, user name, relative timestamp
+- Color-coded by action type: create=emerald, update=amber, delete=rose
+- "Lihat Semua" link to `/admin/audit`
+- Staggered `timelineVariants` animation (0.04s delay per item)
+- Scrollable with `max-h-[420px]` and custom scrollbar
+
+#### C. Data Management Section (enhanced)
+- **Export All Data**: Enhanced with `FileDown` icon, triggers CSV download with all system data
+- **Clear Cache**: Now uses ConfirmDialog before clearing (previously cleared immediately)
+- **Database Backup Info**: New card showing last backup date (mock), backup frequency (6 hours), status (Berhasil), gradient info card with teal styling
+- **Reset Demo Data**: Now uses double-confirmation flow:
+  1. First dialog: warns about reset + mentions second confirmation
+  2. Second dialog: "Konfirmasi Terakhir" with stronger warning text
+  - Uses AnimatePresence for smooth dialog transitions
+
+#### D. Notification Settings (new section)
+- **Email Notifications**: Toggle switch (existing functionality, moved to new section)
+- **Push Notifications**: New toggle with `SmartphoneNfc` icon
+- **Sound Alerts**: Toggle with dynamic Volume2/VolumeX icon based on state
+- **Auto-refresh Interval**: Select dropdown with options: 15 detik, 30 detik, 60 detik, Off
+- All settings persisted to localStorage under `saksi-notif-settings` key
+
+#### E. Security Section (new section)
+- **Two-Factor Authentication**: Toggle (disabled) with "Segera Hadir" amber badge - UI only
+- **Session Timeout**: Select dropdown with options: 15 menit, 30 menit, 1 jam, 4 jam
+- **Login History**: 5 mock entries showing:
+  - Device icon (Monitor for desktop, Smartphone for mobile)
+  - Device name, IP address (font-mono), timestamp
+  - "Sesi Ini" emerald badge for current session
+  - Emerald-tinted background for current login, muted for others
+- Settings persisted to `saksi-security-settings` localStorage key
+
+#### F. Appearance Section (new section, replaces existing theme toggle)
+- **Dark Mode Toggle**: Kept from existing (auto dark mode based on system)
+- **Font Size**: Select dropdown (Kecil/Sedang/Besar) with Type icon
+- **Compact Mode**: Toggle switch with LayoutGrid icon
+- **Sidebar Position**: Select dropdown (Kiri/Kanan) with ArrowLeftRight icon - UI only
+- Settings persisted to `saksi-appearance-settings` localStorage key
+
+#### G. Enhanced Brand/About Card
+- Larger logo (64x64) with ring-2 ring-emerald-100 and shadow
+- "Alpha System v5" with version badge "v5.0.0"
+- Build info line: "Built with Next.js 16 + Supabase" with Zap icon
+- Enhanced tech stack badges: Next.js 16, Supabase, Leaflet, TypeScript
+- New "Informasi Build" card: 6-column grid showing Version, Framework, Database, Runtime, Environment, License
+- Tagline preserved: "Dibuat untuk Pemilu Indonesia" with Heart icons
+
+#### H. Sections Preserved (from original)
+- Profile Section (Admin profile with avatar, badges, action buttons)
+- Payment Configuration (nominal input, method checkboxes, save button)
+- GPS Configuration (radius slider with range indicators)
+
+#### I. Technical Details
+- New `useSystemHealth` hook with simulated health checks (timed setState)
+- New helper functions: `getActionColor`, `getActionDotColor`, `getActionBgColor`
+- Extended `AppSettings` interface with `pushNotifications`, `soundAlerts`, `compactMode`
+- New interfaces: `NotificationSettings`, `SecuritySettings`, `AppearanceSettings`
+- All new settings use localStorage persistence with SSR-safe `loadFromStorage`
+- Clear Cache dialog added as proper confirmation before action
+- Reset Demo Data uses AnimatePresence-wrapped double ConfirmDialog pattern
+- Framer-motion: `miniCardVariants` (scale animation), `timelineVariants` (x-slide), staggered entries throughout
+- Color palette: emerald/teal/amber/rose only, no blue/indigo
+
+#### J. Lint Status
+- Zero lint errors on the settings page (the 1 pre-existing error is in SplashProvider.tsx, unrelated to this change)
+- Dev server running without errors
+
+
+---
+## Task ID: 16-c - Splash Screen, Footer Enhancement & App Polish
+### Work Task
+Create a professional splash/loading screen, enhance the landing page footer with multi-column layout and newsletter CTA, create page transition wrapper, and enhance the sidebar footer with branding and collapsible user info.
+
+### Work Summary
+
+#### A. SplashScreen Component (`src/components/common/SplashScreen.tsx`)
+- Full-screen overlay with emerald-to-teal-to-dark gradient background
+- Animated decorative blur orbs (emerald, teal, amber) floating in background
+- Dot grid pattern overlay for visual depth
+- Logo displayed in 80x80px rounded container with shadow and glow ring animation
+- App name "Alpha System v5" with gradient text on version number
+- "Comprehensive Management System" subtitle
+- Progress bar with gradient fill from emerald-400 to teal-300 that fills over 1.5 seconds
+- "Memuat sistem" text with pulsing opacity animation
+- Smooth fade-out with scale-up exit animation using framer-motion AnimatePresence
+- Auto-dismisses after progress reaches 100% (1.5s)
+- Fully respects `prefers-reduced-motion` - dismisses immediately in 300ms without animations
+- z-index 9999 to cover all content
+
+#### B. SplashProvider (`src/components/providers/SplashProvider.tsx`)
+- Wraps app content with smooth crossfade transition (0.5s opacity)
+- Uses `sessionStorage` flag (`alpha-system-splash-shown`) to only show splash once per session
+- Lazy state initializer reads sessionStorage synchronously on mount
+- Sets sessionStorage on dismiss and triggers 500ms delayed content fade-in
+- Uses `useRef` for timer cleanup on unmount via `useEffect`
+- React Compiler compliant - no setState in effects, no ref access during render
+
+#### C. Layout Integration (`src/app/layout.tsx`)
+- Added `SplashProvider` inside `AuthProvider` but inside `ThemeProvider`
+- Import added for `SplashProvider`
+
+#### D. PageTransition Component (`src/components/common/PageTransition.tsx`)
+- Uses framer-motion `AnimatePresence` with `mode="wait"` for smooth route transitions
+- `usePathname()` as key triggers animation on route change
+- Fade + slight slide (y: 8px) with 0.25s duration and custom easing
+- Respects `prefers-reduced-motion` - bypasses all animations and renders children directly
+
+#### E. Enhanced Landing Page Footer (`src/app/page.tsx`)
+
+1. **Newsletter/Contact CTA Section** (new, above footer):
+   - Emerald-to-teal gradient background with decorative blur orbs
+   - "Hubungi Kami" badge with Mail icon
+   - "Butuh Bantuan atau Informasi?" heading
+   - Email input field with glassmorphism styling (white/15 bg, backdrop-blur)
+   - "Kirim" button with Send icon, white bg, emerald text
+   - Wrapped in FadeInSection for scroll-triggered animation
+
+2. **Multi-Column Footer** (4 columns):
+   - **Column 1 - Brand**: Logo + name + subtitle, description text, social links row (GitHub, Twitter, Email as icon buttons with hover effects)
+   - **Column 2 - Fitur**: Dashboard, Monitoring, Analitik, Notifikasi links with icons
+   - **Column 3 - Peran**: Saksi (emerald hover), Admin (teal hover), Keuangan (amber hover) links with icons
+   - **Column 4 - Kontak**: Email, phone, address with MapPinned icon
+
+3. **Enhanced Bottom Bar**:
+   - Copyright year + "Alpha System v5" + version pill badge (v5.0.0)
+   - Policy links: Privacy Policy, Terms of Service, Contact with emerald hover
+   - "Built with ❤️ using Next.js" text
+
+4. **New Imports**: `Github`, `Twitter`, `Send`, `Bell`, `BarChart2`, `MapPinned` from lucide-react
+
+#### F. Enhanced Sidebar Footer (`src/components/layout/Sidebar.tsx`)
+
+1. **Help Link ("Bantuan")**: Added above user info section with `HelpCircle` icon, emerald hover styling, matching nav item pattern
+2. **Collapsible User Info**: Replaced static user info with `Collapsible`/`CollapsibleTrigger`/`CollapsibleContent`:
+   - Trigger shows avatar, name, role badge, and chevron arrow (rotates 90° on open via CSS `[[data-state=open]>&]:rotate-90`)
+   - Expanded content shows user email with Mail icon, and a "Keluar" (logout) button with destructive styling
+3. **Bottom Branding**: Small centered branding strip at very bottom with mini logo (14px), "Alpha System v5" text, and version "v5.0.0"
+4. **New Imports**: `HelpCircle`, `Mail`, `Collapsible`/`CollapsibleContent`/`CollapsibleTrigger` from shadcn/ui
+
+#### G. Technical Details
+- All components use `'use client'` directive
+- Emerald/teal/amber/rose palette throughout - NO blue/indigo colors
+- Framer-motion for all animations with consistent easing curves
+- Responsive: 1-col mobile, 2-col tablet, 4-col desktop for footer
+- Dark mode compatible via Tailwind `dark:` prefixes
+- `prefers-reduced-motion` respected in SplashScreen and PageTransition
+- Zero lint errors (1 pre-existing warning in useSocket.ts, not from this task)
+
+#### H. Files Created
+- `src/components/common/SplashScreen.tsx`
+- `src/components/providers/SplashProvider.tsx`
+- `src/components/common/PageTransition.tsx`
+
+#### I. Files Modified
+- `src/app/layout.tsx` (added SplashProvider)
+- `src/app/page.tsx` (enhanced footer + newsletter CTA section)
+- `src/components/layout/Sidebar.tsx` (help link, collapsible user info, bottom branding)
+
+---
+## Task ID: 16-a - WebSocket Real-Time Notification Mini-Service
+### Work Task
+Create a Socket.IO-based real-time notification mini-service and integrate it into the existing notification system. Includes server-side service, client-side hook, React context provider, and integration with the NotificationBell component.
+
+### Work Summary
+
+#### A. Mini-Service (`mini-services/notification-service/`)
+
+1. **`package.json`**: Updated with `"private": true`, socket.io ^4.8.1, bun dev script with hot reload.
+
+2. **`index.ts`** – Socket.IO server on port 3004 with:
+   - CORS configured for `http://localhost:3000` and `http://localhost:3004`
+   - REST endpoints: POST/GET /events, GET /health
+   - Socket events: `join-room` (role-based room), `send-notification` (admin broadcast), `join:user`, `join:role`, `leave:room`, `ping/pong`
+   - In-memory event history (last 50 events) with initialization payload on connect
+   - **Periodic simulated notifications**: Every 60 seconds, broadcasts a random notification from 8 predefined templates (new_report, payment_update, check_in, new_user) only when clients are connected
+   - Graceful shutdown on SIGINT/SIGTERM
+   - Comprehensive startup banner with all available endpoints and events
+
+#### B. Client-Side Hook (`src/hooks/useSocket.ts`)
+
+- Custom React hook using `socket.io-client`
+- Connects via gateway pattern: `io('/?XTransformPort=3004')`
+- Auto-connects on mount, disconnects on unmount
+- **Exponential backoff reconnection**: 1s base delay, doubling per attempt with jitter, capped at 30s
+- Provides: `isConnected`, `lastNotification`, `notificationCount`, `joinRoom()`, `sendNotification()`
+- Does not expose socket ref during render (React Compiler compatible)
+
+#### C. SocketProvider (`src/components/providers/SocketProvider.tsx`)
+
+- React context provider wrapping the app with socket state
+- `useSocketContext()` hook for consuming socket state
+- **Auto-joins role room**: When user authenticates and socket connects, automatically joins the appropriate role room (saksi/admin/keuangan)
+- **Toast notifications**: Shows sonner toast for each incoming real-time notification with event-type-specific titles
+- **Connection status indicator**: Fixed-position bottom-right pill showing "Realtime terputus" with WifiOff icon when disconnected (AnimatePresence animation)
+
+#### D. App Integration
+
+1. **`src/app/layout.tsx`**: Added `SocketProvider` wrapping children inside `AuthProvider` and above `SplashProvider`
+
+2. **`src/components/common/NotificationBell.tsx`**:
+   - Imports `useSocketContext` from SocketProvider
+   - Added `socketEventToNotification` mapping: translates socket event types (new_report, payment_update, check_in, new_user) to NotificationBell display format with appropriate type, icon, title, description
+   - **Real-time badge updates**: When socket notification arrives, creates a new Notification object and prepends it to the notification list with animation
+   - **Unread count increment**: Automatically increments unread count for socket notifications
+   - **Connection indicator**: Green emerald dot on the bell icon when socket is connected
+   - Duplicate prevention via timestamp ref
+
+#### E. Dependencies Installed
+- `socket.io-client@4.8.3` in main project
+- `socket.io@^4.8.1` in mini-service (already present)
+
+#### F. Service Status
+- Notification service running on port 3004 (verified via health check)
+- Health endpoint returns: `{ success: true, status: "ok", uptime, connectedClients, eventHistoryCount }`
+
+#### G. Lint Status
+- Zero lint errors after all changes

@@ -19,6 +19,42 @@ function addHistory(event: typeof eventHistory[number]) {
   if (eventHistory.length > MAX_HISTORY) eventHistory.shift()
 }
 
+// ── Simulated notification data ─────────────────────────────────────
+const simulatedNotifications = [
+  {
+    type: 'new_report' as const,
+    data: { message: 'Laporan baru diterima dari TPS-001', tps: 'TPS-001' },
+  },
+  {
+    type: 'payment_update' as const,
+    data: { message: 'Pembayaran berhasil dicairkan ke rekening saksi', amount: 500000 },
+  },
+  {
+    type: 'check_in' as const,
+    data: { message: 'Saksi berhasil check-in pagi di TPS-003', tps: 'TPS-003', period: 'pagi' },
+  },
+  {
+    type: 'new_user' as const,
+    data: { message: 'Saksi baru terdaftar dan menunggu verifikasi', role: 'SAKSI' },
+  },
+  {
+    type: 'payment_update' as const,
+    data: { message: 'Dana siap dibayarkan untuk 3 saksi', total: 1500000 },
+  },
+  {
+    type: 'new_report' as const,
+    data: { message: 'Laporan anomali terdeteksi di TPS-005', tps: 'TPS-005', priority: 'high' },
+  },
+  {
+    type: 'check_in' as const,
+    data: { message: 'Check-in akhir tercatat di TPS-002', tps: 'TPS-002', period: 'akhir' },
+  },
+  {
+    type: 'new_user' as const,
+    data: { message: 'Admin baru bergabung ke sistem', role: 'ADMIN' },
+  },
+]
+
 // ── HTTP server (REST API) ──────────────────────────────────────────
 const httpServer = http.createServer(async (req, res) => {
   // CORS headers
@@ -83,18 +119,14 @@ const httpServer = http.createServer(async (req, res) => {
 
       // Broadcast strategy
       if (userId) {
-        // Send to specific user room
         io.to(`user:${userId}`).emit('notification', event)
-        // Also broadcast globally if no role filter
         if (!role) {
           io.emit('notification', event)
         }
       } else {
-        // Broadcast to all connected clients
         io.emit('notification', event)
       }
 
-      // If role is specified, also emit to role-specific room
       if (role) {
         io.to(`role:${role}`).emit('notification', event)
       }
@@ -132,7 +164,11 @@ function readBody(req: http.IncomingMessage): Promise<any> {
 
 // ── Socket.IO server ────────────────────────────────────────────────
 const io = new Server(httpServer, {
-  cors: { origin: '*' },
+  cors: {
+    origin: ['http://localhost:3000', 'http://localhost:3004'],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
   path: '/socket.io',
 })
 
@@ -144,7 +180,39 @@ io.on('connection', (socket) => {
     message: 'Connected to SAKSI APP notifications',
     socketId: socket.id,
     allowedEvents: ALLOWED_EVENT_TYPES,
-    eventHistory: eventHistory.slice(-20), // last 20 events on connect
+    eventHistory: eventHistory.slice(-20),
+  })
+
+  // ── join-room: join a role-based room (saksi, admin, keuangan) ───
+  socket.on('join-room', (room: string) => {
+    if (!room) return
+    socket.join(room)
+    socket.join(`role:${room}`)
+    console.log(`[WS] ${socket.id} joined room: ${room}`)
+    socket.emit('room-joined', { room, message: `Joined room: ${room}` })
+  })
+
+  // ── send-notification: admin broadcasts to rooms ──────────────────
+  socket.on('send-notification', (payload: { targetRoom?: string; type: string; data: any }) => {
+    const { targetRoom, type, data } = payload
+    if (!type) return
+
+    const event = {
+      type,
+      data: data || {},
+      timestamp: new Date().toISOString(),
+      from: socket.id,
+    }
+
+    addHistory(event)
+    console.log(`[WS] Notification from ${socket.id} | type=${type} | target=${targetRoom || 'all'}`)
+
+    if (targetRoom) {
+      io.to(targetRoom).emit('notification', event)
+      io.to(`role:${targetRoom}`).emit('notification', event)
+    } else {
+      io.emit('notification', event)
+    }
   })
 
   // Allow clients to join a user room for targeted notifications
@@ -178,6 +246,24 @@ io.on('connection', (socket) => {
   })
 })
 
+// ── Periodic simulated notifications (every 60s) ────────────────────
+setInterval(() => {
+  const clients = io.sockets.sockets.size
+  if (clients === 0) return // No connected clients, skip
+
+  const notification = simulatedNotifications[Math.floor(Math.random() * simulatedNotifications.length)]
+  const event = {
+    type: notification.type,
+    data: { ...notification.data, simulated: true },
+    timestamp: new Date().toISOString(),
+  }
+
+  addHistory(event)
+  console.log(`[SIMULATED] Broadcasting ${notification.type} to all clients`)
+
+  io.emit('notification', event)
+}, 60_000)
+
 // ── Start server ─────────────────────────────────────────────────────
 const PORT = 3004
 httpServer.listen(PORT, () => {
@@ -190,13 +276,19 @@ httpServer.listen(PORT, () => {
   console.log(`║     GET  /events   – Get event history (last 50) ║`)
   console.log(`║     GET  /health   – Health check                ║`)
   console.log(`╠══════════════════════════════════════════════════╣`)
+  console.log(`║   Socket Events:                                 ║`)
+  console.log(`║     join-room   <room>  – Join role room         ║`)
+  console.log(`║     send-notification      – Admin broadcast     ║`)
+  console.log(`║     join:user   <id>    – Join user room         ║`)
+  console.log(`║     join:role   <role>  – Join role room         ║`)
+  console.log(`║     leave:room  <room>  – Leave a room           ║`)
+  console.log(`╠══════════════════════════════════════════════════╣`)
   console.log(`║   Event Types:                                   ║`)
   console.log(`║     new_report, payment_update, check_in,        ║`)
   console.log(`║     new_user                                      ║`)
   console.log(`╠══════════════════════════════════════════════════╣`)
-  console.log(`║   Socket.IO Rooms:                               ║`)
-  console.log(`║     join:user  <userId>  – User-specific room    ║`)
-  console.log(`║     join:role  <role>    – Role-specific room    ║`)
+  console.log(`║   Auto-simulation: Every 60s (when clients       ║`)
+  console.log(`║   are connected)                                  ║`)
   console.log(`╚══════════════════════════════════════════════════╝\n`)
 })
 
