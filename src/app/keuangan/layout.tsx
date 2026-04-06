@@ -14,7 +14,7 @@ export default function KeuanganLayout({ children }: { children: React.ReactNode
   return (
     <PageWrapper>
       <AppSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-      <div className="flex flex-1 flex-col lg:ml-64 min-h-screen">
+      <div className="flex flex-1 flex-col min-h-screen">
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         <main className="flex-1">
           <div className="p-4 md:p-6 lg:p-8 pb-20 lg:pb-8">
