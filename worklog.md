@@ -2309,3 +2309,61 @@ Stage Summary:
 ### Unresolved Issues
 - Verify Vercel build succeeds after this fix (user to confirm)
 - If other pages fail prerendering, may need `export const dynamic = 'force-dynamic'` on their route segments
+---
+Task ID: 17-a
+Agent: full-stack-developer
+Task: Mobile Bottom Navigation Component
+
+Work Log:
+- Created `src/components/layout/MobileBottomNav.tsx` as a 'use client' component
+- Component uses `usePathname()` for active route detection and `useAuthStore` for role-based nav items
+- Defined role-specific navigation items for SAKSI (5), ADMIN (5), and ADMIN_KEUANGAN (5)
+- Active state: emerald-600 text + bg-emerald-50 dark:bg-emerald-950/30
+- Inactive state: muted-foreground text
+- Each item shows Lucide icon + small label text (10px)
+- Fixed at bottom with glassmorphism effect (backdrop-blur-lg, bg-white/80 dark:bg-slate-900/80)
+- iOS safe area padding via pb-[env(safe-area-inset-bottom)]
+- Framer-motion whileTap={{ scale: 0.9 }} on each nav item
+- Hidden on lg+ screens (lg:hidden), uses next/link for navigation
+- Integrated into all 3 layout files (saksi, admin, keuangan)
+- Added pb-20 lg:pb-8 to content area padding to prevent nav overlap
+- Zero lint errors verified via `npm run lint`
+
+Stage Summary:
+- New mobile bottom nav with role-based navigation items
+- Responsive: visible on mobile/tablet (lg breakpoint and below), hidden on desktop
+- Glassmorphism design with iOS safe area support
+- Framer-motion tap animation for touch feedback
+- No blue/indigo colors used - emerald/teal for active states
+---
+Task ID: 17-b
+Agent: full-stack-developer
+Task: Quick Actions Widget & Recent Activity Feed
+
+Work Log:
+- Created `src/components/common/QuickActions.tsx` - reusable 'use client' component
+  - Accepts `actions` prop with label, icon, href, and variant (default/emerald/amber/rose)
+  - Responsive: horizontal scrollable on mobile with `min-w-[100px]`, 4-column grid on desktop
+  - Framer-motion stagger entry animation (0.06s delay between items)
+  - Uses `next/link` for navigation with rounded-xl cards and colored icon containers
+  - Dark mode support for all variants
+- Created `src/components/common/RecentActivityFeed.tsx` - reusable 'use client' component
+  - Accepts `activities` prop with id, title, description, time, icon, and optional color
+  - Shows latest 5 activities with icon in colored circle, left border per item, relative time
+  - Empty state with Clock icon when no activities
+  - Optional "Lihat Semua" link via `onViewAll` prop
+  - Framer-motion stagger entry animation
+- Integrated QuickActions into saksi dashboard: Check-in, Input Suara, Lapor, Pembayaran, Profil
+- Integrated QuickActions into admin dashboard: Tambah Saksi, Tambah TPS, Lihat Laporan, Plotting, Pengaturan
+- Integrated QuickActions into keuangan dashboard: Validasi, Cairkan, Riwayat, Laporan
+- All components placed AFTER stat cards section and BEFORE main content
+- Added required lucide-react icon imports (Vote, MapPinned, Settings, FileBarChart)
+- Updated animation custom indices in saksi dashboard to avoid conflicts
+- Ran `npm run lint` - zero errors
+
+Stage Summary:
+- New QuickActions widget with role-based actions and responsive layout
+- New RecentActivityFeed component ready for integration
+- Responsive horizontal scroll on mobile, grid on desktop
+- All emerald/amber/rose color scheme - no blue/indigo
+- Zero lint errors

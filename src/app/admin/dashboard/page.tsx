@@ -10,11 +10,12 @@ import {
   Users, MapPin, ClipboardCheck, FileText, Wallet,
   BarChart3, ArrowRight, TrendingUp, ShieldCheck,
   AlertTriangle, Clock, CheckCircle2, UserPlus,
-  ChevronDown, Activity,
+  ChevronDown, Activity, MapPinned, Settings,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
 import { ErrorState } from '@/components/common/ErrorState'
+import QuickActions from '@/components/common/QuickActions'
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion'
 
 // ─── Animated Counter ────────────────────────────────────────────────
@@ -409,6 +410,23 @@ export default function AdminDashboardPage() {
           trendLabel={overview.totalReports > 0 ? 'Perlu review' : 'Aman'}
         />
       </div>
+
+      {/* ── Quick Actions ──────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+      >
+        <QuickActions
+          actions={[
+            { label: 'Tambah Saksi', icon: <UserPlus className="h-5 w-5" />, href: '/admin/saksi', variant: 'emerald' },
+            { label: 'Tambah TPS', icon: <MapPin className="h-5 w-5" />, href: '/admin/tps', variant: 'amber' },
+            { label: 'Lihat Laporan', icon: <FileText className="h-5 w-5" />, href: '/admin/reports', variant: 'rose' },
+            { label: 'Plotting', icon: <MapPinned className="h-5 w-5" />, href: '/admin/plotting', variant: 'emerald' },
+            { label: 'Pengaturan', icon: <Settings className="h-5 w-5" />, href: '/admin/settings', variant: 'default' },
+          ]}
+        />
+      </motion.div>
 
       {/* ── Rates Section ──────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

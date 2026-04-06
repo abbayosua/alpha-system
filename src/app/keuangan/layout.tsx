@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { CommandPalette } from '@/components/common/CommandPalette'
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 
 export default function KeuanganLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -16,13 +17,14 @@ export default function KeuanganLayout({ children }: { children: React.ReactNode
       <div className="flex flex-1 flex-col lg:ml-64 min-h-screen">
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         <main className="flex-1">
-          <div className="p-4 md:p-6 lg:p-8">
+          <div className="p-4 md:p-6 lg:p-8 pb-20 lg:pb-8">
             {children}
           </div>
         </main>
         <Footer />
       </div>
       <CommandPalette />
+      <MobileBottomNav />
     </PageWrapper>
   )
 }

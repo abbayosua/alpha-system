@@ -11,11 +11,12 @@ import {
   MapPin, ClipboardCheck, Camera, FileText, Wallet,
   Clock, ArrowRight, CheckCircle2, XCircle, AlertTriangle,
   User, Phone, CreditCard, Landmark, Map,
-  Upload, ChevronRight, RefreshCw
+  Upload, ChevronRight, RefreshCw, Vote
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
 import { ErrorState } from '@/components/common/ErrorState'
+import QuickActions from '@/components/common/QuickActions'
 import { motion, AnimatePresence } from 'framer-motion'
 
 type DashboardData = {
@@ -273,8 +274,21 @@ export default function SaksiDashboardPage() {
         </Card>
       </motion.div>
 
-      {/* Enhanced Assignment Card */}
+      {/* Quick Actions */}
       <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
+        <QuickActions
+          actions={[
+            { label: 'Check-in', icon: <ClipboardCheck className="h-5 w-5" />, href: '/saksi/check-in', variant: 'emerald' },
+            { label: 'Input Suara', icon: <Vote className="h-5 w-5" />, href: '/saksi/input', variant: 'emerald' },
+            { label: 'Lapor', icon: <AlertTriangle className="h-5 w-5" />, href: '/saksi/lapor', variant: 'rose' },
+            { label: 'Pembayaran', icon: <Wallet className="h-5 w-5" />, href: '/saksi/payment', variant: 'amber' },
+            { label: 'Profil', icon: <User className="h-5 w-5" />, href: '/saksi/profile', variant: 'default' },
+          ]}
+        />
+      </motion.div>
+
+      {/* Enhanced Assignment Card */}
+      <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
         <Card
           className={`overflow-hidden ${
             hasAssignment
@@ -348,7 +362,7 @@ export default function SaksiDashboardPage() {
 
       {/* Task Progress Tracker */}
       {hasAssignment && (
-        <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
+        <motion.div custom={4} variants={cardVariants} initial="hidden" animate="visible">
           <Card className="overflow-hidden shadow-sm">
             <CardHeader className="pb-3 bg-muted/30">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -451,7 +465,7 @@ export default function SaksiDashboardPage() {
 
       {/* Enhanced Payment Card */}
       {hasAssignment && (
-        <motion.div custom={4} variants={cardVariants} initial="hidden" animate="visible">
+        <motion.div custom={5} variants={cardVariants} initial="hidden" animate="visible">
           <Card className="overflow-hidden shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">

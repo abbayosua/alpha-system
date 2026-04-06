@@ -10,12 +10,13 @@ import {
   ArrowRight, Wallet, CheckCircle2, Clock, Send,
   History, TrendingUp, ChevronRight, CircleDollarSign,
   Banknote, ArrowDownUp, AlertCircle, XCircle,
-  RefreshCw,
+  RefreshCw, FileBarChart,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
 import { ErrorState } from '@/components/common/ErrorState'
 import { EmptyState } from '@/components/common/EmptyState'
+import QuickActions from '@/components/common/QuickActions'
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion'
 
 // ─── Animated Counter ────────────────────────────────────────────────
@@ -393,6 +394,22 @@ export default function KeuanganDashboardPage() {
           iconColor="text-emerald-600"
         />
       </div>
+
+      {/* ── Quick Actions ──────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+      >
+        <QuickActions
+          actions={[
+            { label: 'Validasi', icon: <CheckCircle2 className="h-5 w-5" />, href: '/keuangan/payments', variant: 'emerald' },
+            { label: 'Cairkan', icon: <Send className="h-5 w-5" />, href: '/keuangan/disbursement', variant: 'amber' },
+            { label: 'Riwayat', icon: <History className="h-5 w-5" />, href: '/keuangan/history', variant: 'default' },
+            { label: 'Laporan', icon: <FileBarChart className="h-5 w-5" />, href: '/keuangan/disbursement', variant: 'rose' },
+          ]}
+        />
+      </motion.div>
 
       {/* ── Total Disbursed ────────────────────────────────── */}
       <motion.div
