@@ -6,10 +6,16 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // Guard: if Supabase env vars are not configured, pass through without auth
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return supabaseResponse
+  }
+
+  try {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -24,87 +30,93 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
-          Object.entries(headers).forEach(([key, value]) =>
-            supabaseResponse.headers.set(key, value)
-          )
+          if (headers) {
+            Object.entries(headers).forEach(([key, value]) =>
+              supabaseResponse.headers.set(key, value)
+            )
+          }
         },
       },
+    })
+
+    // IMPORTANT: Avoid writing any logic between createServerClient and
+    // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+    // issues with users being randomly logged out.
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    // API routes are handled by their own auth checks — skip middleware protection
+    if (request.nextUrl.pathname.startsWith('/api')) {
+      return supabaseResponse
     }
-  )
 
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+    // Build a public paths list
+    const publicPaths = ['/auth', '/', '/alpha-database']
+    const isPublicPath = publicPaths.some(
+      (path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + '/')
+    )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // API routes are handled by their own auth checks — skip middleware protection
-  if (request.nextUrl.pathname.startsWith('/api')) {
-    return supabaseResponse
-  }
-
-  // Build a public paths list
-  const publicPaths = ['/auth', '/', '/alpha-database']
-  const isPublicPath = publicPaths.some(
-    (path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + '/')
-  )
-
-  if (!user && !isPublicPath) {
-    // No user and not on a public path, redirect to login
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
-    return NextResponse.redirect(url)
-  }
-
-  if (user) {
-    // User is authenticated — fetch their profile to check role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    const role = profile?.role as string | undefined
-
-    // Redirect authenticated users away from auth pages
-    if (request.nextUrl.pathname.startsWith('/auth')) {
+    if (!user && !isPublicPath) {
+      // No user and not on a public path, redirect to login
       const url = request.nextUrl.clone()
-      if (role === 'ADMIN') {
-        url.pathname = '/admin'
-      } else if (role === 'ADMIN_KEUANGAN') {
-        url.pathname = '/keuangan'
-      } else {
-        url.pathname = '/saksi'
+      url.pathname = '/auth/login'
+      return NextResponse.redirect(url)
+    }
+
+    if (user) {
+      // User is authenticated — fetch their profile to check role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const role = profile?.role as string | undefined
+
+      // Redirect authenticated users away from auth pages
+      if (request.nextUrl.pathname.startsWith('/auth')) {
+        const url = request.nextUrl.clone()
+        if (role === 'ADMIN') {
+          url.pathname = '/admin'
+        } else if (role === 'ADMIN_KEUANGAN') {
+          url.pathname = '/keuangan'
+        } else {
+          url.pathname = '/saksi'
+        }
+        return NextResponse.redirect(url)
       }
-      return NextResponse.redirect(url)
-    }
 
-    // Role-based route protection
-    if (request.nextUrl.pathname.startsWith('/saksi') && role !== 'SAKSI') {
-      const url = request.nextUrl.clone()
-      if (role === 'ADMIN') url.pathname = '/admin'
-      else if (role === 'ADMIN_KEUANGAN') url.pathname = '/keuangan'
-      else url.pathname = '/'
-      return NextResponse.redirect(url)
-    }
+      // Role-based route protection
+      if (request.nextUrl.pathname.startsWith('/saksi') && role !== 'SAKSI') {
+        const url = request.nextUrl.clone()
+        if (role === 'ADMIN') url.pathname = '/admin'
+        else if (role === 'ADMIN_KEUANGAN') url.pathname = '/keuangan'
+        else url.pathname = '/'
+        return NextResponse.redirect(url)
+      }
 
-    if (request.nextUrl.pathname.startsWith('/admin') && role !== 'ADMIN') {
-      const url = request.nextUrl.clone()
-      if (role === 'ADMIN_KEUANGAN') url.pathname = '/keuangan'
-      else if (role === 'SAKSI') url.pathname = '/saksi'
-      else url.pathname = '/'
-      return NextResponse.redirect(url)
-    }
+      if (request.nextUrl.pathname.startsWith('/admin') && role !== 'ADMIN') {
+        const url = request.nextUrl.clone()
+        if (role === 'ADMIN_KEUANGAN') url.pathname = '/keuangan'
+        else if (role === 'SAKSI') url.pathname = '/saksi'
+        else url.pathname = '/'
+        return NextResponse.redirect(url)
+      }
 
-    if (request.nextUrl.pathname.startsWith('/keuangan') && role !== 'ADMIN_KEUANGAN') {
-      const url = request.nextUrl.clone()
-      if (role === 'ADMIN') url.pathname = '/admin'
-      else if (role === 'SAKSI') url.pathname = '/saksi'
-      else url.pathname = '/'
-      return NextResponse.redirect(url)
+      if (request.nextUrl.pathname.startsWith('/keuangan') && role !== 'ADMIN_KEUANGAN') {
+        const url = request.nextUrl.clone()
+        if (role === 'ADMIN') url.pathname = '/admin'
+        else if (role === 'SAKSI') url.pathname = '/saksi'
+        else url.pathname = '/'
+        return NextResponse.redirect(url)
+      }
     }
+  } catch (error) {
+    // If any error occurs (e.g., Supabase network issue), log and pass through
+    // This ensures the app doesn't completely break if Supabase is temporarily unavailable
+    console.error('[Middleware] Error in updateSession:', error)
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
