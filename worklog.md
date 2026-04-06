@@ -1655,3 +1655,261 @@ The application is highly stable and mature. All core features work correctly:
 5. PDF export for reports/analytics
 6. Dark mode polish on charts (Recharts dark mode theme)
 7. Consider adding a "Recent Activity" feed on dashboards
+
+---
+## Task ID: 15-a - Profile Enhancement & Dark Mode Fix
+### Work Task
+Enhance the Saksi Profile Page with circular progress ring, check items, activity summary, change password dialog, logout, delete account, and improved edit workflow. Fix dark mode persistence by adding storageKey to ThemeProvider.
+
+### Work Summary
+
+#### A. Saksi Profile Page Enhancement (`src/app/saksi/profile/page.tsx`)
+
+Complete rewrite with the following enhancements:
+
+1. **Enhanced Gradient Title Area with Large Avatar**:
+   - `bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent` banner with decorative blurred circles (3 circles: emerald, teal, amber)
+   - Large 96px avatar circle with gradient `from-emerald-500 to-teal-400`, showing user initials in white
+   - Camera icon badge on avatar (bottom-right)
+   - User name, role badge, email, and description centered below avatar
+   - Back button positioned absolute top-left
+   - Entry animation: avatar scales from 0.5 to 1, text fades in with delay
+
+2. **Profile Completion Card with Circular Progress Ring**:
+   - Inline `ProgressRing` SVG component with animated `stroke-dashoffset` via framer-motion
+   - 100px size, 8px stroke width, color-coded trail/stroke (emerald/amber/rose based on percentage)
+   - Centered percentage text with "Lengkap" label
+   - `CheckItem` component for each completion check: Nama, No. HP, No. KTP, Info Bank, Email Terverifikasi
+   - Each item shows green circle with CheckCircle2 when filled, gray circle with icon when empty
+   - "Lengkap!" badge shown when 100% complete
+
+3. **Activity Summary Section (NEW)**:
+   - 3-column grid with stat cards: Total Check-ins, Reports Submitted, Last Activity
+   - Check-ins card: emerald gradient bg, ClipboardCheck icon, animated count spring-in
+   - Reports card: amber gradient bg, FileText icon, animated count spring-in
+   - Last Activity card: slate gradient bg, Clock icon, relative time display (timeAgo helper)
+   - Each card has `whileHover` scale/lift animation
+   - Data fetched from `/api/check-ins/my` and `/api/reports` endpoints
+
+4. **Personal Information Section (Enhanced)**:
+   - Section-level edit button (replaces global edit toggle)
+   - `editSection` state for targeted editing ('personal' or 'bank' or null)
+   - Fields: Nama Lengkap, Email (read-only with verified badge), No. Telepon, No. KTP
+   - Email field always visible, read-only, with emerald "Terverifikasi" badge
+   - Save/Cancel buttons appear inline when editing personal section
+   - Cancel restores original form values
+
+5. **Bank Information Section (Enhanced)**:
+   - Section-level edit button
+   - Bank Info: Nama Bank, No. Rekening (masked), Nama Pemilik
+   - E-Wallet Info: Jenis E-Wallet, No. E-Wallet (masked)
+   - Save/Cancel buttons appear inline when editing bank section
+   - Emerald gradient bank section, amber gradient e-wallet section
+
+6. **Account Actions Section (NEW)**:
+   - Replaces old "Keamanan Akun" card
+   - Registration Date display
+   - Role display with badge
+   - Change Password button (opens Dialog)
+   - Logout button (full-width outline, uses authStore.logout)
+   - Delete Account button (ghost, rose-colored, opens confirmation Dialog)
+
+7. **Change Password Dialog**:
+   - Uses shadcn/ui `Dialog` component
+   - 3 fields: Current Password, New Password, Confirm Password
+   - Real-time validation: shows "Kata sandi tidak cocok" when mismatch
+   - 6 character minimum validation
+   - Amber gradient save button with loading spinner
+   - Posts to `/api/auth/change-password`
+
+8. **Delete Account Confirmation Dialog**:
+   - Rose-themed warning design
+   - AlertTriangle icon in rose badge
+   - Warning card with user email shown
+   - "Ya, Hapus Akun" destructive button with loading state
+   - DELETE to `/api/users/{id}`, then logout and redirect to `/`
+
+9. **Framer Motion Animations**:
+   - Title area: fade-in from top
+   - Profile completion: itemVariants (y:20→0)
+   - Card container: staggerChildren 0.08s
+   - Activity stat numbers: spring animation with delay
+   - Edit transitions: AnimatePresence on input fields
+   - Save success: spring scale-in with auto-dismiss
+   - All animations use ease [0.22, 1, 0.36, 1]
+
+10. **Additional Helpers**:
+    - `timeAgo()` function for relative timestamps
+    - `useCallback` for stable fetchProfile/fetchActivity references
+    - `originalForm` state for cancel functionality
+
+#### B. Dark Mode Persistence Fix (`src/app/layout.tsx`)
+
+1. Added `storageKey="alpha-system-theme"` to `ThemeProvider` in layout.tsx
+2. This ensures the theme preference is persisted in localStorage under a consistent key
+3. Combined with existing `attribute="class"` and `enableSystem` for proper system theme detection
+4. Dark mode toggle in Header.tsx already uses `resolvedTheme` correctly
+
+#### C. Bug Fix (`src/app/saksi/check-in/page.tsx`)
+
+1. Fixed JSX parsing error on line 679: `whileHover={gpsCoords && selfieBase64 ? { scale: 1.02 }}` was missing else clause
+2. Changed to: `whileHover={gpsCoords && selfieBase64 ? { scale: 1.02 } : undefined}`
+
+#### D. Lint Status
+- Zero lint errors after all changes
+
+---
+## Task ID: 15-c - Admin Plotting Page Enhancement
+### Work Task
+Enhance the Admin Plotting (assignment) page (`src/app/admin/plotting/page.tsx`) with gradient title area, stats cards, filter/sort controls, enhanced assignment table with status badges, Leaflet assignment map, enhanced add assignment dialog, and framer-motion animations throughout.
+
+### Work Summary
+
+#### A. Gradient Title Area
+- Updated to `bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent dark:from-slate-800 dark:via-emerald-950/20 dark:to-transparent` matching other admin pages (reports, TPS, audit)
+- Gradient icon container with `GitBranch` icon in white (`from-emerald-500 to-teal-600`)
+- Inline summary stats: Total, Aktif (with green dot), Selesai (with CheckCircle2 icon) displayed as pill badges in the title area
+- Three decorative blurred circles for visual depth
+- Back button and responsive flex layout (column on mobile, row on desktop)
+
+#### B. Assignment Stats Cards (3 cards)
+- **Total Penugasan** (Users icon, emerald border): Shows total count + sub-value text showing unassigned saksi count
+- **Penugasan Aktif** (MapPin icon, emerald border): Shows active count + sub-value text showing occupied/total TPS
+- **Tingkat Penyelesaian** (Percent icon, teal border): Shows completion percentage + sub-value text showing completed/total
+- Each card uses `AssignmentStatCard` component with `whileHover` scale animation, `border-l-4`, gradient backgrounds
+- Staggered entry animation (0.08s per card)
+
+#### C. Enhanced Assignment Table
+- **Status badges**: New `AssignmentStatusBadge` component with 3 status configurations:
+  - ACTIVE: emerald dot + "Aktif" label
+  - COMPLETED: teal dot + "Selesai" label
+  - CANCELLED: rose dot + "Dibatalkan" label
+- **Left border color per status**: emerald for Active, teal for Completed, rose for Cancelled
+- **TPS Code Badge**: New `TPSCodeBadge` component with color-coded borders (cycles through emerald/teal/amber based on code hash)
+- **User avatar initials**: Reusable `UserAvatar` component (sm/md/lg) with emerald-to-teal gradient
+- **Staggered row animations**: 0.04s delay per row with `rowVariants` (x:-10→0)
+- **Hover effects**: `whileHover` with light background color change
+- Now fetches ALL assignments (not just ACTIVE) for comprehensive view
+
+#### D. Filter/Sort Controls
+- **Status filter**: Select dropdown with All, Aktif, Selesai, Dibatalkan options
+- **Sort control**: Select dropdown with 6 options:
+  - Terbaru (date_desc), Terlama (date_asc)
+  - TPS A-Z, TPS Z-A
+  - Saksi A-Z, Saksi Z-A
+- Filter and Sort labels with `Filter` and `ArrowUpDown` icons
+- Responsive layout: stacked on mobile, inline on desktop
+- Results count badge updates dynamically
+
+#### E. Visual Assignment Map
+- Integrated `TPSMapView` component (dynamically imported, SSR disabled)
+- Shows all TPS locations with color-coded markers:
+  - Green markers: TPS with assigned saksi (active)
+  - Yellow markers: TPS without assigned saksi (inactive)
+- Map card with `Map` icon in header and occupied/total TPS badge
+- 350px height with legend overlay
+- Animated fade-in entry
+
+#### F. Enhanced Add Assignment Dialog
+- **Gradient icon** in dialog title (emerald-to-teal with UserPlus icon)
+- **Selected Saksi info card**: UserAvatar (lg) with name, email, phone, and "Saksi" badge on amber gradient background
+- **Gradient separator**: `from-transparent via-amber-200 to-transparent`
+- **TPS Select with visual indicators**: Each TPS option shows colored dot (green=has saksi, gray=empty), code, name, and current assignment count
+- **Validation message**: Rose-colored warning text "Pilih TPS tujuan untuk melanjutkan" shown when no TPS selected
+- **TPS Info Card**: AnimatePresence animated card showing selected TPS details in 2-column grid (saksi count + coordinates)
+- **Gradient submit button**: `from-emerald-600 to-teal-600` with shadow, 44px height, disabled state styling
+- **Dialog width**: Increased to `sm:max-w-lg`
+
+#### G. Custom Components Created
+- `UserAvatar`: Reusable avatar with gradient background (emerald→teal), 3 sizes (sm/md/lg)
+- `AssignmentStatCard`: Stats card with icon, value, sub-value, border-l-4, gradient bg, hover scale animation
+- `AssignmentStatusBadge`: Status badge with colored dot and label (Active/Completed/Cancelled)
+- `TPSCodeBadge`: TPS code badge with color-cycled borders and MapPin icon
+- `PlottingEmptyState`: Illustration-style empty state with gradient circle, pulsing ring, decorative dots
+
+#### H. Framer Motion Animations
+- Title area: fade-in from top (y: -10 → 0, 0.5s duration)
+- Stats cards: `containerVariants` with staggerChildren: 0.08 (delay 0.1s)
+- Coverage bar: `itemVariants` entry
+- Saksi panel: `itemVariants` entry
+- TPS panel: `itemVariants` entry
+- Map section: fade-in from below (delay 0.25s)
+- Table section: fade-in from below (delay 0.3s)
+- Stat card hover: `whileHover={{ scale: 1.02, y: -2 }}` spring animation
+
+#### I. Data Fetching Changes
+- Changed from fetching only ACTIVE assignments to fetching ALL assignments (`/api/assignments?limit=100` without status param)
+- Derived `activeAssignments` from `allAssignments` for DnD panel
+- Derived stats (total, active, completed, completionRate) via `useMemo`
+
+#### J. Lint Status
+- Zero lint errors after all changes
+- All existing functionality preserved (DnD, drag-to-assign, TPS panel expand, confirm dialog)
+
+---
+## Task ID: 15-b - Saksi Action Pages UI Enhancement Agent
+### Work Task
+Enhance the Saksi action pages (check-in, input suara, lapor, final check-in) with gradient title areas, framer-motion animations, and improved styling while preserving all existing functionality.
+
+### Work Summary
+
+#### A. Check-in Page (`src/app/saksi/check-in/page.tsx`)
+
+1. **Gradient Title Area**: Changed icon from Shield to MapPin in gradient container (`from-emerald-500 to-teal-600`). Added `text-emerald-900` for title. Added `StatusDot` animated component with pulsing ping effect for TPS code display.
+
+2. **Enhanced GPS Location Card**: Added visual pulse animation using `StatusDot` component with animated `ring-2 ring-white` styling. GPS active state shows emerald-tinted rounded card with pulsing dot, coordinates in `font-mono`, TPS location in subtle text. GPS error shown in rose-tinted card with slide-in animation.
+
+3. **Better Selfie Upload Area**: Added drag-and-drop support with `dragOver` state, `handleSelfieDrop` callback. Drag state shows emerald ring (`ring-2 ring-emerald-400 ring-offset-2`), animated upload icon with spring rotation, dynamic text ("Seret gambar ke sini" / "Lepaskan gambar di sini"). Selfie preview uses `AnimatePresence` for smooth transitions.
+
+4. **Status Indicators**: Added `StatusDot` component with emerald/amber/rose color variants, using `animate-ping` on outer ring + solid inner dot.
+
+5. **Staggered Framer-motion Animations**: Converted entire page to `containerVariants` (staggerChildren: 0.1) + `itemVariants` (y:20→0) + `scaleVariants` pattern. Added `whileHover` and `whileTap` on submit button.
+
+#### B. Input Suara Page (`src/app/saksi/input/page.tsx`)
+
+1. **ClipboardCheck Icon**: Changed page icon from PenLine to ClipboardCheck in gradient container. Applied to all success state headers as well.
+
+2. **Candidate Color Scheme**: Fixed to K1=emerald, K2=amber, K3=teal (was K1=emerald, K2=teal, K3=amber). Each candidate card now has comprehensive color tokens: `border`, `bg`, `badge`, `inputRing`, `gradient`, `dot`, `label`, `numberBg`, `numberText`, `inputBorder`.
+
+3. **Visual Step Progress Indicator**: Added `StepProgress` component showing 3 steps (Isi Suara → Upload C1 → Kirim Data) with completion detection. Steps show colored circles (emerald=done, gray=pending) with connecting lines.
+
+4. **Enhanced Total Suara Preview**: Added K1/K2/K3 color dot indicators in the gradient summary card. Each candidate column shows colored dot matching the candidate's theme color.
+
+5. **Submission Confirmation Section**: Added summary section when any votes are entered, showing colored badges for each candidate's vote count. Section appears with `motion.div` fade-in animation.
+
+6. **Success State Enhancement**: Already-submitted view now shows 3-column grid with colored dots (K1=emerald, K2=amber, K3=teal) instead of simple total. New submission success shows same colored breakdown.
+
+#### C. Lapor (Report) Page (`src/app/saksi/lapor/page.tsx`)
+
+1. **Previous Reports List**: Added `useEffect` fetch from `/api/reports/my` to load user's previous reports. Displayed in a scrollable list (`max-h-48 overflow-y-auto`) with amber left border. Each report row shows: category icon in colored container, title (truncated), date with Clock icon, status badge (Menunggu/Ditinjau/Terverifikasi/Ditolak) with colored backgrounds and icons.
+
+2. **Enhanced Category Selection**: Improved visual category cards grid (2 cols mobile, 4 cols desktop). Selected category now shows animated emerald checkmark badge in top-right corner using `motion.div` spring animation. Grid changed to 4-column layout for better space usage.
+
+3. **Enhanced Form Styling**: Added character count to description textarea. Added label icons (Tag for category). Increased input height to `h-11`. Added "Terpilih" badge in selected category summary.
+
+4. **Enhanced Drag-drop**: Both video upload and selfie areas show dynamic text changes during drag. "Lepaskan file di sini" text appears during drag state.
+
+#### D. Final Check-in Page (`src/app/saksi/final-check-in/page.tsx`)
+
+1. **Gradient Title Area with Urgency**: Added "HARI H" badge with `animate-pulse` and rose-to-amber gradient. Added third decorative circle. Title uses `text-amber-900`. TPS info shown with `StatusDot` animated indicator.
+
+2. **Check-in Progress Timeline**: Added `CheckInTimeline` component showing 3 steps (Check-in Pagi → Input Suara → Check-in Akhir) with animated entry. Completed steps show emerald checkmark with spring animation. Current step shows amber pulsing gradient circle. Connector lines animate height from 0. Status badges: "Selesai" (completed), "Sekarang" with pulsing dot (current).
+
+3. **Enhanced Urgency Banner**: Changed from simple amber to gradient amber-to-rose with `AlertTriangle` icon in gradient container (`from-amber-500 to-rose-500`). Added shadow. Warning text emphasizes mandatory nature.
+
+4. **Enhanced GPS Verification**: Same pulse animation pattern as check-in page. GPS active state in emerald-tinted card with pulsing dot. GPS error in rose-tinted card with slide-in animation.
+
+5. **Enhanced Selfie Area**: Added drag-and-drop support with amber-themed styling. Ring color `ring-amber-400`. Upload icon uses amber-to-orange gradient.
+
+6. **Warning Note**: Added disclaimer text below submit button: "Tindakan ini tidak dapat dibatalkan. Pastikan semua data sudah benar."
+
+7. **All States Enhanced**: Success state, no-assignment state, and main flow all use `containerVariants/itemVariants/scaleVariants` pattern for consistent staggered animations.
+
+#### E. Shared Patterns Across All Pages
+- `containerVariants` (staggerChildren: 0.1), `itemVariants` (y:20→0, ease [0.22, 1, 0.36, 1]), `scaleVariants`
+- `StatusDot` component with emerald/amber/rose color variants
+- `'use client'` directive on all pages
+- `motion` and `AnimatePresence` from `framer-motion`
+- No blue/indigo colors - emerald/teal/amber/rose palette only
+- All existing functionality preserved (form submissions, API calls, state management, file uploads, GPS, camera)
+- Zero lint errors after all changes

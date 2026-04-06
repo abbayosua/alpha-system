@@ -1,18 +1,65 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ArrowLeft, Camera, MapPin, CheckCircle2, XCircle, Loader2, Map, Shield } from 'lucide-react'
+import { ArrowLeft, Camera, MapPin, CheckCircle2, Loader2, Map, Shield } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
 import { ErrorState } from '@/components/common/ErrorState'
 
 const CheckInMap = dynamic(() => import('@/components/maps/CheckInMap'), { ssr: false })
+
+/* ─── Animation Variants ─── */
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+  },
+}
+
+const scaleVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  show: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+  },
+}
+
+/* ─── Animated Status Dot ─── */
+function StatusDot({ color = 'emerald' }: { color?: 'emerald' | 'amber' | 'rose' }) {
+  const colorMap = {
+    emerald: 'bg-emerald-500',
+    amber: 'bg-amber-500',
+    rose: 'bg-rose-500',
+  }
+  const ringMap = {
+    emerald: 'bg-emerald-400',
+    amber: 'bg-amber-400',
+    rose: 'bg-rose-400',
+  }
+  return (
+    <span className="relative inline-flex h-2.5 w-2.5">
+      <span className={`absolute inline-flex h-full w-full rounded-full ${ringMap[color]} opacity-75 animate-ping`} />
+      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${colorMap[color]}`} />
+    </span>
+  )
+}
 
 /* ─── Step Indicator ─── */
 function StepIndicator({ currentStep }: { currentStep: number }) {
@@ -27,7 +74,6 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
       {steps.map((step, i) => {
         const isCompleted = i < currentStep
         const isCurrent = i === currentStep
-        const isFuture = i > currentStep
 
         return (
           <div key={step.label} className="flex items-center">
@@ -60,7 +106,12 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
             </div>
             {i < steps.length - 1 && (
               <div className="w-12 sm:w-16 h-0.5 mx-1.5 mt-[-18px]">
-                <div className={`h-full rounded-full transition-all ${isCompleted ? 'bg-emerald-500' : 'bg-gray-200'}`} />
+                <motion.div
+                  className={`h-full rounded-full ${isCompleted ? 'bg-emerald-500' : 'bg-gray-200'}`}
+                  initial={false}
+                  animate={{ scaleX: isCompleted ? 1 : 1 }}
+                  transition={{ duration: 0.3 }}
+                />
               </div>
             )}
           </div>
@@ -127,6 +178,7 @@ export default function SaksiCheckInPage() {
   const [selfieBase64, setSelfieBase64] = useState<string | null>(null)
   const [cameraActive, setCameraActive] = useState(false)
   const [result, setResult] = useState<any>(null)
+  const [dragOver, setDragOver] = useState(false)
   const streamRef = useRef<MediaStream | null>(null)
 
   // Derive current step
@@ -188,6 +240,21 @@ export default function SaksiCheckInPage() {
     )
   }
 
+  const handleSelfieDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Hanya file gambar yang diperbolehkan')
+      return
+    }
+    const reader = new FileReader()
+    reader.onloadend = () => setSelfieBase64(reader.result as string)
+    reader.readAsDataURL(file)
+    toast.success('Foto berhasil ditambahkan')
+  }, [])
+
   const handleSubmit = async () => {
     if (!gpsCoords) {
       toast.error('Aktifkan GPS terlebih dahulu')
@@ -230,25 +297,35 @@ export default function SaksiCheckInPage() {
   // ─── Success State ───
   if (result) {
     return (
-      <div className="space-y-6 max-w-lg mx-auto">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => router.push('/saksi/dashboard')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">Check-in Berhasil!</h1>
-        </div>
+      <motion.div
+        className="space-y-6 max-w-lg mx-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div
+          variants={itemVariants}
+          className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent p-6 sm:p-8 overflow-hidden"
+        >
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-emerald-100/60" />
+          <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-teal-100/40" />
+          <div className="relative flex items-center gap-3 mb-1">
+            <Button variant="ghost" size="icon" className="bg-white/60 hover:bg-white/80 -ml-2" onClick={() => router.push('/saksi/dashboard')}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <h1 className="text-2xl font-bold text-emerald-900">Check-in Berhasil!</h1>
+          </div>
+        </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          variants={scaleVariants}
         >
           <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 shadow-sm overflow-hidden relative">
-            {/* Confetti */}
             <ConfettiParticles />
-
             <CardContent className="p-6 text-center space-y-4 relative z-10">
-              {/* Animated checkmark */}
               <motion.div
                 className="mx-auto w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center"
                 initial={{ scale: 0 }}
@@ -264,41 +341,28 @@ export default function SaksiCheckInPage() {
                 </motion.div>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <p className="font-semibold text-lg">Check-in Pagi Berhasil</p>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+                <p className="font-semibold text-lg text-emerald-900">Check-in Pagi Berhasil</p>
                 <p className="text-sm text-muted-foreground">
                   {new Date(result.timestamp).toLocaleString('id-ID')}
                 </p>
               </motion.div>
 
-              <motion.div
-                className="space-y-2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-              >
+              <motion.div className="space-y-2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
                 {result.gpsVerified ? (
                   <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-sm gap-1.5">
-                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    <StatusDot color="emerald" />
                     GPS Terverifikasi
                   </Badge>
                 ) : (
                   <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-sm gap-1.5">
-                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    <StatusDot color="amber" />
                     GPS Tidak Terverifikasi ({Math.round(result.distance || 0)}m dari TPS)
                   </Badge>
                 )}
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
                 <Button onClick={() => router.push('/saksi/dashboard')} className="mt-2">
                   Kembali ke Dashboard
                 </Button>
@@ -306,29 +370,40 @@ export default function SaksiCheckInPage() {
             </CardContent>
           </Card>
         </motion.div>
-      </div>
+      </motion.div>
     )
   }
 
   // ─── No Assignment ───
   if (!assignment) {
     return (
-      <div className="space-y-6 max-w-lg mx-auto">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Check-in Pagi</h1>
-            <p className="text-sm text-muted-foreground">Verifikasi kehadiran di TPS</p>
-          </div>
-        </div>
-
+      <motion.div
+        className="space-y-6 max-w-lg mx-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          variants={itemVariants}
+          className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent p-6 sm:p-8 overflow-hidden"
         >
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-emerald-100/60" />
+          <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-teal-100/40" />
+          <div className="relative flex items-center gap-3">
+            <Button variant="ghost" size="icon" className="bg-white/60 hover:bg-white/80 -ml-2" onClick={() => router.back()}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-emerald-900">Check-in Pagi</h1>
+              <p className="text-sm text-muted-foreground">Verifikasi kehadiran di TPS</p>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div variants={scaleVariants}>
           <Card className="shadow-sm">
             <CardContent className="p-8 text-center space-y-4">
               <motion.div
@@ -353,19 +428,22 @@ export default function SaksiCheckInPage() {
             </CardContent>
           </Card>
         </motion.div>
-      </div>
+      </motion.div>
     )
   }
 
   // ─── Main Check-in Flow ───
   return (
-    <div className="space-y-6 max-w-lg mx-auto">
+    <motion.div
+      className="space-y-6 max-w-lg mx-auto"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
       {/* Gradient Title Area */}
       <motion.div
+        variants={itemVariants}
         className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent p-6 sm:p-8 overflow-hidden"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
       >
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-emerald-100/60" />
         <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-teal-100/40" />
@@ -375,64 +453,109 @@ export default function SaksiCheckInPage() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200">
-              <Shield className="h-5 w-5" />
+              <MapPin className="h-5 w-5" />
             </div>
-            <h1 className="text-2xl font-bold">Check-in Pagi</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-emerald-900">Check-in Pagi</h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                <StatusDot color="emerald" />
+                <span className="text-sm text-muted-foreground">
+                  {assignment?.tps?.code} - {assignment?.tps?.name}
+                </span>
+              </div>
+            </div>
           </div>
           <p className="text-sm text-muted-foreground ml-11">
-            Verifikasi kehadiran pagi melalui GPS dan foto selfie di {assignment?.tps?.code} - {assignment?.tps?.name}
+            Verifikasi kehadiran pagi melalui GPS dan foto selfie
           </p>
         </div>
       </motion.div>
 
       {/* Step Indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-      >
+      <motion.div variants={itemVariants}>
         <Card className="shadow-sm py-4 px-2">
           <StepIndicator currentStep={currentStep} />
         </Card>
       </motion.div>
 
       {/* Camera Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15 }}
-      >
+      <motion.div variants={itemVariants}>
         <Card className="shadow-sm overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">
             <CardTitle className="text-lg flex items-center gap-2 text-white">
               <Camera className="h-5 w-5" />
               Foto Selfie
+              {selfieBase64 && (
+                <Badge className="bg-white/20 text-white border-0 text-xs ml-auto">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Selesai
+                </Badge>
+              )}
             </CardTitle>
             <CardDescription className="text-emerald-100">
-              Ambil foto selfie sebagai bukti kehadiran
+              Ambil foto selfie atau seret gambar ke area di bawah
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="relative rounded-lg overflow-hidden bg-muted aspect-[4/3] flex items-center justify-center">
+            <motion.div
+              whileHover={{ scale: 1.005 }}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleSelfieDrop}
+              className={`relative rounded-lg overflow-hidden bg-muted aspect-[4/3] flex items-center justify-center transition-all duration-300 ${
+                dragOver
+                  ? 'ring-2 ring-emerald-400 ring-offset-2 bg-emerald-50/50'
+                  : ''
+              }`}
+            >
               {cameraActive ? (
                 <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
               ) : selfieBase64 ? (
-                <img src={selfieBase64} alt="Selfie" className="w-full h-full object-cover" />
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key="selfie"
+                    src={selfieBase64}
+                    alt="Selfie"
+                    className="w-full h-full object-cover"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </AnimatePresence>
               ) : (
-                <div className="text-center text-muted-foreground p-4">
-                  <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Klik tombol untuk mulai kamera</p>
-                </div>
+                <motion.div
+                  className={`text-center text-muted-foreground p-4 cursor-pointer transition-colors duration-200 ${
+                    dragOver ? 'text-emerald-500' : ''
+                  }`}
+                  animate={dragOver ? { scale: 1.02 } : { scale: 1 }}
+                >
+                  <motion.div
+                    className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center mb-3"
+                    animate={dragOver ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <Camera className="h-7 w-7 text-emerald-500" />
+                  </motion.div>
+                  <p className="text-sm font-medium">
+                    {dragOver ? 'Lepaskan gambar di sini' : 'Seret gambar ke sini atau ambil foto'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG - Maks 5MB</p>
+                </motion.div>
               )}
               {selfieBase64 && !cameraActive && (
-                <div className="absolute top-3 right-3">
+                <motion.div
+                  className="absolute top-3 right-3"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
                   <Badge className="bg-emerald-500 text-white text-xs gap-1 shadow-sm">
                     <CheckCircle2 className="h-3 w-3" />
                     Foto Diambil
                   </Badge>
-                </div>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
             <div className="flex gap-2">
               {!cameraActive && !selfieBase64 && (
                 <Button onClick={startCamera} className="flex-1">
@@ -455,16 +578,18 @@ export default function SaksiCheckInPage() {
       </motion.div>
 
       {/* GPS Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.25 }}
-      >
+      <motion.div variants={itemVariants}>
         <Card className="shadow-sm overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-600 text-white">
             <CardTitle className="text-lg flex items-center gap-2 text-white">
               <MapPin className="h-5 w-5" />
               Verifikasi GPS
+              {gpsCoords && (
+                <Badge className="bg-white/20 text-white border-0 text-xs ml-auto">
+                  <StatusDot color="emerald" />
+                  Aktif
+                </Badge>
+              )}
             </CardTitle>
             <CardDescription className="text-teal-100">
               Aktifkan GPS untuk verifikasi lokasi di TPS
@@ -472,31 +597,62 @@ export default function SaksiCheckInPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {gpsCoords ? (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                  <span className="text-sm font-medium">GPS Aktif</span>
+              <motion.div
+                className="space-y-3"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="flex items-center gap-2.5 p-3 rounded-lg bg-emerald-50 border border-emerald-100">
+                  <motion.div
+                    className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <StatusDot color="emerald" />
+                  </motion.div>
+                  <div>
+                    <span className="text-sm font-medium text-emerald-800 block">GPS Aktif</span>
+                    <span className="text-xs text-emerald-600 font-mono">
+                      {gpsCoords.lat.toFixed(6)}, {gpsCoords.lng.toFixed(6)}
+                    </span>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Lat: {gpsCoords.lat.toFixed(6)}, Lng: {gpsCoords.lng.toFixed(6)}
-                </p>
                 {assignment?.tps && (
-                  <p className="text-xs text-muted-foreground">
-                    TPS: {assignment.tps.latitude}, {assignment.tps.longitude}
-                  </p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+                    <MapPin className="h-3.5 w-3.5 text-teal-500" />
+                    <span>TPS: {assignment.tps.latitude}, {assignment.tps.longitude}</span>
+                  </div>
                 )}
-              </div>
+              </motion.div>
             ) : (
               <div className="space-y-2">
                 {gpsError && (
-                  <p className="text-sm text-destructive">{gpsError}</p>
+                  <motion.p
+                    className="text-sm text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-100"
+                    initial={{ opacity: 0, x: -5 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    {gpsError}
+                  </motion.p>
                 )}
-                <p className="text-sm text-muted-foreground">GPS belum aktif</p>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground p-1">
+                  <span className="inline-flex h-2 w-2 rounded-full bg-gray-300" />
+                  <span>GPS belum aktif</span>
+                </div>
               </div>
             )}
-            <Button onClick={getGPS} variant="outline" className="w-full">
-              <MapPin className="h-4 w-4 mr-2" />
-              {gpsCoords ? 'Perbarui Lokasi' : 'Aktifkan GPS'}
+            <Button
+              onClick={getGPS}
+              variant="outline"
+              className={`w-full ${gpsCoords ? 'border-emerald-200 text-emerald-700 hover:bg-emerald-50' : ''}`}
+            >
+              <motion.div
+                className="flex items-center gap-2"
+                whileTap={{ scale: 0.95 }}
+              >
+                <MapPin className="h-4 w-4" />
+                {gpsCoords ? 'Perbarui Lokasi' : 'Aktifkan GPS'}
+              </motion.div>
             </Button>
 
             {/* GPS Map */}
@@ -519,27 +675,28 @@ export default function SaksiCheckInPage() {
       </motion.div>
 
       {/* Submit */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.35 }}
-      >
-        <Button
-          className="w-full"
-          size="lg"
-          onClick={handleSubmit}
-          disabled={submitting || !gpsCoords || !selfieBase64}
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Memproses...
-            </>
-          ) : (
-            'Submit Check-in Pagi'
-          )}
-        </Button>
+      <motion.div variants={itemVariants}>
+        <motion.div whileHover={gpsCoords && selfieBase64 ? { scale: 1.02 } : undefined} whileTap={{ scale: 0.98 }}>
+          <Button
+            className="w-full h-12 text-base bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200 transition-all duration-200"
+            size="lg"
+            onClick={handleSubmit}
+            disabled={submitting || !gpsCoords || !selfieBase64}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Memproses...
+              </>
+            ) : (
+              <>
+                <MapPin className="h-4 w-4 mr-2" />
+                Submit Check-in Pagi
+              </>
+            )}
+          </Button>
+        </motion.div>
       </motion.div>
-    </div>
+    </motion.div>
   )
 }

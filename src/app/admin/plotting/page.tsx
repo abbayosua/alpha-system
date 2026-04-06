@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -28,14 +29,18 @@ import {
 } from '@dnd-kit/core'
 import type { Transform } from '@dnd-kit/utilities'
 import { CSS } from '@dnd-kit/utilities'
+import dynamic from 'next/dynamic'
 import {
   ArrowLeft, Users, MapPin, Link, Trash2, Loader2, GitBranch,
   UserPlus, CheckCircle2, Clock, GripVertical, Search,
-  ChevronRight, X, UserCheck, AlertTriangle
+  ChevronRight, X, UserCheck, AlertTriangle, ArrowUpDown,
+  Filter, Map, Percent, TrendingUp
 } from 'lucide-react'
 import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
+
+const TPSMapView = dynamic(() => import('@/components/maps/TPSMapView'), { ssr: false })
 
 // ─── Animation Variants ───────────────────────────────────────────
 
@@ -55,6 +60,105 @@ const itemVariants = {
 const rowVariants = {
   hidden: { opacity: 0, x: -10 },
   show: { opacity: 1, x: 0, transition: { duration: 0.3 } },
+}
+
+// ─── Status Config ────────────────────────────────────────────────
+
+const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string; border: string; bg: string }> = {
+  ACTIVE: { label: 'Aktif', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300', dot: 'bg-emerald-500', border: 'border-l-emerald-400', bg: 'from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800' },
+  COMPLETED: { label: 'Selesai', color: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300', dot: 'bg-teal-500', border: 'border-l-teal-400', bg: 'from-teal-50/50 to-white dark:from-teal-950/20 dark:to-slate-800' },
+  CANCELLED: { label: 'Dibatalkan', color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300', dot: 'bg-rose-500', border: 'border-l-rose-400', bg: 'from-rose-50/50 to-white dark:from-rose-950/20 dark:to-slate-800' },
+}
+
+// ─── UserAvatar Component ─────────────────────────────────────────
+
+function UserAvatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
+  const initial = (name || '?')[0]?.toUpperCase() || '?'
+  const sizeClasses = {
+    sm: 'w-7 h-7 text-xs',
+    md: 'w-10 h-10 text-sm',
+    lg: 'w-14 h-14 text-xl',
+  }
+  return (
+    <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-semibold flex items-center justify-center flex-shrink-0 shadow-sm`}>
+      {initial}
+    </div>
+  )
+}
+
+// ─── Assignment Stat Card ─────────────────────────────────────────
+
+function AssignmentStatCard({
+  icon,
+  label,
+  value,
+  subValue,
+  borderColor,
+  bgColor,
+  iconBg,
+  iconColor,
+  index,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: string | number
+  subValue?: string
+  borderColor: string
+  bgColor: string
+  iconBg: string
+  iconColor: string
+  index: number
+}) {
+  return (
+    <motion.div
+      variants={itemVariants}
+      className="cursor-default"
+      whileHover={{ scale: 1.02, y: -2 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+    >
+      <Card className={`shadow-sm border-l-4 ${borderColor} bg-gradient-to-br ${bgColor} transition-shadow hover:shadow-md`}>
+        <CardContent className="p-4 flex items-center gap-3">
+          <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${iconBg} flex items-center justify-center`}>
+            {icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-2xl font-bold leading-tight">{value}</p>
+            <p className="text-xs text-muted-foreground truncate">{label}</p>
+            {subValue && (
+              <p className={`text-[11px] mt-0.5 ${iconColor} font-medium`}>{subValue}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+// ─── Assignment Status Badge ──────────────────────────────────────
+
+function AssignmentStatusBadge({ status }: { status: string }) {
+  const c = STATUS_CONFIG[status] || STATUS_CONFIG.ACTIVE
+  return (
+    <Badge variant="secondary" className={`${c.color} gap-1.5`}>
+      <span className={`inline-flex h-1.5 w-1.5 rounded-full ${c.dot}`} />
+      {c.label}
+    </Badge>
+  )
+}
+
+// ─── TPS Code Badge ───────────────────────────────────────────────
+
+function TPSCodeBadge({ code }: { code: string }) {
+  const colors = ['from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+    'from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+    'from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800']
+  const colorIdx = code.charCodeAt(code.length - 1) % colors.length
+  return (
+    <Badge variant="outline" className={`${colors[colorIdx]} border text-xs font-medium gap-1`}>
+      <MapPin className="h-3 w-3" />
+      {code}
+    </Badge>
+  )
 }
 
 // ─── Draggable Saksi Card ─────────────────────────────────────────
@@ -100,7 +204,6 @@ function DraggableSaksiCard({ saksi, index, onClick }: DraggableSaksiProps) {
       transition={{ delay: index * 0.04 }}
       {...attributes}
     >
-      {/* Drag handle */}
       <TooltipProvider delayDuration={300}>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -117,18 +220,15 @@ function DraggableSaksiCard({ saksi, index, onClick }: DraggableSaksiProps) {
         </Tooltip>
       </TooltipProvider>
 
-      {/* Avatar */}
       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
         {initials}
       </div>
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">{saksi.name}</p>
         <p className="text-xs text-muted-foreground truncate">{saksi.email}</p>
       </div>
 
-      {/* Assign button */}
       <Button
         size="sm"
         variant="ghost"
@@ -195,7 +295,6 @@ function DroppableTpsCard({ tps, index, assignments, isAnyDragging }: DroppableT
           <p className="text-xs text-muted-foreground truncate">{tps.address}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0 ml-2">
-          {/* Mini avatar stack */}
           {tpsAssignments.length > 0 && (
             <div className="flex -space-x-1.5">
               {tpsAssignments.slice(0, 3).map((a) => {
@@ -236,7 +335,6 @@ function DroppableTpsCard({ tps, index, assignments, isAnyDragging }: DroppableT
         </div>
       </div>
 
-      {/* Expand to show assigned saksi */}
       <AnimatePresence>
         {expanded && tpsAssignments.length > 0 && (
           <motion.div
@@ -281,7 +379,6 @@ function DroppableTpsCard({ tps, index, assignments, isAnyDragging }: DroppableT
         )}
       </AnimatePresence>
 
-      {/* Drop zone overlay hint */}
       {isOver && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -378,7 +475,6 @@ function CoverageBar({
             <span className={`text-2xl font-bold ${textColor}`}>{pct}%</span>
           </div>
         </div>
-        {/* Progress bar */}
         <div className="h-3 rounded-full bg-muted overflow-hidden">
           <motion.div
             className={`h-full rounded-full bg-gradient-to-r ${gradientFrom} ${gradientTo}`}
@@ -387,7 +483,6 @@ function CoverageBar({
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
           />
         </div>
-        {/* Milestone markers */}
         <div className="flex justify-between mt-1.5 px-0.5">
           <span className="text-[10px] text-muted-foreground">0%</span>
           <span className="text-[10px] text-muted-foreground">25%</span>
@@ -395,7 +490,6 @@ function CoverageBar({
           <span className="text-[10px] text-muted-foreground">75%</span>
           <span className="text-[10px] text-muted-foreground">100%</span>
         </div>
-        {/* Status label */}
         <div className="mt-3 flex items-center gap-2">
           {pct >= 70 ? (
             <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 gap-1 text-xs">
@@ -422,13 +516,49 @@ function CoverageBar({
   )
 }
 
+// ─── Empty State Illustration ─────────────────────────────────────
+
+function PlottingEmptyState({ isFiltered }: { isFiltered: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4 }}
+      className="py-16 px-6 text-center"
+    >
+      <div className="relative mx-auto w-24 h-24 mb-6">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-200/50 to-teal-200/50 dark:from-emerald-900/30 dark:to-teal-900/30 animate-pulse" />
+        <div className="relative inset-0 flex items-center justify-center">
+          {isFiltered ? (
+            <Search className="h-10 w-10 text-emerald-600" />
+          ) : (
+            <GitBranch className="h-10 w-10 text-emerald-600" />
+          )}
+        </div>
+        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400/60" />
+        <div className="absolute -bottom-2 left-1 w-2 h-2 rounded-full bg-teal-400/60" />
+        <div className="absolute top-3 -left-2 w-2.5 h-2.5 rounded-full bg-emerald-400/50" />
+      </div>
+      <h3 className="text-lg font-semibold text-foreground mb-1">
+        {isFiltered ? 'Tidak Ada Hasil' : 'Belum Ada Penugasan'}
+      </h3>
+      <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+        {isFiltered
+          ? 'Tidak ditemukan penugasan yang sesuai dengan filter saat ini.'
+          : 'Seret saksi ke TPS untuk mulai membuat penugasan plotting.'}
+      </p>
+    </motion.div>
+  )
+}
+
 // ─── Main Page Component ─────────────────────────────────────────
 
 export default function AdminPlottingPage() {
   const router = useRouter()
   const [unassignedSaksi, setUnassignedSaksi] = useState<any[]>([])
   const [tpsList, setTpsList] = useState<any[]>([])
-  const [assignments, setAssignments] = useState<any[]>([])
+  const [allAssignments, setAllAssignments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [assigning, setAssigning] = useState(false)
   const [showAssignDialog, setShowAssignDialog] = useState(false)
@@ -450,20 +580,29 @@ export default function AdminPlottingPage() {
   const [saksiSearch, setSaksiSearch] = useState('')
   const [tpsSearch, setTpsSearch] = useState('')
 
+  // Table filter & sort
+  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [sortBy, setSortBy] = useState('date_desc')
+
+  // Tab state: 'table' | 'map'
+  const [activeTab, setActiveTab] = useState<'table' | 'map'>('table')
+
   const fetchData = useCallback(() => {
     setLoading(true)
     Promise.all([
       fetch('/api/users?role=SAKSI&limit=100').then((r) => r.json()),
       fetch('/api/tps?limit=100').then((r) => r.json()),
-      fetch('/api/assignments?status=ACTIVE&limit=100').then((r) => r.json()),
+      // Fetch all assignments (no status filter) for stats
+      fetch('/api/assignments?limit=100').then((r) => r.json()),
     ])
       .then(([usersRes, tpsRes, assignRes]) => {
-        if (usersRes.success) {
-          const assignedIds = new Set(assignRes.success ? assignRes.data.assignments.map((a: any) => a.userId) : [])
-          setUnassignedSaksi(usersRes.data.users.filter((u: any) => !assignedIds.has(u.id)))
+        if (usersRes.success && assignRes.success) {
+          const allAssigned = assignRes.data.assignments
+          const activeIds = new Set(allAssigned.filter((a: any) => a.status === 'ACTIVE').map((a: any) => a.userId))
+          setUnassignedSaksi(usersRes.data.users.filter((u: any) => !activeIds.has(u.id)))
+          setAllAssignments(allAssigned)
         }
         if (tpsRes.success) setTpsList(tpsRes.data)
-        if (assignRes.success) setAssignments(assignRes.data.assignments)
       })
       .catch(() => toast.error('Gagal memuat data'))
       .finally(() => setLoading(false))
@@ -474,12 +613,19 @@ export default function AdminPlottingPage() {
   }, [fetchData])
 
   // Compute stats
-  const stats = useMemo(() => ({
-    activeAssignments: assignments.length,
-    unassignedCount: unassignedSaksi.length,
-    tpsCount: tpsList.length,
-    occupiedTps: tpsList.filter((t) => (t.activeAssignmentCount || 0) > 0).length,
-  }), [assignments.length, unassignedSaksi.length, tpsList])
+  const stats = useMemo(() => {
+    const total = allAssignments.length
+    const active = allAssignments.filter((a) => a.status === 'ACTIVE').length
+    const completed = allAssignments.filter((a) => a.status === 'COMPLETED').length
+    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
+    const unassignedCount = unassignedSaksi.length
+    const tpsCount = tpsList.length
+    const occupiedTps = tpsList.filter((t) => (t.activeAssignmentCount || 0) > 0).length
+    return { total, active, completed, completionRate, unassignedCount, tpsCount, occupiedTps }
+  }, [allAssignments.length, unassignedSaksi.length, tpsList])
+
+  // Active assignments for DnD panel
+  const activeAssignments = useMemo(() => allAssignments.filter((a) => a.status === 'ACTIVE'), [allAssignments])
 
   // Find selected TPS data for info card
   const selectedTpsData = tpsList.find((t) => t.id === selectedTps)
@@ -507,6 +653,50 @@ export default function AdminPlottingPage() {
     )
   }, [tpsList, tpsSearch])
 
+  // Filtered & sorted assignments for table
+  const filteredAssignments = useMemo(() => {
+    let list = [...allAssignments]
+    if (statusFilter !== 'ALL') {
+      list = list.filter((a) => a.status === statusFilter)
+    }
+    // Sort
+    switch (sortBy) {
+      case 'date_desc':
+        list.sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime())
+        break
+      case 'date_asc':
+        list.sort((a, b) => new Date(a.assignedAt).getTime() - new Date(b.assignedAt).getTime())
+        break
+      case 'tps_asc':
+        list.sort((a, b) => (a.tps?.code || '').localeCompare(b.tps?.code || ''))
+        break
+      case 'tps_desc':
+        list.sort((a, b) => (b.tps?.code || '').localeCompare(a.tps?.code || ''))
+        break
+      case 'user_asc':
+        list.sort((a, b) => (a.user?.name || '').localeCompare(b.user?.name || ''))
+        break
+      case 'user_desc':
+        list.sort((a, b) => (b.user?.name || '').localeCompare(a.user?.name || ''))
+        break
+    }
+    return list
+  }, [allAssignments, statusFilter, sortBy])
+
+  // Map data for TPSMapView
+  const mapData = useMemo(() => {
+    return tpsList.map((t) => ({
+      id: t.id,
+      name: t.name,
+      code: t.code,
+      latitude: t.latitude,
+      longitude: t.longitude,
+      address: t.address,
+      activeAssignmentCount: t.activeAssignmentCount || 0,
+      status: (t.activeAssignmentCount && t.activeAssignmentCount > 0) ? 'active' as const : 'inactive' as const,
+    }))
+  }, [tpsList])
+
   // DnD handlers
   const handleDragStart = useCallback((event: any) => {
     setActiveId(event.active.id)
@@ -524,13 +714,11 @@ export default function AdminPlottingPage() {
 
       if (!over) return
 
-      // Check if dropped on a TPS
       const overId = String(over.id)
       if (overId.startsWith('tps-')) {
         const tpsId = overId.replace('tps-', '')
         const saksiData = active.data.current?.saksi
         if (saksiData) {
-          // Open assign dialog with pre-selected TPS
           setSelectedSaksi(saksiData)
           setSelectedTps(tpsId)
           setShowAssignDialog(true)
@@ -613,79 +801,110 @@ export default function AdminPlottingPage() {
         initial="hidden"
         animate="show"
       >
-        {/* ─── Page Title Area ─── */}
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 1: Gradient Title Area
+        ═══════════════════════════════════════════════════════════ */}
         <motion.div
-          className="relative rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 dark:from-slate-800 dark:to-slate-900 p-6 sm:p-8 overflow-hidden"
-          variants={itemVariants}
+          className="relative rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-transparent dark:from-slate-800 dark:via-emerald-950/20 dark:to-transparent border border-emerald-100/50 dark:border-emerald-800/50 px-6 py-5 overflow-hidden"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          {/* Decorative circles */}
-          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-emerald-100/60" />
-          <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-teal-100/40" />
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-1">
-              <Button variant="ghost" size="icon" className="bg-white/60 dark:bg-slate-700/60 hover:bg-white/80 dark:hover:bg-slate-600/80 -ml-2" onClick={() => router.push('/admin/dashboard')}>
+          {/* Decorative blurred circles */}
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-emerald-100/30 dark:bg-emerald-900/20 blur-sm" />
+          <div className="absolute bottom-0 left-1/3 w-24 h-24 rounded-full bg-teal-100/20 dark:bg-teal-900/20 blur-sm" />
+          <div className="absolute top-1/2 right-1/4 w-16 h-16 rounded-full bg-amber-100/10 dark:bg-amber-900/10 blur-sm" />
+
+          <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="-ml-2 flex-shrink-0" onClick={() => router.push('/admin/dashboard')}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <h1 className="text-2xl font-bold">Plotting Saksi</h1>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm flex-shrink-0">
+                  <GitBranch className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">Plotting Saksi</h1>
+                  <p className="text-sm text-muted-foreground mt-0.5">Assign saksi ke TPS dan kelola penugasan</p>
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground ml-11">Assign saksi ke TPS dan kelola penugasan aktif</p>
+            {/* Inline summary stats */}
+            <div className="flex items-center gap-3 ml-11 sm:ml-0">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/60 dark:bg-slate-700/60 border border-emerald-100 dark:border-emerald-800/50 text-sm">
+                <span className="font-semibold text-emerald-700 dark:text-emerald-300">{stats.total}</span>
+                <span className="text-muted-foreground text-xs">Total</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/60 dark:bg-slate-700/60 border border-emerald-100 dark:border-emerald-800/50 text-sm">
+                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="font-semibold text-emerald-700 dark:text-emerald-300">{stats.active}</span>
+                <span className="text-muted-foreground text-xs">Aktif</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/60 dark:bg-slate-700/60 border border-emerald-100 dark:border-emerald-800/50 text-sm">
+                <CheckCircle2 className="h-3.5 w-3.5 text-teal-500" />
+                <span className="font-semibold text-teal-700 dark:text-teal-300">{stats.completed}</span>
+                <span className="text-muted-foreground text-xs">Selesai</span>
+              </div>
+            </div>
           </div>
         </motion.div>
 
-        {/* ─── Stats Summary ─── */}
-        <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-3" variants={itemVariants}>
-          <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
-                <GitBranch className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.activeAssignments}</p>
-                <p className="text-xs text-muted-foreground">Penugasan Aktif</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-white dark:from-amber-950/20 dark:to-slate-800">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
-                <Users className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.unassignedCount}</p>
-                <p className="text-xs text-muted-foreground">Belum Ditugaskan</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/50 to-white dark:from-teal-950/20 dark:to-slate-800">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-teal-100 text-teal-600">
-                <MapPin className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.tpsCount}</p>
-                <p className="text-xs text-muted-foreground">Total TPS</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
-                <CheckCircle2 className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.occupiedTps}</p>
-                <p className="text-xs text-muted-foreground">TPS Terisi</p>
-              </div>
-            </CardContent>
-          </Card>
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 2: Assignment Stats Cards (3 cards)
+        ═══════════════════════════════════════════════════════════ */}
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          transition={{ delay: 0.1 }}
+        >
+          <AssignmentStatCard
+            icon={<Users className="h-5 w-5 text-emerald-600" />}
+            label="Total Penugasan"
+            value={stats.total}
+            subValue={`${stats.unassignedCount} saksi belum ditugaskan`}
+            borderColor="border-l-emerald-500"
+            bgColor="from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800"
+            iconBg="bg-emerald-100"
+            iconColor="text-emerald-600"
+            index={0}
+          />
+          <AssignmentStatCard
+            icon={<MapPin className="h-5 w-5 text-emerald-600" />}
+            label="Penugasan Aktif"
+            value={stats.active}
+            subValue={`${stats.occupiedTps} dari ${stats.tpsCount} TPS terisi`}
+            borderColor="border-l-emerald-500"
+            bgColor="from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-slate-800"
+            iconBg="bg-emerald-100"
+            iconColor="text-emerald-600"
+            index={1}
+          />
+          <AssignmentStatCard
+            icon={<Percent className="h-5 w-5 text-teal-600" />}
+            label="Tingkat Penyelesaian"
+            value={`${stats.completionRate}%`}
+            subValue={`${stats.completed} dari ${stats.total} penugasan`}
+            borderColor="border-l-teal-500"
+            bgColor="from-teal-50/50 to-white dark:from-teal-950/20 dark:to-slate-800"
+            iconBg="bg-teal-100"
+            iconColor="text-teal-600"
+            index={2}
+          />
         </motion.div>
 
-        {/* ─── Coverage Visualization ─── */}
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 3: Coverage Visualization
+        ═══════════════════════════════════════════════════════════ */}
         <motion.div variants={itemVariants}>
           <CoverageBar occupied={stats.occupiedTps} total={stats.tpsCount} />
         </motion.div>
 
-        {/* ─── Two Column Panel: Saksi + TPS ─── */}
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 4: Two Column Panel: Saksi + TPS
+        ═══════════════════════════════════════════════════════════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* ── Unassigned Saksi Panel ── */}
           <motion.div variants={itemVariants}>
@@ -714,7 +933,6 @@ export default function AdminPlottingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-3">
-                {/* Search */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -733,7 +951,6 @@ export default function AdminPlottingPage() {
                   )}
                 </div>
 
-                {/* Saksi List */}
                 <div className="max-h-[420px] overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
                   {filteredSaksi.length > 0 ? (
                     filteredSaksi.map((s, i) => (
@@ -761,7 +978,6 @@ export default function AdminPlottingPage() {
                   )}
                 </div>
 
-                {/* Drag hint */}
                 {unassignedSaksi.length > 0 && (
                   <motion.p
                     className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5"
@@ -790,7 +1006,6 @@ export default function AdminPlottingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-3">
-                {/* Search */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -809,7 +1024,6 @@ export default function AdminPlottingPage() {
                   )}
                 </div>
 
-                {/* TPS List */}
                 <div className="max-h-[420px] overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
                   {filteredTps.length > 0 ? (
                     filteredTps.map((t, i) => (
@@ -817,7 +1031,7 @@ export default function AdminPlottingPage() {
                         key={t.id}
                         tps={t}
                         index={i}
-                        assignments={assignments}
+                        assignments={activeAssignments}
                         isAnyDragging={!!activeId}
                       />
                     ))
@@ -831,7 +1045,6 @@ export default function AdminPlottingPage() {
                   )}
                 </div>
 
-                {/* Drop hint */}
                 {activeId && (
                   <motion.p
                     className="text-xs text-emerald-600 dark:text-emerald-400 text-center flex items-center justify-center gap-1.5"
@@ -851,83 +1064,153 @@ export default function AdminPlottingPage() {
           </motion.div>
         </div>
 
-        {/* ─── Active Assignments Table ─── */}
-        <motion.div variants={itemVariants}>
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 5: Visual Assignment Map
+        ═══════════════════════════════════════════════════════════ */}
+        {!loading && tpsList.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Card className="shadow-sm">
+              <CardHeader className="bg-muted/50">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Map className="h-5 w-5 text-emerald-600" />
+                  Peta Sebaran Penugasan
+                  <Badge variant="secondary" className="ml-auto bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-full px-2">
+                    {stats.occupiedTps}/{stats.tpsCount} TPS
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TPSMapView tpsData={mapData} height="350px" />
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 6: All Assignments Table with Filter & Sort
+        ═══════════════════════════════════════════════════════════ */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
           <Card className="shadow-sm">
             <CardHeader className="bg-muted/50">
               <CardTitle className="text-lg flex items-center gap-2">
                 <GitBranch className="h-5 w-5 text-emerald-600" />
-                Penugasan Aktif
+                Daftar Penugasan
                 <Badge variant="secondary" className="ml-auto bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-full px-2">
-                  {assignments.length}
+                  {filteredAssignments.length}
                 </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
+              {/* ── Filter & Sort Controls ── */}
+              <div className="flex flex-col sm:flex-row gap-3 p-4 border-b">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Filter</span>
+                </div>
+                <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
+                  <SelectTrigger className="w-[180px] h-9 text-sm">
+                    <SelectValue placeholder="Semua Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Semua Status</SelectItem>
+                    <SelectItem value="ACTIVE">Aktif</SelectItem>
+                    <SelectItem value="COMPLETED">Selesai</SelectItem>
+                    <SelectItem value="CANCELLED">Dibatalkan</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center gap-2 sm:ml-auto">
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Urutkan</span>
+                </div>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v)}>
+                  <SelectTrigger className="w-[180px] h-9 text-sm">
+                    <SelectValue placeholder="Terbaru" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date_desc">Terbaru</SelectItem>
+                    <SelectItem value="date_asc">Terlama</SelectItem>
+                    <SelectItem value="tps_asc">TPS A-Z</SelectItem>
+                    <SelectItem value="tps_desc">TPS Z-A</SelectItem>
+                    <SelectItem value="user_asc">Saksi A-Z</SelectItem>
+                    <SelectItem value="user_desc">Saksi Z-A</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead className="pl-5">Saksi</TableHead>
                       <TableHead>TPS</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead>Tanggal</TableHead>
                       <TableHead className="text-right pr-5">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {assignments.length > 0 ? assignments.map((a, i) => (
-                      <motion.tr
-                        key={a.id}
-                        className="hover:bg-muted/50 border-b transition-colors border-l-4 border-l-emerald-400"
-                        variants={rowVariants}
-                        initial="hidden"
-                        animate="show"
-                        transition={{ delay: i * 0.04 }}
-                        whileHover={{ backgroundColor: 'rgba(241, 245, 249, 0.8)' }}
-                      >
-                        <TableCell className="pl-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                              {getInitials(a.user?.name || '?')}
+                    {filteredAssignments.length > 0 ? filteredAssignments.map((a, i) => {
+                      const config = STATUS_CONFIG[a.status] || STATUS_CONFIG.ACTIVE
+                      return (
+                        <motion.tr
+                          key={a.id}
+                          className={`hover:bg-muted/50 border-b transition-colors border-l-4 ${config.border}`}
+                          variants={rowVariants}
+                          initial="hidden"
+                          animate="show"
+                          transition={{ delay: i * 0.04 }}
+                          whileHover={{ backgroundColor: 'rgba(241, 245, 249, 0.8)' }}
+                        >
+                          <TableCell className="pl-5">
+                            <div className="flex items-center gap-3">
+                              <UserAvatar name={a.user?.name || '?'} />
+                              <div>
+                                <p className="font-medium">{a.user?.name}</p>
+                                <p className="text-xs text-muted-foreground">{a.user?.email}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium">{a.user?.name}</p>
-                              <p className="text-xs text-muted-foreground">{a.user?.email}</p>
+                          </TableCell>
+                          <TableCell>
+                            <TPSCodeBadge code={a.tps?.code || '?'} />
+                            <p className="text-xs text-muted-foreground mt-0.5">{a.tps?.name}</p>
+                          </TableCell>
+                          <TableCell>
+                            <AssignmentStatusBadge status={a.status} />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                              <Clock className="h-3.5 w-3.5" />
+                              {new Date(a.assignedAt).toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              })}
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-xs font-medium gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {a.tps?.code}
-                          </Badge>
-                          <p className="text-xs text-muted-foreground mt-0.5">{a.tps?.name}</p>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                            <Clock className="h-3.5 w-3.5" />
-                            {new Date(a.assignedAt).toLocaleDateString('id-ID', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right pr-5">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                            onClick={() => setDeleteTarget(a)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </motion.tr>
-                    )) : (
+                          </TableCell>
+                          <TableCell className="text-right pr-5">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                              onClick={() => setDeleteTarget(a)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </motion.tr>
+                      )
+                    }) : (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8">
-                          <EmptyState icon={GitBranch} title="Belum Ada Penugasan" description="Seret saksi ke TPS untuk mulai plotting" />
+                        <TableCell colSpan={5}>
+                          <PlottingEmptyState isFiltered={statusFilter !== 'ALL'} />
                         </TableCell>
                       </TableRow>
                     )}
@@ -938,95 +1221,122 @@ export default function AdminPlottingPage() {
           </Card>
         </motion.div>
 
-        {/* ─── Assign Dialog ─── */}
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 7: Enhanced Assign Dialog
+        ═══════════════════════════════════════════════════════════ */}
         <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <UserPlus className="h-5 w-5 text-emerald-600" />
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                  <UserPlus className="h-4 w-4 text-white" />
+                </div>
                 Assign Saksi ke TPS
               </DialogTitle>
             </DialogHeader>
             {selectedSaksi && (
-              <div className="space-y-4">
-                {/* Selected Saksi Info with Avatar */}
+              <div className="space-y-5">
+                {/* Selected Saksi Info */}
                 <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-lg font-bold shrink-0 shadow-md shadow-amber-200/50">
-                    {getInitials(selectedSaksi.name)}
-                  </div>
-                  <div>
+                  <UserAvatar name={selectedSaksi.name} size="lg" />
+                  <div className="flex-1 min-w-0">
                     <p className="font-semibold">{selectedSaksi.name}</p>
                     <p className="text-sm text-muted-foreground">{selectedSaksi.email}</p>
+                    {selectedSaksi.phone && (
+                      <p className="text-xs text-muted-foreground mt-0.5">{selectedSaksi.phone}</p>
+                    )}
                   </div>
+                  <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 shrink-0">
+                    Saksi
+                  </Badge>
                 </div>
 
-                {/* TPS Select */}
+                <Separator className="bg-gradient-to-r from-transparent via-amber-200 to-transparent" />
+
+                {/* TPS Select with visual indicators */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Pilih TPS</label>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-emerald-600" />
+                    <Label className="text-sm font-semibold">Pilih TPS Tujuan</Label>
+                  </div>
                   <Select value={selectedTps} onValueChange={(val) => setSelectedTps(val)}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full h-11">
                       <SelectValue placeholder="-- Pilih TPS --" />
                     </SelectTrigger>
                     <SelectContent>
                       {tpsList.map((t) => (
                         <SelectItem key={t.id} value={t.id}>
-                          {t.code} - {t.name} ({t.activeAssignmentCount || 0} saksi)
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${(t.activeAssignmentCount || 0) > 0 ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                            <span className="font-medium">{t.code}</span>
+                            <span className="text-muted-foreground">— {t.name}</span>
+                            <span className="text-xs text-muted-foreground ml-auto">({t.activeAssignmentCount || 0} saksi)</span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {!selectedTps && (
+                    <p className="text-xs text-rose-500 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      Pilih TPS tujuan untuk melanjutkan
+                    </p>
+                  )}
                 </div>
 
                 {/* TPS Info Card */}
-                {selectedTpsData && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Card className="border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 overflow-hidden">
-                      <CardContent className="p-4 space-y-3">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600 mt-0.5">
-                            <MapPin className="h-4 w-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm">
-                              {selectedTpsData.code} — {selectedTpsData.name}
-                            </p>
-                            {selectedTpsData.address && (
-                              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                                {selectedTpsData.address}
+                <AnimatePresence>
+                  {selectedTpsData && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Card className="border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 overflow-hidden">
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600 mt-0.5">
+                              <MapPin className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm">
+                                {selectedTpsData.code} — {selectedTpsData.name}
                               </p>
+                              {selectedTpsData.address && (
+                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                                  {selectedTpsData.address}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="flex items-center gap-2 text-xs bg-white/60 dark:bg-slate-700/40 rounded-lg px-3 py-2">
+                              <Users className="h-3.5 w-3.5 text-emerald-600" />
+                              <span className="text-muted-foreground">Saksi saat ini:</span>
+                              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs px-1.5 py-0">
+                                {selectedTpsData.activeAssignmentCount || 0} orang
+                              </Badge>
+                            </div>
+                            {(selectedTpsData.latitude != null && selectedTpsData.longitude != null) && (
+                              <div className="flex items-center gap-2 text-xs bg-white/60 dark:bg-slate-700/40 rounded-lg px-3 py-2">
+                                <MapPin className="h-3.5 w-3.5 text-teal-600" />
+                                <span className="text-muted-foreground">Koordinat:</span>
+                                <span className="font-mono font-medium text-teal-700 dark:text-teal-300">
+                                  {Number(selectedTpsData.latitude).toFixed(4)}
+                                </span>
+                              </div>
                             )}
                           </div>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs">
-                          <div className="flex items-center gap-1.5">
-                            <Users className="h-3.5 w-3.5 text-emerald-600" />
-                            <span className="text-muted-foreground">Saksi saat ini:</span>
-                            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs px-1.5 py-0">
-                              {selectedTpsData.activeAssignmentCount || 0} orang
-                            </Badge>
-                          </div>
-                        </div>
-                        {/* Map coordinates preview */}
-                        {(selectedTpsData.latitude != null && selectedTpsData.longitude != null) && (
-                          <div className="h-16 rounded-md bg-gradient-to-br from-emerald-100/50 to-teal-100/50 border border-dashed border-emerald-200 dark:border-emerald-800 flex items-center justify-center gap-2">
-                            <MapPin className="h-3.5 w-3.5 text-emerald-500" />
-                            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                              {Number(selectedTpsData.latitude).toFixed(4)}, {Number(selectedTpsData.longitude).toFixed(4)}
-                            </span>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                {/* Gradient save button */}
+                {/* Gradient Submit Button */}
                 <Button
-                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-200/50 dark:shadow-emerald-900/30 transition-all"
+                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-200/50 dark:shadow-emerald-900/30 transition-all h-11"
                   onClick={handleAssign}
                   disabled={assigning || !selectedTps}
                 >
@@ -1047,7 +1357,9 @@ export default function AdminPlottingPage() {
           </DialogContent>
         </Dialog>
 
-        {/* ─── Delete Assignment Confirmation ─── */}
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 8: Delete Assignment Confirmation
+        ═══════════════════════════════════════════════════════════ */}
         <ConfirmDialog
           open={!!deleteTarget}
           onOpenChange={(open) => !open && setDeleteTarget(null)}

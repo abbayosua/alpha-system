@@ -17,7 +17,7 @@ import {
   Upload,
   CheckCircle2,
   Loader2,
-  PenLine,
+  ClipboardCheck,
   X,
   ImagePlus,
   BarChart3,
@@ -27,6 +27,8 @@ import {
   PartyPopper,
   Clock,
   ShieldCheck,
+  MapPin,
+  PenLine,
 } from 'lucide-react'
 
 const containerVariants = {
@@ -55,6 +57,7 @@ const scaleVariants = {
   },
 }
 
+/* Candidate colors: K1=emerald, K2=amber, K3=teal */
 const candidateColors = [
   {
     border: 'border-l-emerald-500',
@@ -62,22 +65,78 @@ const candidateColors = [
     badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
     inputRing: 'focus:ring-emerald-300',
     gradient: 'from-emerald-500 to-emerald-600',
+    dot: 'bg-emerald-500',
+    label: 'text-emerald-800',
+    numberBg: 'bg-emerald-100',
+    numberText: 'text-emerald-700',
+    inputBorder: 'border-emerald-200 focus:border-emerald-400',
+  },
+  {
+    border: 'border-l-amber-500',
+    bg: 'from-amber-50/50 to-white dark:from-amber-950/20 dark:to-slate-800',
+    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+    inputRing: 'focus:ring-amber-300',
+    gradient: 'from-amber-500 to-amber-600',
+    dot: 'bg-amber-500',
+    label: 'text-amber-800',
+    numberBg: 'bg-amber-100',
+    numberText: 'text-amber-700',
+    inputBorder: 'border-amber-200 focus:border-amber-400',
   },
   {
     border: 'border-l-teal-500',
     bg: 'from-teal-50/50 to-white dark:from-teal-950/20 dark:to-slate-800',
-    badge: 'bg-teal-100 text-teal-700',
+    badge: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
     inputRing: 'focus:ring-teal-300',
     gradient: 'from-teal-500 to-teal-600',
-  },
-  {
-    border: 'border-l-amber-500',
-    bg: 'from-amber-50/50 to-white',
-    badge: 'bg-amber-100 text-amber-700',
-    inputRing: 'focus:ring-amber-300',
-    gradient: 'from-amber-500 to-amber-600',
+    dot: 'bg-teal-500',
+    label: 'text-teal-800',
+    numberBg: 'bg-teal-100',
+    numberText: 'text-teal-700',
+    inputBorder: 'border-teal-200 focus:border-teal-400',
   },
 ]
+
+/* ─── Visual Step Indicator ─── */
+function StepProgress({ votes }: { votes: { c1: string; c2: string; c3: string; invalid: string } }) {
+  const steps = [
+    { label: 'Isi Suara', icon: BarChart3, done: [votes.c1, votes.c2, votes.c3].every(v => v && parseInt(v) >= 0) },
+    { label: 'Upload C1', icon: Camera, done: false },
+    { label: 'Kirim Data', icon: ClipboardCheck, done: false },
+  ]
+
+  return (
+    <div className="flex items-center justify-between gap-1">
+      {steps.map((step, i) => (
+        <div key={step.label} className="flex items-center flex-1">
+          <div className="flex flex-col items-center flex-shrink-0">
+            <motion.div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border-2 transition-all ${
+                step.done
+                  ? 'bg-emerald-500 border-emerald-500 text-white'
+                  : 'bg-white border-gray-200 text-gray-400 dark:bg-slate-800 dark:border-gray-600'
+              }`}
+              animate={step.done ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ duration: 0.4 }}
+            >
+              {step.done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <step.icon className="h-3.5 w-3.5" />}
+            </motion.div>
+            <span className={`text-[10px] mt-1 text-center max-w-[56px] leading-tight ${
+              step.done ? 'text-emerald-600 font-medium' : 'text-muted-foreground'
+            }`}>
+              {step.label}
+            </span>
+          </div>
+          {i < steps.length - 1 && (
+            <div className="flex-1 h-0.5 mx-2 mt-[-14px]">
+              <div className={`h-full rounded-full transition-all ${step.done ? 'bg-emerald-400' : 'bg-gray-200 dark:bg-gray-600'}`} />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function SaksiInputPage() {
   const router = useRouter()
@@ -234,9 +293,9 @@ export default function SaksiInputPage() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200">
-                <PenLine className="h-5 w-5" />
+                <ClipboardCheck className="h-5 w-5" />
               </div>
-              <h1 className="text-2xl font-bold">Input Suara</h1>
+              <h1 className="text-2xl font-bold text-emerald-900">Input Suara</h1>
             </div>
             <p className="text-sm text-muted-foreground ml-11">Masukkan hasil perhitungan suara</p>
           </div>
@@ -244,39 +303,16 @@ export default function SaksiInputPage() {
 
         <motion.div variants={scaleVariants}>
           <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-white overflow-hidden relative">
-            {/* Confetti-like decorative elements */}
-            <motion.div
-              className="absolute top-4 right-4"
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-            >
-              <div className="p-2 rounded-full bg-amber-100">
-                <PartyPopper className="h-5 w-5 text-amber-600" />
-              </div>
+            <motion.div className="absolute top-4 right-4" initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}>
+              <div className="p-2 rounded-full bg-amber-100"><PartyPopper className="h-5 w-5 text-amber-600" /></div>
             </motion.div>
-            <motion.div
-              className="absolute top-16 right-16"
-              initial={{ scale: 0, rotate: 180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-            >
+            <motion.div className="absolute top-16 right-16" initial={{ scale: 0, rotate: 180 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}>
               <div className="w-3 h-3 rounded-full bg-emerald-400" />
             </motion.div>
-            <motion.div
-              className="absolute bottom-16 right-8"
-              initial={{ scale: 0, rotate: 90 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.7, type: 'spring', stiffness: 200 }}
-            >
+            <motion.div className="absolute bottom-16 right-8" initial={{ scale: 0, rotate: 90 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.7, type: 'spring', stiffness: 200 }}>
               <div className="w-2 h-2 rounded-full bg-teal-400" />
             </motion.div>
-            <motion.div
-              className="absolute top-20 left-6"
-              initial={{ scale: 0, rotate: -90 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}
-            >
+            <motion.div className="absolute top-20 left-6" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}>
               <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
             </motion.div>
 
@@ -290,32 +326,44 @@ export default function SaksiInputPage() {
                 <CheckCircle2 className="h-10 w-10 text-white" />
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                 <h2 className="text-xl font-bold text-emerald-900 dark:text-emerald-100">Data Suara Sudah Diinput</h2>
                 <p className="text-sm text-muted-foreground mt-1">Penghitungan suara Anda telah tersimpan</p>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="bg-white/70 dark:bg-slate-700/70 rounded-xl p-4 space-y-3 border border-emerald-100"
-              >
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-emerald-50/80 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Total Suara</p>
-                    <p className="text-2xl font-bold text-emerald-700">{result.totalVotes}</p>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white/70 dark:bg-slate-700/70 rounded-xl p-4 space-y-3 border border-emerald-100">
+                {/* K1=emerald, K2=amber, K3=teal breakdown */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-emerald-50/80 rounded-lg p-2.5 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <p className="text-[10px] text-muted-foreground">Kandidat 1</p>
+                    </div>
+                    <p className="text-lg font-bold text-emerald-700">{result.candidate1Votes || 0}</p>
                   </div>
-                  <div className="bg-teal-50/80 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Suara Sah</p>
-                    <p className="text-2xl font-bold text-teal-700">{result.totalValidVotes}</p>
+                  <div className="bg-amber-50/80 rounded-lg p-2.5 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      <p className="text-[10px] text-muted-foreground">Kandidat 2</p>
+                    </div>
+                    <p className="text-lg font-bold text-amber-700">{result.candidate2Votes || 0}</p>
+                  </div>
+                  <div className="bg-teal-50/80 rounded-lg p-2.5 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="w-2 h-2 rounded-full bg-teal-500" />
+                      <p className="text-[10px] text-muted-foreground">Kandidat 3</p>
+                    </div>
+                    <p className="text-lg font-bold text-teal-700">{result.candidate3Votes || 0}</p>
                   </div>
                 </div>
                 <Separator />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <Calculator className="h-3.5 w-3.5" />
+                    Total Suara
+                  </span>
+                  <span className="text-xl font-bold text-emerald-700">{result.totalVotes}</span>
+                </div>
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4" />
                   <span>{new Date(result.submittedAt).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })}</span>
@@ -328,11 +376,7 @@ export default function SaksiInputPage() {
                 )}
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                 <Button
                   className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200"
                   onClick={() => router.push('/saksi/dashboard')}
@@ -364,18 +408,13 @@ export default function SaksiInputPage() {
           <div className="absolute bottom-0 left-1/3 w-20 h-20 rounded-full bg-teal-100/40" />
           <div className="relative">
             <div className="flex items-center gap-3 mb-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-white/60 hover:bg-white/80 -ml-2"
-                onClick={() => router.push('/saksi/dashboard')}
-              >
+              <Button variant="ghost" size="icon" className="bg-white/60 hover:bg-white/80 -ml-2" onClick={() => router.push('/saksi/dashboard')}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200">
-                <PenLine className="h-5 w-5" />
+                <ClipboardCheck className="h-5 w-5" />
               </div>
-              <h1 className="text-2xl font-bold">Input Suara</h1>
+              <h1 className="text-2xl font-bold text-emerald-900">Input Suara</h1>
             </div>
             <p className="text-sm text-muted-foreground ml-11">Masukkan hasil perhitungan suara</p>
           </div>
@@ -383,30 +422,13 @@ export default function SaksiInputPage() {
 
         <motion.div variants={scaleVariants}>
           <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-white overflow-hidden relative">
-            <motion.div
-              className="absolute top-4 right-4"
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-            >
-              <div className="p-2 rounded-full bg-emerald-100">
-                <Vote className="h-5 w-5 text-emerald-600" />
-              </div>
+            <motion.div className="absolute top-4 right-4" initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}>
+              <div className="p-2 rounded-full bg-emerald-100"><Vote className="h-5 w-5 text-emerald-600" /></div>
             </motion.div>
-            <motion.div
-              className="absolute top-14 right-14"
-              initial={{ scale: 0, rotate: 180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-            >
+            <motion.div className="absolute top-14 right-14" initial={{ scale: 0, rotate: 180 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}>
               <div className="w-3 h-3 rounded-full bg-teal-400" />
             </motion.div>
-            <motion.div
-              className="absolute bottom-12 right-10"
-              initial={{ scale: 0, rotate: 90 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.7, type: 'spring', stiffness: 200 }}
-            >
+            <motion.div className="absolute bottom-12 right-10" initial={{ scale: 0, rotate: 90 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.7, type: 'spring', stiffness: 200 }}>
               <div className="w-2 h-2 rounded-full bg-emerald-300" />
             </motion.div>
 
@@ -420,42 +442,53 @@ export default function SaksiInputPage() {
                 <CheckCircle2 className="h-10 w-10 text-white" />
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                 <h2 className="text-xl font-bold text-emerald-900 dark:text-emerald-100">Data Suara Berhasil Disimpan!</h2>
                 <p className="text-sm text-muted-foreground mt-1">Terima kasih atas kontribusi Anda</p>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="bg-white/70 dark:bg-slate-700/70 rounded-xl p-4 space-y-3 border border-emerald-100"
-              >
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-emerald-50/80 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Suara Sah</p>
-                    <p className="text-2xl font-bold text-emerald-700">{result.totalValidVotes}</p>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white/70 dark:bg-slate-700/70 rounded-xl p-4 space-y-3 border border-emerald-100">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-emerald-50/80 rounded-lg p-2.5 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <p className="text-[10px] text-muted-foreground">K1</p>
+                    </div>
+                    <p className="text-lg font-bold text-emerald-700">{result.candidate1Votes || 0}</p>
                   </div>
-                  <div className="bg-amber-50/80 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Tidak Sah</p>
-                    <p className="text-2xl font-bold text-amber-700">{result.totalInvalidVotes}</p>
+                  <div className="bg-amber-50/80 rounded-lg p-2.5 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      <p className="text-[10px] text-muted-foreground">K2</p>
+                    </div>
+                    <p className="text-lg font-bold text-amber-700">{result.candidate2Votes || 0}</p>
+                  </div>
+                  <div className="bg-teal-50/80 rounded-lg p-2.5 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="w-2 h-2 rounded-full bg-teal-500" />
+                      <p className="text-[10px] text-muted-foreground">K3</p>
+                    </div>
+                    <p className="text-lg font-bold text-teal-700">{result.candidate3Votes || 0}</p>
                   </div>
                 </div>
-                <div className="bg-teal-50/80 rounded-lg p-3 text-center">
+                <Separator />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-teal-50/80 rounded-lg p-2.5 text-center">
+                    <p className="text-xs text-muted-foreground">Suara Sah</p>
+                    <p className="text-xl font-bold text-teal-700">{result.totalValidVotes}</p>
+                  </div>
+                  <div className="bg-rose-50/80 rounded-lg p-2.5 text-center">
+                    <p className="text-xs text-muted-foreground">Tidak Sah</p>
+                    <p className="text-xl font-bold text-rose-700">{result.totalInvalidVotes}</p>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-3 text-center">
                   <p className="text-xs text-muted-foreground">Total Keseluruhan</p>
-                  <p className="text-3xl font-bold text-teal-700">{result.totalVotes}</p>
+                  <p className="text-2xl font-bold text-emerald-700">{result.totalVotes}</p>
                 </div>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                 <Button
                   className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200"
                   onClick={() => router.push('/saksi/dashboard')}
@@ -496,12 +529,21 @@ export default function SaksiInputPage() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-200">
-              <PenLine className="h-5 w-5" />
+              <ClipboardCheck className="h-5 w-5" />
             </div>
-            <h1 className="text-2xl font-bold">Input Suara</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-emerald-900">Input Suara</h1>
+              <p className="text-sm text-muted-foreground">Masukkan hasil perhitungan suara dari TPS Anda</p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground ml-11">Masukkan hasil perhitungan suara dari TPS Anda</p>
         </div>
+      </motion.div>
+
+      {/* Visual Step Progress */}
+      <motion.div variants={itemVariants}>
+        <Card className="shadow-sm py-4 px-4">
+          <StepProgress votes={form} />
+        </Card>
       </motion.div>
 
       {/* Vote Input Cards */}
@@ -517,17 +559,18 @@ export default function SaksiInputPage() {
             <CardDescription>Masukkan jumlah suara untuk setiap kandidat</CardDescription>
           </CardHeader>
           <CardContent className="p-4 space-y-3">
-            {/* Candidate 1 */}
+            {/* Candidate 1 - Emerald */}
             <motion.div
               whileFocus={{ scale: 1.01 }}
               className={`border-l-4 ${candidateColors[0].border} bg-gradient-to-br ${candidateColors[0].bg} rounded-lg overflow-hidden`}
             >
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <span className="text-sm font-bold text-emerald-700">1</span>
+                  <div className={`w-8 h-8 rounded-full ${candidateColors[0].numberBg} flex items-center justify-center`}>
+                    <span className={`text-sm font-bold ${candidateColors[0].numberText}`}>1</span>
                   </div>
-                  <Label className="text-sm font-medium text-emerald-800">Kandidat 1</Label>
+                  <Label className={`text-sm font-medium ${candidateColors[0].label}`}>Kandidat 1</Label>
+                  <span className={`w-2 h-2 rounded-full ${candidateColors[0].dot} ml-auto`} />
                 </div>
                 <Input
                   id="candidate1Votes"
@@ -536,22 +579,23 @@ export default function SaksiInputPage() {
                   placeholder="0"
                   value={form.candidate1Votes}
                   onChange={(e) => setForm({ ...form, candidate1Votes: e.target.value })}
-                  className={`text-2xl font-bold text-center h-14 border-emerald-200 focus:border-emerald-400 ${candidateColors[0].inputRing} bg-white/80`}
+                  className={`text-2xl font-bold text-center h-14 ${candidateColors[0].inputBorder} ${candidateColors[0].inputRing} bg-white/80`}
                 />
               </div>
             </motion.div>
 
-            {/* Candidate 2 */}
+            {/* Candidate 2 - Amber */}
             <motion.div
               whileFocus={{ scale: 1.01 }}
               className={`border-l-4 ${candidateColors[1].border} bg-gradient-to-br ${candidateColors[1].bg} rounded-lg overflow-hidden`}
             >
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center">
-                    <span className="text-sm font-bold text-teal-700">2</span>
+                  <div className={`w-8 h-8 rounded-full ${candidateColors[1].numberBg} flex items-center justify-center`}>
+                    <span className={`text-sm font-bold ${candidateColors[1].numberText}`}>2</span>
                   </div>
-                  <Label className="text-sm font-medium text-teal-800">Kandidat 2</Label>
+                  <Label className={`text-sm font-medium ${candidateColors[1].label}`}>Kandidat 2</Label>
+                  <span className={`w-2 h-2 rounded-full ${candidateColors[1].dot} ml-auto`} />
                 </div>
                 <Input
                   id="candidate2Votes"
@@ -560,22 +604,23 @@ export default function SaksiInputPage() {
                   placeholder="0"
                   value={form.candidate2Votes}
                   onChange={(e) => setForm({ ...form, candidate2Votes: e.target.value })}
-                  className={`text-2xl font-bold text-center h-14 border-teal-200 focus:border-teal-400 ${candidateColors[1].inputRing} bg-white/80`}
+                  className={`text-2xl font-bold text-center h-14 ${candidateColors[1].inputBorder} ${candidateColors[1].inputRing} bg-white/80`}
                 />
               </div>
             </motion.div>
 
-            {/* Candidate 3 */}
+            {/* Candidate 3 - Teal */}
             <motion.div
               whileFocus={{ scale: 1.01 }}
               className={`border-l-4 ${candidateColors[2].border} bg-gradient-to-br ${candidateColors[2].bg} rounded-lg overflow-hidden`}
             >
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                    <span className="text-sm font-bold text-amber-700">3</span>
+                  <div className={`w-8 h-8 rounded-full ${candidateColors[2].numberBg} flex items-center justify-center`}>
+                    <span className={`text-sm font-bold ${candidateColors[2].numberText}`}>3</span>
                   </div>
-                  <Label className="text-sm font-medium text-amber-800">Kandidat 3</Label>
+                  <Label className={`text-sm font-medium ${candidateColors[2].label}`}>Kandidat 3</Label>
+                  <span className={`w-2 h-2 rounded-full ${candidateColors[2].dot} ml-auto`} />
                 </div>
                 <Input
                   id="candidate3Votes"
@@ -584,7 +629,7 @@ export default function SaksiInputPage() {
                   placeholder="0"
                   value={form.candidate3Votes}
                   onChange={(e) => setForm({ ...form, candidate3Votes: e.target.value })}
-                  className={`text-2xl font-bold text-center h-14 border-amber-200 focus:border-amber-400 ${candidateColors[2].inputRing} bg-white/80`}
+                  className={`text-2xl font-bold text-center h-14 ${candidateColors[2].inputBorder} ${candidateColors[2].inputRing} bg-white/80`}
                 />
               </div>
             </motion.div>
@@ -621,40 +666,34 @@ export default function SaksiInputPage() {
               <div className="p-1.5 rounded-lg bg-white/20">
                 <Calculator className="h-4 w-4" />
               </div>
-              <h3 className="text-sm font-medium text-white/80">Total Suara Sah</h3>
+              <h3 className="text-sm font-medium text-white/80">Total Suara</h3>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white/10 backdrop-blur rounded-lg p-3 text-center">
-                <p className="text-xs text-white/60 mb-0.5">Kandidat 1</p>
-                <motion.p
-                  key={form.candidate1Votes || '0'}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="text-xl font-bold"
-                >
+                <div className="flex items-center justify-center gap-1 mb-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" />
+                  <p className="text-xs text-white/60">K1</p>
+                </div>
+                <motion.p key={form.candidate1Votes || '0'} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-xl font-bold">
                   {form.candidate1Votes || '0'}
                 </motion.p>
               </div>
               <div className="bg-white/10 backdrop-blur rounded-lg p-3 text-center">
-                <p className="text-xs text-white/60 mb-0.5">Kandidat 2</p>
-                <motion.p
-                  key={form.candidate2Votes || '0'}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="text-xl font-bold"
-                >
+                <div className="flex items-center justify-center gap-1 mb-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-300" />
+                  <p className="text-xs text-white/60">K2</p>
+                </div>
+                <motion.p key={form.candidate2Votes || '0'} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-xl font-bold">
                   {form.candidate2Votes || '0'}
                 </motion.p>
               </div>
               <div className="bg-white/10 backdrop-blur rounded-lg p-3 text-center">
-                <p className="text-xs text-white/60 mb-0.5">Kandidat 3</p>
-                <motion.p
-                  key={form.candidate3Votes || '0'}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="text-xl font-bold"
-                >
+                <div className="flex items-center justify-center gap-1 mb-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-300" />
+                  <p className="text-xs text-white/60">K3</p>
+                </div>
+                <motion.p key={form.candidate3Votes || '0'} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-xl font-bold">
                   {form.candidate3Votes || '0'}
                 </motion.p>
               </div>
@@ -704,6 +743,7 @@ export default function SaksiInputPage() {
                 <Camera className="h-4 w-4 text-teal-700" />
               </div>
               Foto Formulir C1
+              <Badge variant="secondary" className="ml-auto text-xs">Opsional</Badge>
             </CardTitle>
             <CardDescription>Upload foto formulir C1 sebagai bukti perhitungan</CardDescription>
           </CardHeader>
@@ -714,31 +754,14 @@ export default function SaksiInputPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="relative group rounded-lg overflow-hidden border border-emerald-200"
               >
-                <img
-                  src={c1Preview}
-                  alt="C1 Preview"
-                  className="w-full max-h-64 object-contain bg-muted/50"
-                />
-                {/* Overlay actions */}
+                <img src={c1Preview} alt="C1 Preview" className="w-full max-h-64 object-contain bg-muted/50" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <div className="absolute bottom-3 left-3 right-3 flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="bg-white/90 hover:bg-white text-slate-800 flex-1"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <ImagePlus className="h-4 w-4 mr-1" />
-                      Ganti
+                    <Button size="sm" variant="secondary" className="bg-white/90 hover:bg-white text-slate-800 flex-1" onClick={() => fileInputRef.current?.click()}>
+                      <ImagePlus className="h-4 w-4 mr-1" /> Ganti
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="bg-rose-500/90 hover:bg-rose-600 flex-1"
-                      onClick={() => { setC1File(null); setC1Preview(null) }}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Hapus
+                    <Button size="sm" variant="destructive" className="bg-rose-500/90 hover:bg-rose-600 flex-1" onClick={() => { setC1File(null); setC1Preview(null) }}>
+                      <X className="h-4 w-4 mr-1" /> Hapus
                     </Button>
                   </div>
                 </div>
@@ -768,41 +791,73 @@ export default function SaksiInputPage() {
                 >
                   <Upload className="h-7 w-7 text-emerald-600" />
                 </motion.div>
-                <p className="text-sm font-medium text-slate-700">Klik atau seret foto ke sini</p>
+                <p className="text-sm font-medium text-slate-700">{dragOver ? 'Lepaskan file di sini' : 'Klik atau seret foto ke sini'}</p>
                 <p className="text-xs text-muted-foreground mt-1">JPG, PNG, maks 10MB</p>
               </motion.div>
             )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
           </CardContent>
         </Card>
       </motion.div>
 
+      {/* Submission Confirmation Summary */}
+      {hasAnyVote && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl bg-emerald-50/60 border border-emerald-100 p-4"
+        >
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-emerald-100 flex-shrink-0">
+              <ClipboardCheck className="h-4 w-4 text-emerald-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-emerald-800">Ringkasan Pengiriman</p>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1" />
+                  K1: {form.candidate1Votes || '0'}
+                </Badge>
+                <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1" />
+                  K2: {form.candidate2Votes || '0'}
+                </Badge>
+                <Badge className="bg-teal-100 text-teal-700 border-0 text-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500 mr-1" />
+                  K3: {form.candidate3Votes || '0'}
+                </Badge>
+                <Badge className="bg-rose-100 text-rose-700 border-0 text-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1" />
+                  T.Sah: {form.totalInvalidVotes || '0'}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Submit Button */}
       <motion.div variants={itemVariants}>
-        <Button
-          className="w-full h-12 text-base bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200 transition-all duration-200"
-          size="lg"
-          onClick={handleSubmit}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              Menyimpan Data Suara...
-            </>
-          ) : (
-            <>
-              <Vote className="h-5 w-5 mr-2" />
-              Simpan Data Suara
-            </>
-          )}
-        </Button>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            className="w-full h-12 text-base bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200 transition-all duration-200"
+            size="lg"
+            onClick={handleSubmit}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                Menyimpan Data Suara...
+              </>
+            ) : (
+              <>
+                <Vote className="h-5 w-5 mr-2" />
+                Simpan Data Suara
+              </>
+            )}
+          </Button>
+        </motion.div>
       </motion.div>
     </motion.div>
   )

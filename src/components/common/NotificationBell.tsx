@@ -256,16 +256,13 @@ export function NotificationBell() {
             <div className="px-4 py-2.5 text-center">
               <button
                 className="text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors"
-                onClick={() => {
-                  setOpen(false)
+                onClick={(e) => {
+                  e.preventDefault()
                   const role = user?.role
-                  if (role === 'ADMIN_KEUANGAN') {
-                    router.push('/keuangan/notifications')
-                  } else if (role === 'ADMIN') {
-                    router.push('/admin/notifications')
-                  } else {
-                    router.push('/saksi/notifications')
-                  }
+                  const basePath = role === 'ADMIN_KEUANGAN' ? '/keuangan' : role === 'ADMIN' ? '/admin' : '/saksi'
+                  setOpen(false)
+                  // Small delay to let popover close before navigation
+                  setTimeout(() => router.push(`${basePath}/notifications`), 100)
                 }}
               >
                 Lihat Semua Notifikasi
