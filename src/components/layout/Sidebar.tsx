@@ -28,6 +28,7 @@ import {
   Settings,
   X,
 } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -320,19 +321,19 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
               className="flex items-center gap-2.5 relative z-10 select-none"
               onClick={handleNavigate}
             >
-              <div className={cn('p-1.5 rounded-lg', roleIconBg[role])}>
-                <Shield className="h-5 w-5 text-white" />
+              <div className="relative h-7 w-7 rounded-lg overflow-hidden flex-shrink-0">
+                <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
               </div>
               <div className="flex flex-col">
-                <span className="text-base font-bold text-white leading-tight">SAKSI APP</span>
-                <span className="text-[10px] text-white/70 leading-tight">Manajemen Saksi Pemilu</span>
+                <span className="text-base font-bold text-white leading-tight">Alpha System v5</span>
+                <span className="text-[10px] text-white/70 leading-tight">Management System</span>
               </div>
             </Link>
           </div>
 
           {/* Hidden accessibility titles */}
           <SheetTitle className="sr-only">Menu Navigasi</SheetTitle>
-          <SheetDescription className="sr-only">Navigasi menu saksi app</SheetDescription>
+          <SheetDescription className="sr-only">Navigasi menu Alpha System</SheetDescription>
 
           {/* Navigation Content */}
           <div className="flex flex-1 flex-col h-[calc(100%-4rem)]">
@@ -361,12 +362,12 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
           <div className="absolute bottom-0 left-8 w-12 h-12 bg-white/5 rounded-full translate-y-1/2" />
 
           <Link href={`/${role === 'ADMIN_KEUANGAN' ? 'keuangan' : role.toLowerCase()}/dashboard`} className="flex items-center gap-2.5 relative z-10">
-            <div className={cn('p-1.5 rounded-lg', roleIconBg[role])}>
-              <Shield className="h-5 w-5 text-white" />
+            <div className="relative h-7 w-7 rounded-lg overflow-hidden flex-shrink-0">
+              <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
             </div>
             <div className="flex flex-col">
-              <span className="text-base font-bold text-white leading-tight">SAKSI APP</span>
-              <span className="text-[10px] text-white/70 leading-tight">Manajemen Saksi Pemilu</span>
+              <span className="text-base font-bold text-white leading-tight">Alpha System v5</span>
+              <span className="text-[10px] text-white/70 leading-tight">Management System</span>
             </div>
           </Link>
         </div>

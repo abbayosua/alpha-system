@@ -39,6 +39,7 @@ import {
   Save,
   CheckCircle2,
 } from 'lucide-react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 
 // ─── Animation Variants ──────────────────────────────────────────────
@@ -639,17 +640,17 @@ export default function AdminSettingsPage() {
           </CardHeader>
           <CardContent className="pt-6 space-y-5">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-200 flex items-center justify-center">
-                <Shield className="h-7 w-7 text-white" />
+              <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden shadow-lg shadow-emerald-200">
+                <Image src="/logo.png" alt="Alpha System v5" width={56} height={56} className="object-cover" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-foreground">SAKSI APP</h3>
+                <h3 className="text-lg font-bold text-foreground">Alpha System v5</h3>
                 <Badge variant="outline" className="mt-1 text-xs border-emerald-200 text-emerald-600">
-                  v1.0.0
+                  v5.0.0
                 </Badge>
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                  Sistem manajemen saksi pemilu terintegrasi untuk monitoring, check-in GPS, 
-                  penghitungan suara real-time, dan transparansi pembayaran honor saksi.
+                  Sistem manajemen terintegrasi untuk monitoring, operasi GPS, 
+                  penghitungan data real-time, dan transparansi pembayaran.
                 </p>
               </div>
             </div>

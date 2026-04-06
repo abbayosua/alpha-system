@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import {
   Shield, MapPin, ClipboardCheck, Camera, FileText, Wallet,
   Users, BarChart3, ArrowRight, CheckCircle2, LayoutDashboard,
@@ -161,10 +162,10 @@ export default function Home() {
       <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-              <Shield className="h-6 w-6 text-emerald-600" />
+            <div className="relative h-8 w-8 rounded-lg overflow-hidden">
+              <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
             </div>
-            <span className="text-xl font-bold">SAKSI APP</span>
+            <span className="text-xl font-bold">Alpha System v5</span>
           </div>
           <div className="flex items-center gap-3">
             {isAuthenticated && user ? (
@@ -464,7 +465,7 @@ export default function Home() {
             <Badge variant="outline" className="mb-4 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400">Dipercaya</Badge>
             <h2 className="text-2xl sm:text-3xl font-bold mb-4">Pengawasan Pemilu Terpercaya</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Saksi App telah digunakan dalam berbagai tahapan pemilu di Indonesia
+              Alpha System v5 telah digunakan dalam berbagai tahapan operasi dan manajemen di Indonesia
             </p>
           </FadeInSection>
 
@@ -531,13 +532,13 @@ export default function Home() {
             {/* Brand */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="p-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-                  <Shield className="h-5 w-5 text-emerald-600" />
+                <div className="relative h-7 w-7 rounded-lg overflow-hidden">
+                  <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
                 </div>
-                <span className="text-lg font-bold">SAKSI APP</span>
+                <span className="text-lg font-bold">Alpha System v5</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Sistem Manajemen Saksi Pemilu terpadu. Lindungi suara rakyat Indonesia
+                Comprehensive management system terpadu. Lindungi integritas data 
                 dengan teknologi modern dan transparansi penuh.
               </p>
             </div>
@@ -583,7 +584,7 @@ export default function Home() {
           {/* Bottom bar */}
           <div className="mt-10 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} SAKSI APP — Sistem Manajemen Saksi Pemilu
+              &copy; {new Date().getFullYear()} Alpha System v5 — Comprehensive Management System
             </p>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               Dibuat dengan <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" /> untuk Indonesia

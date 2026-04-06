@@ -1,5 +1,5 @@
 // ============================================================
-// Types for SAKSI APP - Election Witness Management System
+// Types for Alpha System v5 - Comprehensive Management System
 // ============================================================
 
 // User roles matching the Prisma Role enum

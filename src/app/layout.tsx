@@ -16,10 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SAKSI APP - Sistem Manajemen Saksi Pemilu",
-  description: "Aplikasi manajemen saksi pemilu untuk monitoring, check-in, input suara, dan pelaporan.",
+  title: "Alpha System v5",
+  description: "Alpha System v5 - Comprehensive management system for monitoring, operations, and analytics.",
   icons: {
-    icon: "/logo.svg",
+    icon: "/logo.png",
   },
 };
 

@@ -98,7 +98,7 @@ export function Header({ onMenuClick }: HeaderProps) {
 
       <div className="flex flex-1 items-center gap-2">
         {/* App title on mobile */}
-        <span className="text-sm font-bold text-primary lg:hidden">SAKSI APP</span>
+        <span className="text-sm font-bold text-primary lg:hidden">Alpha System v5</span>
 
         {/* Breadcrumb - hide on mobile when only 1 item */}
         <Breadcrumb className={crumbs.length <= 1 ? 'hidden sm:flex' : ''}>

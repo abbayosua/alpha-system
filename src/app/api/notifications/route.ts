@@ -77,7 +77,7 @@ const saksiNotifications: Notification[] = [
   {
     id: 'n6',
     title: 'Update Aplikasi',
-    description: 'SAKSI APP telah diperbarui. Fitur baru: upload foto C1 dan selfie check-in.',
+    description: 'Alpha System v5 telah diperbarui. Fitur baru: upload foto C1 dan selfie check-in.',
     type: 'info',
     read: true,
     createdAt: daysAgo(2),

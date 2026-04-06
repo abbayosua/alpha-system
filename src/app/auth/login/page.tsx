@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Shield, Eye, EyeOff } from 'lucide-react'
+import Image from 'next/image'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
@@ -77,11 +78,11 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm relative z-10">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-3">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">
-              <Shield className="h-8 w-8 text-white" />
+            <div className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/20">
+              <Image src="/logo.png" alt="Alpha System v5" fill className="object-cover" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">Masuk ke SAKSI APP</CardTitle>
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">Masuk ke Alpha System v5</CardTitle>
           <CardDescription className="text-muted-foreground mt-1">Masuk ke akun Anda untuk melanjutkan</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
