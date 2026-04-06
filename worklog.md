@@ -1446,3 +1446,31 @@ Enhance the main check-in flow section of saksi/check-in and saksi/final-check-i
 #### D. Lint Status
 - Zero lint errors after all changes
 
+---
+Task ID: 13 - Rebrand to Alpha System v5
+Agent: Main
+Task: Change all SAKSI APP branding to Alpha System v5 with custom logo, push to GitHub
+
+Work Log:
+- Searched entire codebase for all "SAKSI APP" and "Saksi App" branding references
+- Copied uploaded alphasystem.png to public/logo.png
+- Updated layout.tsx: title, description, favicon to Alpha System v5
+- Updated page.tsx (landing page): header logo, footer brand, copyright text
+- Updated Sidebar.tsx: both mobile sheet and desktop sidebar branding (2 instances)
+- Updated Header.tsx: mobile title text
+- Updated Footer.tsx: copyright, version (v5.0.0)
+- Updated login/page.tsx: card title, logo icon → actual image
+- Updated register/page.tsx: card title, logo icon → actual image
+- Updated settings/page.tsx: app name, version badge, description
+- Updated notifications API route: app name in notification description
+- Updated types/index.ts: file comment header
+- Replaced Shield icon placeholders with actual logo.png using next/image
+- Set git user: abbayosua, email: abbasiagian@gmail.com
+- Committed and pushed to GitHub (main branch, commit fcdfec6)
+
+Stage Summary:
+- All 11 files modified: branding fully changed from "SAKSI APP" to "Alpha System v5"
+- Custom logo deployed: /public/logo.png (used in layout, sidebar, header, login, register, settings)
+- Version updated to v5.0.0 across all components
+- Zero lint errors
+- Pushed to: https://github.com/abbayosua/alpha-system.git
