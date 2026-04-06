@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,11 +8,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
-import { ArrowLeft, Search, Plus, Trash2, Edit, Loader2, MapPin } from 'lucide-react'
+import { ArrowLeft, Search, Plus, Trash2, Edit, Loader2, MapPin, MapPinned } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { EmptyState } from '@/components/common/EmptyState'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 
 const SingleTPSMap = dynamic(() => import('@/components/maps/SingleTPSMap'), { ssr: false })
 const TPSMapView = dynamic(() => import('@/components/maps/TPSMapView'), { ssr: false })
@@ -36,10 +39,12 @@ export default function AdminTpsPage() {
   const [tpsList, setTpsList] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [editingTps, setEditingTps] = useState<any>(null)
   const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<any>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
   const [form, setForm] = useState({
     code: '',
     name: '',
@@ -53,25 +58,27 @@ export default function AdminTpsPage() {
     totalDpt: '',
   })
 
-  const fetchTps = () => {
+  // Debounce
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  const fetchTps = useCallback(() => {
     setLoading(true)
-    fetch(`/api/tps?search=${encodeURIComponent(search)}`)
-      .then((res) => res.json())
+    fetch(`/api/tps?search=${encodeURIComponent(debouncedSearch)}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) setTpsList(res.data)
+        else toast.error(res.error)
       })
       .catch(() => toast.error('Gagal memuat data'))
       .finally(() => setLoading(false))
-  }
+  }, [debouncedSearch])
 
   useEffect(() => {
     fetchTps()
-  }, [])
-
-  useEffect(() => {
-    const timer = setTimeout(() => fetchTps(), 500)
-    return () => clearTimeout(timer)
-  }, [search])
+  }, [fetchTps])
 
   const resetForm = () => {
     setForm({ code: '', name: '', address: '', latitude: '', longitude: '', kelurahan: '', kecamatan: '', kota: '', province: '', totalDpt: '' })
@@ -125,14 +132,15 @@ export default function AdminTpsPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Yakin ingin menghapus TPS ini?')) return
-    setDeleting(id)
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeleteLoading(true)
     try {
-      const res = await fetch(`/api/tps/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/tps/${deleteTarget.id}`, { method: 'DELETE' })
       const data = await res.json()
       if (data.success) {
         toast.success('TPS berhasil dihapus')
+        setDeleteTarget(null)
         fetchTps()
       } else {
         toast.error(data.error)
@@ -140,12 +148,12 @@ export default function AdminTpsPage() {
     } catch {
       toast.error('Gagal menghapus TPS')
     } finally {
-      setDeleting(null)
+      setDeleteLoading(false)
     }
   }
 
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.push('/admin/dashboard')}>
           <ArrowLeft className="h-5 w-5" />
@@ -162,12 +170,17 @@ export default function AdminTpsPage() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input placeholder="Cari kode, nama, atau alamat TPS..." className="pl-10" value={search} onChange={(e) => setSearch(e.target.value)} />
+        {debouncedSearch && search !== debouncedSearch && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
+        )}
       </div>
 
       {/* TPS Map Overview */}
-      {tpsList.length > 0 && (
-        <Card>
-          <CardHeader>
+      {tpsList.length > 0 && !loading && (
+        <Card className="shadow-sm">
+          <CardHeader className="bg-muted/50">
             <CardTitle className="text-lg flex items-center gap-2">
               <MapPin className="h-5 w-5" />
               Peta Sebaran TPS
@@ -179,19 +192,23 @@ export default function AdminTpsPage() {
         </Card>
       )}
 
-      <Card>
+      <Card className="shadow-sm">
         <CardContent className="p-0">
           {loading ? (
             <div className="p-6 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
             </div>
           ) : tpsList.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground">Tidak ada TPS ditemukan</div>
+            <EmptyState
+              icon={MapPinned}
+              title={debouncedSearch ? 'Tidak Ada Hasil' : 'Belum Ada TPS'}
+              description={debouncedSearch ? `Tidak ditemukan TPS untuk "${debouncedSearch}"` : 'Tambahkan TPS baru untuk memulai plotting'}
+            />
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50">
                     <TableHead>Kode</TableHead>
                     <TableHead>Nama</TableHead>
                     <TableHead>Alamat</TableHead>
@@ -203,7 +220,7 @@ export default function AdminTpsPage() {
                 </TableHeader>
                 <TableBody>
                   {tpsList.map((t) => (
-                    <TableRow key={t.id}>
+                    <TableRow key={t.id} className="hover:bg-muted/50">
                       <TableCell className="font-medium">{t.code}</TableCell>
                       <TableCell>{t.name}</TableCell>
                       <TableCell className="text-sm max-w-[200px] truncate">{t.address}</TableCell>
@@ -212,17 +229,18 @@ export default function AdminTpsPage() {
                       </TableCell>
                       <TableCell>{t.totalDpt?.toLocaleString('id-ID')}</TableCell>
                       <TableCell>
-                        <Badge variant={t.activeAssignmentCount > 0 ? 'default' : 'secondary'}>
+                        <Badge variant="secondary" className={t.activeAssignmentCount > 0 ? 'bg-emerald-100 text-emerald-700 gap-1.5' : 'bg-gray-100 text-gray-600'}>
+                          <span className={`inline-flex h-1.5 w-1.5 rounded-full ${t.activeAssignmentCount > 0 ? 'bg-emerald-500' : 'bg-gray-400'}`} />
                           {t.activeAssignmentCount}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
                           <Button variant="ghost" size="sm" onClick={() => openEdit(t)}>
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-4 w-4 mr-1" /> Edit
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(t.id)} disabled={deleting === t.id}>
-                            {deleting === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+                          <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(t)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
                       </TableCell>
@@ -267,7 +285,6 @@ export default function AdminTpsPage() {
               </div>
             </div>
 
-            {/* Map Preview */}
             {form.latitude && form.longitude && !isNaN(Number(form.latitude)) && !isNaN(Number(form.longitude)) && (
               <div className="space-y-2">
                 <Label className="text-sm text-muted-foreground">Pratinjau Lokasi</Label>
@@ -310,6 +327,17 @@ export default function AdminTpsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Hapus TPS"
+        description={`Apakah Anda yakin ingin menghapus TPS "${deleteTarget?.code} - ${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        onConfirm={handleDelete}
+        loading={deleteLoading}
+      />
     </div>
   )
 }

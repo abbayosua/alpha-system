@@ -1,5 +1,5 @@
 // Override system env vars before any imports
-process.env.DATABASE_URL = 'postgresql://postgres.wwekdhlzsyhqkgapiszl:890iop*()IOP@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres'
+process.env.DATABASE_URL = 'postgresql://postgres.wwekdhlzsyhqkgapiszl:890iop*()IOP@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres'
 process.env.DIRECT_URL = process.env.DATABASE_URL
 
 import { createClient } from '@supabase/supabase-js'

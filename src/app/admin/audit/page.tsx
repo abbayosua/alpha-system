@@ -7,40 +7,40 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ArrowLeft, Shield } from 'lucide-react'
+import { ArrowLeft, Shield, ScrollText, ClipboardCheck, PenLine } from 'lucide-react'
 import { toast } from 'sonner'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { EmptyState } from '@/components/common/EmptyState'
 
 export default function AdminAuditPage() {
   const router = useRouter()
   const [checkIns, setCheckIns] = useState<any[]>([])
   const [votes, setVotes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'checkins' | 'votes'>('checkins')
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/check-ins?limit=50').then((r) => r.json()),
-      fetch('/api/votes?limit=50').then((r) => r.json()),
+      fetch('/api/check-ins?limit=50').then((r) => (r.ok ? r.json() : Promise.reject(r))),
+      fetch('/api/votes?limit=50').then((r) => (r.ok ? r.json() : Promise.reject(r))),
     ])
       .then(([ciRes, vRes]) => {
         if (ciRes.success) setCheckIns(ciRes.data.checkIns)
         if (vRes.success) setVotes(vRes.data.votes)
       })
-      .catch(() => toast.error('Gagal memuat data audit'))
+      .catch(() => {
+        setError('Gagal memuat data audit')
+        toast.error('Gagal memuat data audit')
+      })
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) {
-    return (
-      <div className="p-4 max-w-6xl mx-auto space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    )
-  }
+  if (loading) return <DashboardSkeleton variant="table" />
+  if (error) return <EmptyState icon={ScrollText} title={error} description="Coba muat ulang halaman" action={<Button onClick={() => window.location.reload()}>Coba Lagi</Button>} />
 
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.push('/admin/dashboard')}>
           <ArrowLeft className="h-5 w-5" />
@@ -56,24 +56,42 @@ export default function AdminAuditPage() {
 
       {/* Tabs */}
       <div className="flex gap-2">
-        <Button variant={activeTab === 'checkins' ? 'default' : 'outline'} size="sm" onClick={() => setActiveTab('checkins')}>
-          Check-ins ({checkIns.length})
+        <Button
+          variant={activeTab === 'checkins' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveTab('checkins')}
+          className="gap-2"
+        >
+          <ClipboardCheck className="h-4 w-4" />
+          Check-ins
+          <Badge variant="secondary" className="rounded-full px-2 bg-background/20 text-foreground">
+            {checkIns.length}
+          </Badge>
         </Button>
-        <Button variant={activeTab === 'votes' ? 'default' : 'outline'} size="sm" onClick={() => setActiveTab('votes')}>
-          Input Suara ({votes.length})
+        <Button
+          variant={activeTab === 'votes' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveTab('votes')}
+          className="gap-2"
+        >
+          <PenLine className="h-4 w-4" />
+          Input Suara
+          <Badge variant="secondary" className="rounded-full px-2 bg-background/20 text-foreground">
+            {votes.length}
+          </Badge>
         </Button>
       </div>
 
       {activeTab === 'checkins' && (
-        <Card>
-          <CardHeader>
+        <Card className="shadow-sm">
+          <CardHeader className="bg-muted/50">
             <CardTitle className="text-lg">Log Check-in</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50">
                     <TableHead>Tanggal</TableHead>
                     <TableHead>Tipe</TableHead>
                     <TableHead>Saksi</TableHead>
@@ -84,12 +102,16 @@ export default function AdminAuditPage() {
                 </TableHeader>
                 <TableBody>
                   {checkIns.length > 0 ? checkIns.map((c) => (
-                    <TableRow key={c.id}>
+                    <TableRow key={c.id} className="hover:bg-muted/50">
                       <TableCell className="text-sm">
                         {new Date(c.timestamp).toLocaleString('id-ID')}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={c.type === 'MORNING' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant="secondary"
+                          className={c.type === 'MORNING' ? 'bg-emerald-100 text-emerald-700 gap-1.5' : 'bg-amber-100 text-amber-700 gap-1.5'}
+                        >
+                          <span className={`inline-flex h-1.5 w-1.5 rounded-full ${c.type === 'MORNING' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                           {c.type === 'MORNING' ? 'Pagi' : 'Akhir'}
                         </Badge>
                       </TableCell>
@@ -99,15 +121,18 @@ export default function AdminAuditPage() {
                       </TableCell>
                       <TableCell className="text-sm">{c.tps?.code} - {c.tps?.name}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className={c.gpsVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
-                          {c.gpsVerified ? '✓ Valid' : '✗ Invalid'}
+                        <Badge variant="secondary" className={c.gpsVerified ? 'bg-emerald-100 text-emerald-700 gap-1.5' : 'bg-rose-100 text-rose-700 gap-1.5'}>
+                          <span className={`inline-flex h-1.5 w-1.5 rounded-full ${c.gpsVerified ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                          {c.gpsVerified ? 'Valid' : 'Invalid'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">{c.distance ? `${Math.round(c.distance)}m` : '-'}</TableCell>
                     </TableRow>
                   )) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-6">Belum ada data check-in</TableCell>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        <EmptyState icon={ClipboardCheck} title="Belum Ada Data Check-in" />
+                      </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
@@ -118,15 +143,15 @@ export default function AdminAuditPage() {
       )}
 
       {activeTab === 'votes' && (
-        <Card>
-          <CardHeader>
+        <Card className="shadow-sm">
+          <CardHeader className="bg-muted/50">
             <CardTitle className="text-lg">Log Input Suara</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50">
                     <TableHead>Tanggal</TableHead>
                     <TableHead>Saksi</TableHead>
                     <TableHead>TPS</TableHead>
@@ -139,7 +164,7 @@ export default function AdminAuditPage() {
                 </TableHeader>
                 <TableBody>
                   {votes.length > 0 ? votes.map((v) => (
-                    <TableRow key={v.id}>
+                    <TableRow key={v.id} className="hover:bg-muted/50">
                       <TableCell className="text-sm">
                         {new Date(v.submittedAt).toLocaleString('id-ID')}
                       </TableCell>
@@ -150,16 +175,19 @@ export default function AdminAuditPage() {
                       <TableCell className="text-sm text-center">{v.candidate1Votes}</TableCell>
                       <TableCell className="text-sm text-center">{v.candidate2Votes}</TableCell>
                       <TableCell className="text-sm text-center">{v.candidate3Votes}</TableCell>
-                      <TableCell className="text-sm font-medium text-center">{v.totalVotes}</TableCell>
+                      <TableCell className="text-sm font-semibold text-center">{v.totalVotes}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className={v.c1Photo ? 'bg-green-100 text-green-700' : 'bg-gray-100'}>
-                          {v.c1Photo ? '✓' : '✗'}
+                        <Badge variant="secondary" className={v.c1Photo ? 'bg-emerald-100 text-emerald-700 gap-1.5' : 'bg-gray-100 text-gray-600 gap-1.5'}>
+                          <span className={`inline-flex h-1.5 w-1.5 rounded-full ${v.c1Photo ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                          {v.c1Photo ? 'Ada' : 'Tidak'}
                         </Badge>
                       </TableCell>
                     </TableRow>
                   )) : (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground py-6">Belum ada data input suara</TableCell>
+                      <TableCell colSpan={8} className="text-center py-8">
+                        <EmptyState icon={PenLine} title="Belum Ada Data Input Suara" />
+                      </TableCell>
                     </TableRow>
                   )}
                 </TableBody>

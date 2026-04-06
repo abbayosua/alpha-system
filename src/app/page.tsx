@@ -6,47 +6,60 @@ import { useAuthStore } from '@/store/authStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Shield, MapPin, ClipboardCheck, Camera, FileText, Wallet, Users, BarChart3, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { Shield, MapPin, ClipboardCheck, Camera, FileText, Wallet, Users, BarChart3, ArrowRight, CheckCircle2, LayoutDashboard } from 'lucide-react'
 
 export default function Home() {
   const router = useRouter()
   const { user, isAuthenticated, isLoading } = useAuthStore()
 
+  const getDashboardPath = () => {
+    if (!user) return '/auth/login'
+    return user.role === 'ADMIN' ? '/admin/dashboard' : user.role === 'ADMIN_KEUANGAN' ? '/keuangan/dashboard' : '/saksi/dashboard'
+  }
+
+  const getRoleLabel = () => {
+    if (!user) return ''
+    return user.role === 'ADMIN' ? 'Admin' : user.role === 'ADMIN_KEUANGAN' ? 'Keuangan' : 'Saksi'
+  }
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-emerald-50">
         <div className="animate-pulse text-muted-foreground text-lg">Memuat...</div>
       </div>
     )
   }
 
-  if (isAuthenticated && user) {
-    // Redirect to appropriate dashboard
-    const dashboardPath = user.role === 'ADMIN' ? '/admin/dashboard' : user.role === 'ADMIN_KEUANGAN' ? '/keuangan/dashboard' : '/saksi/dashboard'
-    router.replace(dashboardPath)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="animate-pulse text-muted-foreground text-lg">Mengalihkan...</div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Shield className="h-8 w-8 text-primary" />
+            <Shield className="h-8 w-8 text-emerald-600" />
             <span className="text-xl font-bold">SAKSI APP</span>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" onClick={() => router.push('/auth/login')}>
-              Masuk
-            </Button>
-            <Button onClick={() => router.push('/auth/register')}>
-              Daftar Sekarang
-            </Button>
+            {isAuthenticated && user ? (
+              <>
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                  {user.name} · {getRoleLabel()}
+                </span>
+                <Button onClick={() => router.push(getDashboardPath())}>
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={() => router.push('/auth/login')}>
+                  Masuk
+                </Button>
+                <Button onClick={() => router.push('/auth/register')}>
+                  Daftar Sekarang
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -59,21 +72,29 @@ export default function Home() {
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
           Lindungi Suara Rakyat
           <br />
-          <span className="text-primary">Dengan Teknologi Modern</span>
+          <span className="text-emerald-600">Dengan Teknologi Modern</span>
         </h1>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
           Aplikasi terpadu untuk manajemen saksi pemilu. Check-in GPS, input suara real-time,
           pelaporan fraud, dan transparansi pembayaran.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" onClick={() => router.push('/auth/register')} className="text-lg px-8">
-            Daftar Sebagai Saksi
+        {isAuthenticated && user ? (
+          <Button size="lg" onClick={() => router.push(getDashboardPath())} className="text-lg px-8 bg-emerald-600 hover:bg-emerald-700">
+            <LayoutDashboard className="mr-2 h-5 w-5" />
+            Buka Dashboard {getRoleLabel()}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-          <Button size="lg" variant="outline" onClick={() => router.push('/auth/login')} className="text-lg px-8">
-            Masuk ke Akun
-          </Button>
-        </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" onClick={() => router.push('/auth/register')} className="text-lg px-8 bg-emerald-600 hover:bg-emerald-700">
+              Daftar Sebagai Saksi
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => router.push('/auth/login')} className="text-lg px-8">
+              Masuk ke Akun
+            </Button>
+          </div>
+        )}
       </section>
 
       {/* Features Section */}
@@ -119,7 +140,7 @@ export default function Home() {
       </section>
 
       {/* How it Works Section */}
-      <section className="bg-primary/5 py-20">
+      <section className="bg-emerald-50/50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Cara Kerja</h2>
@@ -145,51 +166,57 @@ export default function Home() {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+          <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
-                <Users className="h-8 w-8 text-primary" />
+                <div className="p-2 rounded-lg bg-emerald-100">
+                  <Users className="h-6 w-6 text-emerald-600" />
+                </div>
                 <CardTitle className="text-lg">Saksi</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Check-in GPS</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Input suara</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Laporan fraud</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tracking pembayaran</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Check-in GPS</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Input suara</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Laporan fraud</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Tracking pembayaran</li>
               </ul>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
-                <Shield className="h-8 w-8 text-primary" />
+                <div className="p-2 rounded-lg bg-emerald-100">
+                  <Shield className="h-6 w-6 text-emerald-600" />
+                </div>
                 <CardTitle className="text-lg">Admin</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Manajemen saksi</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Plotting TPS</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Monitoring check-in</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Review laporan</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Manajemen saksi</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Plotting TPS</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Monitoring check-in</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Review laporan</li>
               </ul>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
-                <Wallet className="h-8 w-8 text-primary" />
+                <div className="p-2 rounded-lg bg-emerald-100">
+                  <Wallet className="h-6 w-6 text-emerald-600" />
+                </div>
                 <CardTitle className="text-lg">Keuangan</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Approval pembayaran</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Validasi data</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Pencairan dana</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Riwayat transaksi</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Approval pembayaran</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Validasi data</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Pencairan dana</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Riwayat transaksi</li>
               </ul>
             </CardContent>
           </Card>
@@ -197,16 +224,23 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-primary text-primary-foreground py-20">
+      <section className="bg-emerald-600 text-white py-20">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Siap Berkontribusi?</h2>
-          <p className="text-primary-foreground/80 mb-8">
+          <p className="text-emerald-100 mb-8">
             Bergabunglah sebagai saksi pemilu dan lindungi suara rakyat Indonesia.
           </p>
-          <Button size="lg" variant="secondary" onClick={() => router.push('/auth/register')} className="text-lg px-8">
-            Daftar Sekarang
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+          {isAuthenticated && user ? (
+            <Button size="lg" variant="secondary" onClick={() => router.push(getDashboardPath())} className="text-lg px-8">
+              <LayoutDashboard className="mr-2 h-5 w-5" />
+              Buka Dashboard
+            </Button>
+          ) : (
+            <Button size="lg" variant="secondary" onClick={() => router.push('/auth/register')} className="text-lg px-8">
+              Daftar Sekarang
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          )}
         </div>
       </section>
 
@@ -222,9 +256,9 @@ export default function Home() {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="shadow-sm hover:shadow-md transition-shadow">
       <CardHeader>
-        <div className="mb-2 text-primary">{icon}</div>
+        <div className="mb-2 text-emerald-600">{icon}</div>
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent>
@@ -237,7 +271,7 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
 function StepCard({ number, title, description }: { number: number; title: string; description: string }) {
   return (
     <div className="text-center">
-      <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+      <div className="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
         {number}
       </div>
       <h3 className="font-semibold text-lg mb-2">{title}</h3>

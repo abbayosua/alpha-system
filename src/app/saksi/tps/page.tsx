@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, MapPin, Users, Clock, Navigation } from 'lucide-react'
+import { ArrowLeft, MapPin, Users, Clock, Navigation, ClipboardCheck, Camera, AlertTriangle } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { ErrorState } from '@/components/common/ErrorState'
+import { EmptyState } from '@/components/common/EmptyState'
 
 const SingleTPSMap = dynamic(() => import('@/components/maps/SingleTPSMap'), { ssr: false })
 
@@ -19,46 +21,42 @@ export default function SaksiTpsPage() {
 
   useEffect(() => {
     fetch('/api/assignments/my')
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) setData(res.data)
         else if (!res.success && res.error) setError(res.error)
       })
-      .catch((err) => setError(err.message))
+      .catch((err) => setError(err.statusText || 'Gagal memuat data'))
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) {
-    return (
-      <div className="p-4 max-w-2xl mx-auto space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    )
-  }
+  if (loading) return <DashboardSkeleton variant="detail" />
+
+  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />
 
   if (!data) {
     return (
-      <div className="p-4 max-w-2xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">Detail TPS</h1>
+          <div>
+            <h1 className="text-2xl font-bold">Detail TPS</h1>
+            <p className="text-sm text-muted-foreground">Informasi TPS penugasan Anda</p>
+          </div>
         </div>
-        <Card>
-          <CardContent className="p-6 text-center text-muted-foreground">
-            <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>Anda belum ditugaskan ke TPS manapun.</p>
-            <p className="text-sm mt-1">Menunggu plotting dari admin.</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={MapPin}
+          title="Belum Ditugaskan"
+          description="Anda belum ditugaskan ke TPS manapun. Menunggu plotting dari admin."
+        />
       </div>
     )
   }
 
   return (
-    <div className="p-4 max-w-2xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
           <ArrowLeft className="h-5 w-5" />
@@ -69,24 +67,27 @@ export default function SaksiTpsPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="shadow-sm border-l-4 border-l-emerald-500">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-primary" />
+              <MapPin className="h-5 w-5 text-emerald-600" />
               {data.tps.code} - {data.tps.name}
             </CardTitle>
-            <Badge variant="default">{data.status}</Badge>
+            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 gap-1.5">
+              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              {data.status}
+            </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 divide-y">
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">Alamat</p>
-            <p>{data.tps.address}</p>
+            <p className="text-sm">{data.tps.address}</p>
           </div>
 
           {(data.tps.kelurahan || data.tps.kecamatan || data.tps.kota || data.tps.province) && (
-            <div>
+            <div className="pt-3">
               <p className="text-sm font-medium text-muted-foreground mb-1">Wilayah</p>
               <p className="text-sm">
                 {[data.tps.kelurahan, data.tps.kecamatan, data.tps.kota, data.tps.province].filter(Boolean).join(', ')}
@@ -94,7 +95,7 @@ export default function SaksiTpsPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="pt-3 grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">DPT</p>
               <p className="text-lg font-semibold">{data.tps.totalDpt?.toLocaleString('id-ID') || 0} pemilih</p>
@@ -102,14 +103,14 @@ export default function SaksiTpsPage() {
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Koordinat GPS</p>
               <div className="flex items-center gap-1 text-sm">
-                <Navigation className="h-4 w-4" />
+                <Navigation className="h-4 w-4 text-muted-foreground" />
                 <span>{data.tps.latitude.toFixed(6)}, {data.tps.longitude.toFixed(6)}</span>
               </div>
             </div>
           </div>
 
           {/* TPS Location Map */}
-          <div className="pt-2">
+          <div className="pt-3">
             <p className="text-sm font-medium text-muted-foreground mb-2">Lokasi TPS</p>
             <SingleTPSMap
               latitude={data.tps.latitude}
@@ -121,10 +122,10 @@ export default function SaksiTpsPage() {
             />
           </div>
 
-          <div className="pt-3 border-t">
+          <div className="pt-3">
             <p className="text-sm font-medium text-muted-foreground mb-1">Ditugaskan sejak</p>
             <p className="text-sm flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+              <Clock className="h-4 w-4 text-muted-foreground" />
               {new Date(data.assignedAt).toLocaleString('id-ID')}
             </p>
           </div>
@@ -150,14 +151,17 @@ export default function SaksiTpsPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-3">
-        <Button variant="outline" className="flex-1" onClick={() => router.push('/saksi/check-in')}>
+      <div className="flex flex-wrap gap-3">
+        <Button variant="outline" className="flex-1 min-w-[120px]" onClick={() => router.push('/saksi/check-in')}>
+          <ClipboardCheck className="h-4 w-4 mr-2" />
           Check-in
         </Button>
-        <Button variant="outline" className="flex-1" onClick={() => router.push('/saksi/input')}>
+        <Button variant="outline" className="flex-1 min-w-[120px]" onClick={() => router.push('/saksi/input')}>
+          <Camera className="h-4 w-4 mr-2" />
           Input Suara
         </Button>
-        <Button variant="outline" className="flex-1" onClick={() => router.push('/saksi/lapor')}>
+        <Button variant="outline" className="flex-1 min-w-[120px]" onClick={() => router.push('/saksi/lapor')}>
+          <AlertTriangle className="h-4 w-4 mr-2" />
           Lapor
         </Button>
       </div>
@@ -167,10 +171,17 @@ export default function SaksiTpsPage() {
 
 function StatusCard({ title, status, detail }: { title: string; status: 'done' | 'pending'; detail?: string }) {
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardContent className="p-4 text-center">
-        <p className="text-sm text-muted-foreground mb-1">{title}</p>
-        <Badge variant={status === 'done' ? 'default' : 'secondary'} className={status === 'done' ? 'bg-green-100 text-green-700' : ''}>
+        <p className="text-sm text-muted-foreground mb-2">{title}</p>
+        <Badge
+          variant="secondary"
+          className={status === 'done'
+            ? 'bg-emerald-100 text-emerald-700 gap-1.5'
+            : 'bg-amber-100 text-amber-700 gap-1.5'
+          }
+        >
+          <span className={`inline-flex h-1.5 w-1.5 rounded-full ${status === 'done' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
           {status === 'done' ? 'Selesai' : 'Belum'}
         </Badge>
         {detail && <p className="text-xs text-muted-foreground mt-1">{detail}</p>}

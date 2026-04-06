@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
-import { ArrowLeft, Wallet, Loader2 } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, Wallet } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { EmptyState } from '@/components/common/EmptyState'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 
 export default function KeuanganDisbursementPage() {
   const router = useRouter()
@@ -17,16 +20,19 @@ export default function KeuanganDisbursementPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [disbursing, setDisbursing] = useState<string | null>(null)
+  const [disburseTarget, setDisburseTarget] = useState<any>(null)
+  const [disbursing, setDisbursing] = useState(false)
 
   const fetchPayments = () => {
     setLoading(true)
     fetch(`/api/payments?status=APPROVED&page=${page}&limit=20`)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) {
           setPayments(res.data.payments)
           setTotalPages(res.data.pagination.totalPages)
+        } else {
+          toast.error(res.error)
         }
       })
       .catch(() => toast.error('Gagal memuat data'))
@@ -37,14 +43,15 @@ export default function KeuanganDisbursementPage() {
     fetchPayments()
   }, [page])
 
-  const handleDisburse = async (paymentId: string) => {
-    if (!confirm('Konfirmasi bahwa dana sudah dicairkan?')) return
-    setDisbursing(paymentId)
+  const handleDisburse = async () => {
+    if (!disburseTarget) return
+    setDisbursing(true)
     try {
-      const res = await fetch(`/api/payments/${paymentId}?action=disburse`, { method: 'PUT' })
+      const res = await fetch(`/api/payments/${disburseTarget.id}?action=disburse`, { method: 'PUT' })
       const data = await res.json()
       if (data.success) {
-        toast.success('Dana berhasil dicairkan!')
+        toast.success(`Dana berhasil dicairkan untuk ${disburseTarget.user?.name}!`)
+        setDisburseTarget(null)
         fetchPayments()
       } else {
         toast.error(data.error)
@@ -52,12 +59,12 @@ export default function KeuanganDisbursementPage() {
     } catch {
       toast.error('Terjadi kesalahan')
     } finally {
-      setDisbursing(null)
+      setDisbursing(false)
     }
   }
 
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.push('/keuangan/dashboard')}>
           <ArrowLeft className="h-5 w-5" />
@@ -68,22 +75,23 @@ export default function KeuanganDisbursementPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="shadow-sm">
         <CardContent className="p-0">
           {loading ? (
             <div className="p-6 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
             </div>
           ) : payments.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground">
-              <Wallet className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              Tidak ada pembayaran yang siap dicairkan
-            </div>
+            <EmptyState
+              icon={Send}
+              title="Tidak Ada Dana untuk Dicairkan"
+              description="Semua pembayaran yang disetujui sudah dicairkan"
+            />
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50">
                     <TableHead>Saksi</TableHead>
                     <TableHead>Jumlah</TableHead>
                     <TableHead>Metode</TableHead>
@@ -95,12 +103,12 @@ export default function KeuanganDisbursementPage() {
                 </TableHeader>
                 <TableBody>
                   {payments.map((p) => (
-                    <TableRow key={p.id}>
+                    <TableRow key={p.id} className="hover:bg-muted/50">
                       <TableCell>
                         <p className="font-medium">{p.user?.name}</p>
                         <p className="text-xs text-muted-foreground">{p.user?.email}</p>
                       </TableCell>
-                      <TableCell className="font-medium">{formatCurrency(p.amount)}</TableCell>
+                      <TableCell className="font-medium text-emerald-600">{formatCurrency(p.amount)}</TableCell>
                       <TableCell className="text-sm">{p.paymentMethod || '-'}</TableCell>
                       <TableCell className="text-sm">{p.accountNumber || '-'}</TableCell>
                       <TableCell className="text-sm">{p.accountName || '-'}</TableCell>
@@ -108,12 +116,8 @@ export default function KeuanganDisbursementPage() {
                         {p.approvedAt ? new Date(p.approvedAt).toLocaleDateString('id-ID') : '-'}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button size="sm" onClick={() => handleDisburse(p.id)} disabled={disbursing === p.id}>
-                          {disbursing === p.id ? (
-                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Memproses...</>
-                          ) : (
-                            'Cairkan'
-                          )}
+                        <Button size="sm" onClick={() => setDisburseTarget(p)}>
+                          <Send className="h-4 w-4 mr-1" /> Cairkan
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -132,6 +136,18 @@ export default function KeuanganDisbursementPage() {
           <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>Selanjutnya</Button>
         </div>
       )}
+
+      {/* Disburse Confirmation */}
+      <ConfirmDialog
+        open={!!disburseTarget}
+        onOpenChange={(open) => !open && setDisburseTarget(null)}
+        title="Konfirmasi Pencairan Dana"
+        description={`Apakah Anda yakin ingin mencairkan dana sebesar ${formatCurrency(disburseTarget?.amount || 0)} untuk ${disburseTarget?.user?.name}? Pastikan dana sudah ditransfer.`}
+        confirmLabel="Ya, Cairkan"
+        onConfirm={handleDisburse}
+        loading={disbursing}
+        variant="default"
+      />
     </div>
   )
 }

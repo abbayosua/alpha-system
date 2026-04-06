@@ -11,8 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { ArrowLeft, CheckCircle2, Loader2, Wallet } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Loader2, Wallet, Eye, Receipt } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { EmptyState } from '@/components/common/EmptyState'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 
 export default function KeuanganPaymentsPage() {
   const router = useRouter()
@@ -23,6 +26,7 @@ export default function KeuanganPaymentsPage() {
   const [detailPayment, setDetailPayment] = useState<any>(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [approving, setApproving] = useState(false)
+  const [rejectTarget, setRejectTarget] = useState<any>(null)
   const [rejecting, setRejecting] = useState(false)
   const [approveForm, setApproveForm] = useState({
     paymentMethod: '',
@@ -33,11 +37,13 @@ export default function KeuanganPaymentsPage() {
   const fetchPayments = () => {
     setLoading(true)
     fetch(`/api/payments?status=READY_FOR_PAYMENT&page=${page}&limit=20`)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) {
           setPayments(res.data.payments)
           setTotalPages(res.data.pagination.totalPages)
+        } else {
+          toast.error(res.error)
         }
       })
       .catch(() => toast.error('Gagal memuat data'))
@@ -52,7 +58,7 @@ export default function KeuanganPaymentsPage() {
     setDetailLoading(true)
     setDetailPayment(null)
     fetch(`/api/payments/${paymentId}`)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) {
           setDetailPayment(res.data)
@@ -94,13 +100,14 @@ export default function KeuanganPaymentsPage() {
   }
 
   const handleReject = async () => {
-    if (!detailPayment || !confirm('Yakin ingin menolak pembayaran ini?')) return
+    if (!rejectTarget) return
     setRejecting(true)
     try {
-      const res = await fetch(`/api/payments/${detailPayment.id}?action=reject`, { method: 'PUT' })
+      const res = await fetch(`/api/payments/${rejectTarget.id}?action=reject`, { method: 'PUT' })
       const data = await res.json()
       if (data.success) {
         toast.success('Pembayaran ditolak')
+        setRejectTarget(null)
         setDetailPayment(null)
         fetchPayments()
       } else {
@@ -114,7 +121,7 @@ export default function KeuanganPaymentsPage() {
   }
 
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.push('/keuangan/dashboard')}>
           <ArrowLeft className="h-5 w-5" />
@@ -125,53 +132,52 @@ export default function KeuanganPaymentsPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="shadow-sm">
         <CardContent className="p-0">
           {loading ? (
             <div className="p-6 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
             </div>
           ) : payments.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground">
-              <Wallet className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              Tidak ada pembayaran yang menunggu approval
-            </div>
+            <EmptyState
+              icon={Receipt}
+              title="Tidak Ada Pembayaran"
+              description="Tidak ada pembayaran yang menunggu approval"
+            />
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50">
                     <TableHead>Saksi</TableHead>
                     <TableHead>Jumlah</TableHead>
                     <TableHead>Validasi</TableHead>
-                    <TableHead>Bank</TableHead>
+                    <TableHead>Telepon</TableHead>
                     <TableHead>Tanggal</TableHead>
                     <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {payments.map((p) => (
-                    <TableRow key={p.id}>
+                    <TableRow key={p.id} className="hover:bg-muted/50">
                       <TableCell>
                         <p className="font-medium">{p.user?.name}</p>
                         <p className="text-xs text-muted-foreground">{p.user?.email}</p>
                       </TableCell>
-                      <TableCell className="font-medium">{formatCurrency(p.amount)}</TableCell>
+                      <TableCell className="font-medium text-emerald-600">{formatCurrency(p.amount)}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Badge variant="secondary" className={p.gpsVerified ? 'bg-green-100 text-green-700' : 'bg-gray-100'}>GPS</Badge>
-                          <Badge variant="secondary" className={p.dataInputted ? 'bg-green-100 text-green-700' : 'bg-gray-100'}>Data</Badge>
-                          <Badge variant="secondary" className={p.c1Uploaded ? 'bg-green-100 text-green-700' : 'bg-gray-100'}>C1</Badge>
+                          <ValidationBadge label="GPS" done={p.gpsVerified} />
+                          <ValidationBadge label="Data" done={p.dataInputted} />
+                          <ValidationBadge label="C1" done={p.c1Uploaded} />
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">{p.validationScore}/3</p>
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {p.user?.phone || '-'}
-                      </TableCell>
+                      <TableCell className="text-sm">{p.user?.phone || '-'}</TableCell>
                       <TableCell className="text-sm">{new Date(p.createdAt).toLocaleDateString('id-ID')}</TableCell>
                       <TableCell className="text-right">
                         <Button variant="outline" size="sm" onClick={() => viewDetail(p.id)}>
-                          Review
+                          <Eye className="h-4 w-4 mr-1" /> Review
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -210,29 +216,32 @@ export default function KeuanganPaymentsPage() {
                   <p className="text-sm text-muted-foreground">{detailPayment.user?.email}</p>
                   <p className="text-sm text-muted-foreground">{detailPayment.user?.phone}</p>
                 </div>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(detailPayment.amount)}</p>
+                <p className="text-2xl font-bold text-emerald-600">{formatCurrency(detailPayment.amount)}</p>
               </div>
 
-              <div className="p-3 bg-muted rounded space-y-2 text-sm">
-                <div className="flex justify-between">
+              <div className="p-3 bg-muted rounded-lg space-y-2 text-sm divide-y">
+                <div className="flex justify-between pt-1 first:pt-0">
                   <span className="text-muted-foreground">Validasi GPS</span>
-                  <Badge variant="secondary" className={detailPayment.gpsVerified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                  <Badge variant="secondary" className={detailPayment.gpsVerified ? 'bg-emerald-100 text-emerald-700 gap-1.5' : 'bg-rose-100 text-rose-700 gap-1.5'}>
+                    <span className={`inline-flex h-1.5 w-1.5 rounded-full ${detailPayment.gpsVerified ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                     {detailPayment.gpsVerified ? '✓' : '✗'}
                   </Badge>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between pt-2">
                   <span className="text-muted-foreground">Data Suara</span>
-                  <Badge variant="secondary" className={detailPayment.dataInputted ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                  <Badge variant="secondary" className={detailPayment.dataInputted ? 'bg-emerald-100 text-emerald-700 gap-1.5' : 'bg-rose-100 text-rose-700 gap-1.5'}>
+                    <span className={`inline-flex h-1.5 w-1.5 rounded-full ${detailPayment.dataInputted ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                     {detailPayment.dataInputted ? '✓' : '✗'}
                   </Badge>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between pt-2">
                   <span className="text-muted-foreground">Foto C1</span>
-                  <Badge variant="secondary" className={detailPayment.c1Uploaded ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                  <Badge variant="secondary" className={detailPayment.c1Uploaded ? 'bg-emerald-100 text-emerald-700 gap-1.5' : 'bg-rose-100 text-rose-700 gap-1.5'}>
+                    <span className={`inline-flex h-1.5 w-1.5 rounded-full ${detailPayment.c1Uploaded ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                     {detailPayment.c1Uploaded ? '✓' : '✗'}
                   </Badge>
                 </div>
-                <div className="flex justify-between font-medium">
+                <div className="flex justify-between font-medium pt-2">
                   <span>Skor Validasi</span>
                   <span>{detailPayment.validationScore}/3</span>
                 </div>
@@ -255,8 +264,12 @@ export default function KeuanganPaymentsPage() {
               </div>
 
               <div className="flex gap-3">
-                <Button variant="destructive" className="flex-1" onClick={handleReject} disabled={rejecting}>
-                  {rejecting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Menolak...</> : 'Tolak'}
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={() => setRejectTarget(detailPayment)}
+                >
+                  Tolak
                 </Button>
                 <Button className="flex-1" onClick={handleApprove} disabled={approving}>
                   {approving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Menyetujui...</> : 'Setujui'}
@@ -266,6 +279,26 @@ export default function KeuanganPaymentsPage() {
           ) : null}
         </DialogContent>
       </Dialog>
+
+      {/* Reject Confirmation */}
+      <ConfirmDialog
+        open={!!rejectTarget}
+        onOpenChange={(open) => !open && setRejectTarget(null)}
+        title="Tolak Pembayaran"
+        description={`Apakah Anda yakin ingin menolak pembayaran sebesar ${formatCurrency(rejectTarget?.amount || 0)} untuk ${rejectTarget?.user?.name}?`}
+        confirmLabel="Ya, Tolak"
+        onConfirm={handleReject}
+        loading={rejecting}
+      />
     </div>
+  )
+}
+
+function ValidationBadge({ label, done }: { label: string; done: boolean }) {
+  return (
+    <Badge variant="secondary" className={done ? 'bg-emerald-100 text-emerald-700 gap-1.5' : 'bg-gray-100 text-gray-600 gap-1.5'}>
+      <span className={`inline-flex h-1.5 w-1.5 rounded-full ${done ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+      {label}
+    </Badge>
   )
 }

@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { useEffect, useState } from 'react'
 import {
   LayoutDashboard,
   MapPin,
@@ -35,6 +36,7 @@ interface NavItem {
   label: string
   href: string
   icon: LucideIcon
+  badgeApi?: string
 }
 
 const navConfigs: Record<UserRole, NavItem[]> = {
@@ -52,13 +54,13 @@ const navConfigs: Record<UserRole, NavItem[]> = {
     { label: 'Kelola Saksi', href: '/admin/saksi', icon: Users },
     { label: 'Kelola TPS', href: '/admin/tps', icon: MapPinned },
     { label: 'Plotting', href: '/admin/plotting', icon: GitBranch },
-    { label: 'Laporan', href: '/admin/reports', icon: FileBarChart },
+    { label: 'Laporan', href: '/admin/reports', icon: FileBarChart, badgeApi: '/api/reports?status=PENDING&limit=1' },
     { label: 'Audit Log', href: '/admin/audit', icon: ScrollText },
   ],
   ADMIN_KEUANGAN: [
     { label: 'Dashboard', href: '/keuangan/dashboard', icon: LayoutDashboard },
-    { label: 'Pembayaran', href: '/keuangan/payments', icon: Receipt },
-    { label: 'Pencairan', href: '/keuangan/disbursement', icon: Send },
+    { label: 'Pembayaran', href: '/keuangan/payments', icon: Receipt, badgeApi: '/api/payments?status=READY_FOR_PAYMENT&limit=1' },
+    { label: 'Pencairan', href: '/keuangan/disbursement', icon: Send, badgeApi: '/api/payments?status=APPROVED&limit=1' },
     { label: 'Riwayat', href: '/keuangan/history', icon: History },
   ],
 }
@@ -71,7 +73,7 @@ const roleLabels: Record<UserRole, string> = {
 
 const roleColors: Record<UserRole, string> = {
   SAKSI: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
-  ADMIN: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  ADMIN: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
   ADMIN_KEUANGAN: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
 }
 
@@ -85,9 +87,45 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
   const pathname = usePathname()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
+  const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({})
 
   const role = user?.role || 'SAKSI'
   const navItems = navConfigs[role] || []
+
+  // Fetch badge counts
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchBadges = async () => {
+      const counts: Record<string, number> = {}
+      const promises = navItems
+        .filter((item) => item.badgeApi)
+        .map(async (item) => {
+          try {
+            const res = await fetch(item.badgeApi!)
+            if (res.ok) {
+              const data = await res.json()
+              if (data.success && !cancelled) {
+                counts[item.href] = data.data.pagination?.total || data.data.payments?.length || data.data.reports?.length || 0
+              }
+            }
+          } catch {
+            // ignore
+          }
+        })
+      await Promise.all(promises)
+      if (!cancelled) {
+        setBadgeCounts(counts)
+      }
+    }
+
+    fetchBadges()
+    const interval = setInterval(fetchBadges, 60000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [navItems])
 
   const handleLogout = async () => {
     await logout()
@@ -123,7 +161,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
         {/* Logo / Brand */}
         <div className="flex h-16 items-center justify-between px-4 border-b">
           <Link href={`/${role === 'ADMIN_KEUANGAN' ? 'keuangan' : role.toLowerCase()}/dashboard`} className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" />
+            <Shield className="h-6 w-6 text-emerald-600" />
             <span className="text-lg font-bold">SAKSI APP</span>
           </Link>
           <Button
@@ -142,6 +180,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
               const Icon = item.icon
+              const count = badgeCounts[item.href]
               return (
                 <Link
                   key={item.href}
@@ -152,12 +191,25 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-emerald-600 text-white'
                       : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span>{item.label}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {count !== undefined && count > 0 && (
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        'rounded-full px-2 py-0 text-xs font-semibold min-w-[20px] text-center',
+                        isActive
+                          ? 'bg-white/20 text-white border-0'
+                          : 'bg-amber-100 text-amber-700'
+                      )}
+                    >
+                      {count}
+                    </Badge>
+                  )}
                 </Link>
               )
             })}
@@ -169,7 +221,7 @@ export function AppSidebar({ isOpen, onToggle }: AppSidebarProps) {
         <div className="p-4">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              <AvatarFallback className="text-xs font-medium">
+              <AvatarFallback className="text-xs font-medium bg-emerald-100 text-emerald-700">
                 {initials}
               </AvatarFallback>
             </Avatar>

@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ArrowRight, Wallet, CheckCircle2, Clock, XCircle } from 'lucide-react'
+import { ArrowRight, Wallet, CheckCircle2, Clock, Send, History, TrendingUp } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { ErrorState } from '@/components/common/ErrorState'
+import { EmptyState } from '@/components/common/EmptyState'
 
 export default function KeuanganDashboardPage() {
   const router = useRouter()
@@ -18,43 +20,23 @@ export default function KeuanganDashboardPage() {
 
   useEffect(() => {
     fetch('/api/dashboard/keuangan')
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) setData(res.data)
         else setError(res.error)
       })
-      .catch((err) => setError(err.message))
+      .catch((err) => setError(err.statusText || 'Gagal memuat data'))
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) {
-    return (
-      <div className="p-4 max-w-6xl mx-auto space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
-        </div>
-        <Skeleton className="h-48 w-full" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 max-w-6xl mx-auto">
-        <Card className="border-destructive">
-          <CardContent className="p-6 text-center text-destructive">{error}</CardContent>
-        </Card>
-      </div>
-    )
-  }
-
+  if (loading) return <DashboardSkeleton variant="dashboard" />
+  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />
   if (!data) return null
 
   const { summary, statusBreakdown, recentDisbursements } = data
 
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Dashboard Keuangan</h1>
@@ -65,53 +47,61 @@ export default function KeuanganDashboardPage() {
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
-          icon={<Clock className="h-5 w-5 text-yellow-500" />}
+          icon={<Clock className="h-5 w-5 text-amber-500" />}
           label="Menunggu Validasi"
           value={summary.pendingCount}
           detail="PENDING"
+          borderColor="border-l-amber-500"
+          bgClass="bg-gradient-to-br from-amber-50 to-orange-50"
         />
         <StatCard
-          icon={<Wallet className="h-5 w-5 text-blue-500" />}
+          icon={<Wallet className="h-5 w-5 text-emerald-500" />}
           label="Siap Dibayar"
           value={summary.readyForPaymentCount}
           detail={formatCurrency(summary.readyForPaymentAmount)}
+          borderColor="border-l-emerald-500"
+          bgClass="bg-gradient-to-br from-emerald-50 to-teal-50"
         />
         <StatCard
-          icon={<CheckCircle2 className="h-5 w-5 text-purple-500" />}
+          icon={<CheckCircle2 className="h-5 w-5 text-teal-500" />}
           label="Disetujui"
           value={summary.approvedCount}
           detail="Menunggu pencairan"
+          borderColor="border-l-teal-500"
+          bgClass="bg-gradient-to-br from-teal-50 to-cyan-50"
         />
         <StatCard
-          icon={<CheckCircle2 className="h-5 w-5 text-green-500" />}
+          icon={<TrendingUp className="h-5 w-5 text-emerald-600" />}
           label="Dicairkan"
           value={summary.disbursedCount}
           detail={formatCurrency(summary.disbursedTotalAmount)}
+          borderColor="border-l-emerald-500"
+          bgClass="bg-gradient-to-br from-emerald-50 to-teal-50"
         />
       </div>
 
       {/* Total Disbursed */}
-      <Card className="bg-green-50 border-green-200">
+      <Card className="shadow-sm border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50">
         <CardContent className="p-6 text-center">
           <p className="text-sm text-muted-foreground mb-1">Total Dana Dicairkan</p>
-          <p className="text-4xl font-bold text-green-700">{formatCurrency(summary.disbursedTotalAmount)}</p>
+          <p className="text-4xl font-bold text-emerald-700">{formatCurrency(summary.disbursedTotalAmount)}</p>
           <p className="text-sm text-muted-foreground mt-1">{summary.disbursedCount} transaksi berhasil</p>
         </CardContent>
       </Card>
 
       {/* Status Breakdown */}
-      <Card>
-        <CardHeader>
+      <Card className="shadow-sm">
+        <CardHeader className="bg-muted/50">
           <CardTitle className="text-lg">Status Pembayaran</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {statusBreakdown && Object.entries(statusBreakdown).map(([status, info]: [string, any]) => (
-              <div key={status} className="text-center p-3 bg-muted rounded">
+              <div key={status} className="text-center p-3 bg-muted rounded-lg">
                 <p className="text-2xl font-bold">{info.count}</p>
                 <p className="text-xs text-muted-foreground mb-1">{status.replace(/_/g, ' ')}</p>
                 {info.total > 0 && (
-                  <p className="text-xs font-medium">{formatCurrency(info.total)}</p>
+                  <p className="text-xs font-medium text-emerald-600">{formatCurrency(info.total)}</p>
                 )}
               </div>
             ))}
@@ -121,14 +111,14 @@ export default function KeuanganDashboardPage() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <ActionButton label="Approval" onClick={() => router.push('/keuangan/payments')} sublabel={`${summary.readyForPaymentCount} menunggu`} />
-        <ActionButton label="Pencairan" onClick={() => router.push('/keuangan/disbursement')} sublabel={`${summary.approvedCount} siap cair`} />
-        <ActionButton label="Riwayat" onClick={() => router.push('/keuangan/history')} sublabel={`${summary.disbursedCount} transaksi`} />
+        <ActionButton label="Approval" onClick={() => router.push('/keuangan/payments')} sublabel={`${summary.readyForPaymentCount} menunggu`} icon={<Wallet className="h-5 w-5" />} />
+        <ActionButton label="Pencairan" onClick={() => router.push('/keuangan/disbursement')} sublabel={`${summary.approvedCount} siap cair`} icon={<Send className="h-5 w-5" />} />
+        <ActionButton label="Riwayat" onClick={() => router.push('/keuangan/history')} sublabel={`${summary.disbursedCount} transaksi`} icon={<History className="h-5 w-5" />} />
       </div>
 
       {/* Recent Disbursements */}
-      <Card>
-        <CardHeader>
+      <Card className="shadow-sm">
+        <CardHeader className="bg-muted/50">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Pencairan Terbaru</CardTitle>
             <Button variant="outline" size="sm" onClick={() => router.push('/keuangan/history')}>
@@ -137,22 +127,24 @@ export default function KeuanganDashboardPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3 max-h-64 overflow-y-auto">
+          <div className="space-y-1 max-h-64 overflow-y-auto divide-y">
             {recentDisbursements?.length > 0 ? recentDisbursements.map((d: any) => (
-              <div key={d.id} className="flex items-center justify-between py-2 border-b last:border-0">
+              <div key={d.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
                 <div>
                   <p className="font-medium text-sm">{d.user?.name}</p>
                   <p className="text-xs text-muted-foreground">{d.user?.email}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium text-sm">{formatCurrency(d.amount)}</p>
+                  <p className="font-medium text-sm text-emerald-600">{formatCurrency(d.amount)}</p>
                   <p className="text-xs text-muted-foreground">
                     {d.disbursedAt ? new Date(d.disbursedAt).toLocaleDateString('id-ID') : '-'}
                   </p>
                 </div>
               </div>
             )) : (
-              <p className="text-sm text-muted-foreground text-center py-4">Belum ada pencairan</p>
+              <div className="py-4">
+                <EmptyState icon={Wallet} title="Belum Ada Pencairan" />
+              </div>
             )}
           </div>
         </CardContent>
@@ -161,9 +153,9 @@ export default function KeuanganDashboardPage() {
   )
 }
 
-function StatCard({ icon, label, value, detail }: { icon: React.ReactNode; label: string; value: number; detail: string }) {
+function StatCard({ icon, label, value, detail, borderColor, bgClass }: { icon: React.ReactNode; label: string; value: number; detail: string; borderColor: string; bgClass: string }) {
   return (
-    <Card>
+    <Card className={`shadow-sm border-l-4 ${borderColor} ${bgClass}`}>
       <CardContent className="p-4">
         <div className="flex items-center gap-2 mb-2">{icon}</div>
         <p className="text-2xl font-bold">{value}</p>
@@ -174,9 +166,10 @@ function StatCard({ icon, label, value, detail }: { icon: React.ReactNode; label
   )
 }
 
-function ActionButton({ label, onClick, sublabel }: { label: string; onClick: () => void; sublabel: string }) {
+function ActionButton({ label, onClick, sublabel, icon }: { label: string; onClick: () => void; sublabel: string; icon: React.ReactNode }) {
   return (
-    <Button variant="outline" className="h-auto py-4 flex-col gap-1" onClick={onClick}>
+    <Button variant="outline" className="h-auto py-4 flex-col gap-2 shadow-sm" onClick={onClick}>
+      {icon}
       <span className="font-medium">{label}</span>
       <span className="text-xs text-muted-foreground">{sublabel}</span>
     </Button>

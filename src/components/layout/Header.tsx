@@ -39,7 +39,6 @@ function getBreadcrumbSegments(pathname: string) {
       lapor: 'Lapor',
       payment: 'Pembayaran',
       profile: 'Profil',
-      saksi: 'Kelola Saksi',
       plotting: 'Plotting',
       reports: 'Laporan',
       audit: 'Audit Log',

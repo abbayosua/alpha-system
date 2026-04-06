@@ -9,7 +9,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
-import { ArrowLeft, Users, MapPin, Link, Trash2, Loader2 } from 'lucide-react'
+import { ArrowLeft, Users, MapPin, Link, Trash2, Loader2, GitBranch } from 'lucide-react'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { EmptyState } from '@/components/common/EmptyState'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 
 export default function AdminPlottingPage() {
   const router = useRouter()
@@ -21,6 +24,8 @@ export default function AdminPlottingPage() {
   const [showAssignDialog, setShowAssignDialog] = useState(false)
   const [selectedSaksi, setSelectedSaksi] = useState<any>(null)
   const [selectedTps, setSelectedTps] = useState<string>('')
+  const [deleteTarget, setDeleteTarget] = useState<any>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const fetchData = () => {
     setLoading(true)
@@ -31,7 +36,6 @@ export default function AdminPlottingPage() {
     ])
       .then(([usersRes, tpsRes, assignRes]) => {
         if (usersRes.success) {
-          // Filter: only saksi without active assignment
           const assignedIds = new Set(assignRes.success ? assignRes.data.assignments.map((a: any) => a.userId) : [])
           setUnassignedSaksi(usersRes.data.users.filter((u: any) => !assignedIds.has(u.id)))
         }
@@ -75,37 +79,30 @@ export default function AdminPlottingPage() {
     }
   }
 
-  const handleRemoveAssignment = async (assignmentId: string) => {
-    if (!confirm('Yakin ingin menghapus penugasan ini?')) return
+  const handleRemoveAssignment = async () => {
+    if (!deleteTarget) return
+    setDeleteLoading(true)
     try {
-      const res = await fetch(`/api/assignments/${assignmentId}`, { method: 'DELETE' })
+      const res = await fetch(`/api/assignments/${deleteTarget.id}`, { method: 'DELETE' })
       const data = await res.json()
       if (data.success) {
         toast.success('Penugasan berhasil dihapus')
+        setDeleteTarget(null)
         fetchData()
       } else {
         toast.error(data.error)
       }
     } catch {
       toast.error('Gagal menghapus penugasan')
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-4 max-w-6xl mx-auto space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-64 w-full" />
-        </div>
-        <Skeleton className="h-48 w-full" />
-      </div>
-    )
-  }
+  if (loading) return <DashboardSkeleton variant="dashboard" />
 
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.push('/admin/dashboard')}>
           <ArrowLeft className="h-5 w-5" />
@@ -118,17 +115,20 @@ export default function AdminPlottingPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Unassigned Saksi */}
-        <Card>
-          <CardHeader>
+        <Card className="shadow-sm border-l-4 border-l-amber-500">
+          <CardHeader className="bg-muted/50">
             <CardTitle className="text-lg flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Saksi Belum Ditugaskan ({unassignedSaksi.length})
+              Saksi Belum Ditugaskan
+              <Badge variant="secondary" className="ml-auto bg-amber-100 text-amber-700 rounded-full px-2">
+                {unassignedSaksi.length}
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="max-h-64 overflow-y-auto space-y-2">
               {unassignedSaksi.length > 0 ? unassignedSaksi.map((s) => (
-                <div key={s.id} className="flex items-center justify-between p-2 bg-muted rounded text-sm">
+                <div key={s.id} className="flex items-center justify-between p-3 bg-muted rounded-lg text-sm hover:bg-muted/80 transition-colors">
                   <div>
                     <p className="font-medium">{s.name}</p>
                     <p className="text-xs text-muted-foreground">{s.email}</p>
@@ -145,39 +145,53 @@ export default function AdminPlottingPage() {
         </Card>
 
         {/* TPS */}
-        <Card>
-          <CardHeader>
+        <Card className="shadow-sm border-l-4 border-l-emerald-500">
+          <CardHeader className="bg-muted/50">
             <CardTitle className="text-lg flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              Daftar TPS ({tpsList.length})
+              Daftar TPS
+              <Badge variant="secondary" className="ml-auto bg-emerald-100 text-emerald-700 rounded-full px-2">
+                {tpsList.length}
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="max-h-64 overflow-y-auto space-y-2">
-              {tpsList.map((t) => (
-                <div key={t.id} className="flex items-center justify-between p-2 bg-muted rounded text-sm">
+              {tpsList.length > 0 ? tpsList.map((t) => (
+                <div key={t.id} className="flex items-center justify-between p-3 bg-muted rounded-lg text-sm">
                   <div>
                     <p className="font-medium">{t.code} - {t.name}</p>
                     <p className="text-xs text-muted-foreground">{t.address}</p>
                   </div>
-                  <Badge variant="secondary">{t.activeAssignmentCount} saksi</Badge>
+                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 gap-1.5">
+                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    {t.activeAssignmentCount} saksi
+                  </Badge>
                 </div>
-              ))}
+              )) : (
+                <EmptyState icon={MapPin} title="Belum Ada TPS" description="Tambahkan TPS terlebih dahulu" />
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Current Assignments */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Penugasan Aktif ({assignments.length})</CardTitle>
+      <Card className="shadow-sm">
+        <CardHeader className="bg-muted/50">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <GitBranch className="h-5 w-5" />
+            Penugasan Aktif
+            <Badge variant="secondary" className="ml-auto bg-emerald-100 text-emerald-700 rounded-full px-2">
+              {assignments.length}
+            </Badge>
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-muted/50">
                   <TableHead>Saksi</TableHead>
                   <TableHead>TPS</TableHead>
                   <TableHead>Tanggal</TableHead>
@@ -186,7 +200,7 @@ export default function AdminPlottingPage() {
               </TableHeader>
               <TableBody>
                 {assignments.length > 0 ? assignments.map((a) => (
-                  <TableRow key={a.id}>
+                  <TableRow key={a.id} className="hover:bg-muted/50">
                     <TableCell>
                       <p className="font-medium">{a.user?.name}</p>
                       <p className="text-xs text-muted-foreground">{a.user?.email}</p>
@@ -197,15 +211,15 @@ export default function AdminPlottingPage() {
                     </TableCell>
                     <TableCell className="text-sm">{new Date(a.assignedAt).toLocaleDateString('id-ID')}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => handleRemoveAssignment(a.id)}>
+                      <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(a)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </TableCell>
                   </TableRow>
                 )) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
-                      Belum ada penugasan
+                    <TableCell colSpan={4} className="text-center py-8">
+                      <EmptyState icon={GitBranch} title="Belum Ada Penugasan" />
                     </TableCell>
                   </TableRow>
                 )}
@@ -223,7 +237,7 @@ export default function AdminPlottingPage() {
           </DialogHeader>
           {selectedSaksi && (
             <div className="space-y-4">
-              <div className="p-3 bg-muted rounded">
+              <div className="p-3 bg-muted rounded-lg">
                 <p className="font-medium">{selectedSaksi.name}</p>
                 <p className="text-sm text-muted-foreground">{selectedSaksi.email}</p>
               </div>
@@ -247,6 +261,17 @@ export default function AdminPlottingPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Assignment Confirmation */}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Hapus Penugasan"
+        description={`Apakah Anda yakin ingin menghapus penugasan ${deleteTarget?.user?.name} dari ${deleteTarget?.tps?.name}?`}
+        confirmLabel="Ya, Hapus"
+        onConfirm={handleRemoveAssignment}
+        loading={deleteLoading}
+      />
     </div>
   )
 }

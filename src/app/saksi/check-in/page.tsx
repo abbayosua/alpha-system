@@ -4,11 +4,13 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { ArrowLeft, Camera, MapPin, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { ErrorState } from '@/components/common/ErrorState'
+import { EmptyState } from '@/components/common/EmptyState'
 
 const CheckInMap = dynamic(() => import('@/components/maps/CheckInMap'), { ssr: false })
 
@@ -17,6 +19,7 @@ export default function SaksiCheckInPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [assignment, setAssignment] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [gpsError, setGpsError] = useState<string | null>(null)
@@ -27,12 +30,12 @@ export default function SaksiCheckInPage() {
 
   useEffect(() => {
     fetch('/api/assignments/my')
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success && res.data) setAssignment(res.data)
-        else toast.error('Anda belum memiliki penugasan aktif')
+        else setError('Anda belum memiliki penugasan aktif')
       })
-      .catch(() => toast.error('Gagal memuat data penugasan'))
+      .catch(() => setError('Gagal memuat data penugasan'))
       .finally(() => setLoading(false))
 
     return () => {
@@ -117,18 +120,12 @@ export default function SaksiCheckInPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-4 max-w-lg mx-auto space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    )
-  }
+  if (loading) return <DashboardSkeleton variant="detail" />
+  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />
 
   if (result) {
     return (
-      <div className="p-4 max-w-lg mx-auto space-y-6">
+      <div className="space-y-6 max-w-lg mx-auto">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.push('/saksi/dashboard')}>
             <ArrowLeft className="h-5 w-5" />
@@ -136,9 +133,11 @@ export default function SaksiCheckInPage() {
           <h1 className="text-2xl font-bold">Check-in Berhasil!</h1>
         </div>
 
-        <Card className="border-green-200 bg-green-50/50">
+        <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-sm">
           <CardContent className="p-6 text-center space-y-4">
-            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+            </div>
             <div>
               <p className="font-semibold text-lg">Check-in Pagi Berhasil</p>
               <p className="text-sm text-muted-foreground">
@@ -147,16 +146,18 @@ export default function SaksiCheckInPage() {
             </div>
             <div className="space-y-2">
               {result.gpsVerified ? (
-                <Badge className="bg-green-100 text-green-700 text-sm">
-                  <CheckCircle2 className="h-4 w-4 mr-1" /> GPS Terverifikasi
+                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-sm gap-1.5">
+                  <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  GPS Terverifikasi
                 </Badge>
               ) : (
-                <Badge className="bg-yellow-100 text-yellow-700 text-sm">
-                  <XCircle className="h-4 w-4 mr-1" /> GPS Tidak Terverifikasi ({Math.round(result.distance || 0)}m dari TPS)
+                <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-sm gap-1.5">
+                  <span className="inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
+                  GPS Tidak Terverifikasi ({Math.round(result.distance || 0)}m dari TPS)
                 </Badge>
               )}
             </div>
-            <Button onClick={() => router.push('/saksi/dashboard')}>
+            <Button onClick={() => router.push('/saksi/dashboard')} className="mt-2">
               Kembali ke Dashboard
             </Button>
           </CardContent>
@@ -166,7 +167,7 @@ export default function SaksiCheckInPage() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto space-y-6">
+    <div className="space-y-6 max-w-lg mx-auto">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
           <ArrowLeft className="h-5 w-5" />
@@ -179,120 +180,132 @@ export default function SaksiCheckInPage() {
         </div>
       </div>
 
-      {/* Camera */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Camera className="h-5 w-5" />
-            Foto Selfie
-          </CardTitle>
-          <CardDescription>Ambil foto selfie sebagai bukti kehadiran</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="relative rounded-lg overflow-hidden bg-muted aspect-[4/3] flex items-center justify-center">
-            {cameraActive ? (
-              <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-            ) : selfieBase64 ? (
-              <img src={selfieBase64} alt="Selfie" className="w-full h-full object-cover" />
-            ) : (
-              <div className="text-center text-muted-foreground p-4">
-                <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Klik tombol untuk mulai kamera</p>
-              </div>
-            )}
-          </div>
-          <div className="flex gap-2">
-            {!cameraActive && !selfieBase64 && (
-              <Button onClick={startCamera} className="flex-1">
-                <Camera className="h-4 w-4 mr-2" /> Mulai Kamera
-              </Button>
-            )}
-            {cameraActive && (
-              <Button onClick={captureSelfie} className="flex-1">
-                Ambil Foto
-              </Button>
-            )}
-            {selfieBase64 && !cameraActive && (
-              <Button onClick={startCamera} variant="outline" className="flex-1">
-                Ambil Ulang
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {!assignment && (
+        <EmptyState
+          icon={MapPin}
+          title="Belum Ada Penugasan"
+          description="Anda belum ditugaskan ke TPS. Menunggu plotting dari admin."
+        />
+      )}
 
-      {/* GPS */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Verifikasi GPS
-          </CardTitle>
-          <CardDescription>Aktifkan GPS untuk verifikasi lokasi di TPS</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {gpsCoords ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
-                <span className="text-sm font-medium">GPS Aktif</span>
+      {assignment && (
+        <>
+          {/* Camera */}
+          <Card className="shadow-sm">
+            <CardHeader className="bg-muted/50">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Foto Selfie
+              </CardTitle>
+              <CardDescription>Ambil foto selfie sebagai bukti kehadiran</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="relative rounded-lg overflow-hidden bg-muted aspect-[4/3] flex items-center justify-center">
+                {cameraActive ? (
+                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                ) : selfieBase64 ? (
+                  <img src={selfieBase64} alt="Selfie" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="text-center text-muted-foreground p-4">
+                    <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Klik tombol untuk mulai kamera</p>
+                  </div>
+                )}
               </div>
-              <p className="text-sm text-muted-foreground">
-                Lat: {gpsCoords.lat.toFixed(6)}, Lng: {gpsCoords.lng.toFixed(6)}
-              </p>
+              <div className="flex gap-2">
+                {!cameraActive && !selfieBase64 && (
+                  <Button onClick={startCamera} className="flex-1">
+                    <Camera className="h-4 w-4 mr-2" /> Mulai Kamera
+                  </Button>
+                )}
+                {cameraActive && (
+                  <Button onClick={captureSelfie} className="flex-1">
+                    Ambil Foto
+                  </Button>
+                )}
+                {selfieBase64 && !cameraActive && (
+                  <Button onClick={startCamera} variant="outline" className="flex-1">
+                    Ambil Ulang
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* GPS */}
+          <Card className="shadow-sm">
+            <CardHeader className="bg-muted/50">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Verifikasi GPS
+              </CardTitle>
+              <CardDescription>Aktifkan GPS untuk verifikasi lokasi di TPS</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {gpsCoords ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="text-sm font-medium">GPS Aktif</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Lat: {gpsCoords.lat.toFixed(6)}, Lng: {gpsCoords.lng.toFixed(6)}
+                  </p>
+                  {assignment?.tps && (
+                    <p className="text-xs text-muted-foreground">
+                      TPS: {assignment.tps.latitude}, {assignment.tps.longitude}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {gpsError && (
+                    <p className="text-sm text-destructive">{gpsError}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">GPS belum aktif</p>
+                </div>
+              )}
+              <Button onClick={getGPS} variant="outline" className="w-full">
+                <MapPin className="h-4 w-4 mr-2" />
+                {gpsCoords ? 'Perbarui Lokasi' : 'Aktifkan GPS'}
+              </Button>
+
+              {/* GPS Map */}
               {assignment?.tps && (
-                <p className="text-xs text-muted-foreground">
-                  TPS: {assignment.tps.latitude}, {assignment.tps.longitude}
-                </p>
+                <div className="pt-2">
+                  <CheckInMap
+                    tpsLatitude={assignment.tps.latitude}
+                    tpsLongitude={assignment.tps.longitude}
+                    tpsName={assignment.tps.name}
+                    tpsCode={assignment.tps.code}
+                    userLatitude={gpsCoords?.lat}
+                    userLongitude={gpsCoords?.lng}
+                    radiusMeters={100}
+                    height="250px"
+                  />
+                </div>
               )}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {gpsError && (
-                <p className="text-sm text-destructive">{gpsError}</p>
-              )}
-              <p className="text-sm text-muted-foreground">GPS belum aktif</p>
-            </div>
-          )}
-          <Button onClick={getGPS} variant="outline" className="w-full">
-            <MapPin className="h-4 w-4 mr-2" />
-            {gpsCoords ? 'Perbarui Lokasi' : 'Aktifkan GPS'}
+            </CardContent>
+          </Card>
+
+          {/* Submit */}
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={handleSubmit}
+            disabled={submitting || !gpsCoords || !selfieBase64}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Memproses...
+              </>
+            ) : (
+              'Submit Check-in Pagi'
+            )}
           </Button>
-
-          {/* GPS Map */}
-          {assignment?.tps && (
-            <div className="pt-2">
-              <CheckInMap
-                tpsLatitude={assignment.tps.latitude}
-                tpsLongitude={assignment.tps.longitude}
-                tpsName={assignment.tps.name}
-                tpsCode={assignment.tps.code}
-                userLatitude={gpsCoords?.lat}
-                userLongitude={gpsCoords?.lng}
-                radiusMeters={100}
-                height="250px"
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Submit */}
-      <Button
-        className="w-full"
-        size="lg"
-        onClick={handleSubmit}
-        disabled={submitting || !gpsCoords || !selfieBase64}
-      >
-        {submitting ? (
-          <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Memproses...
-          </>
-        ) : (
-          'Submit Check-in Pagi'
-        )}
-      </Button>
+        </>
+      )}
     </div>
   )
 }

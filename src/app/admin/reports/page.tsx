@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,13 +19,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { ArrowLeft, Search, Eye, Loader2 } from 'lucide-react'
+import { ArrowLeft, Search, Eye, Loader2, FileBarChart, AlertTriangle } from 'lucide-react'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { EmptyState } from '@/components/common/EmptyState'
 
-const STATUS_STYLES: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-700',
-  UNDER_REVIEW: 'bg-blue-100 text-blue-700',
-  VERIFIED: 'bg-green-100 text-green-700',
-  DISMISSED: 'bg-gray-100 text-gray-700',
+const STATUS_CONFIG: Record<string, { color: string; dot: string }> = {
+  PENDING: { color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+  UNDER_REVIEW: { color: 'bg-teal-100 text-teal-700', dot: 'bg-teal-500' },
+  VERIFIED: { color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+  DISMISSED: { color: 'bg-gray-100 text-gray-700', dot: 'bg-gray-500' },
 }
 
 export default function AdminReportsPage() {
@@ -33,6 +35,7 @@ export default function AdminReportsPage() {
   const [reports, setReports] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -42,40 +45,47 @@ export default function AdminReportsPage() {
   const [updateNotes, setUpdateNotes] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const fetchReports = () => {
+  // Debounce
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  const fetchReports = useCallback(() => {
     setLoading(true)
     const params = new URLSearchParams()
     params.set('page', String(page))
     params.set('limit', '20')
-    if (search) params.set('search', search)
+    if (debouncedSearch) params.set('search', debouncedSearch)
     if (statusFilter !== 'ALL') params.set('status', statusFilter)
 
     fetch(`/api/reports?${params}`)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) {
           setReports(res.data.reports)
           setTotalPages(res.data.pagination.totalPages)
+        } else {
+          toast.error(res.error)
         }
       })
       .catch(() => toast.error('Gagal memuat laporan'))
       .finally(() => setLoading(false))
-  }
+  }, [page, statusFilter, debouncedSearch])
 
   useEffect(() => {
     fetchReports()
-  }, [page, statusFilter])
+  }, [fetchReports])
 
   useEffect(() => {
-    const timer = setTimeout(() => { setPage(1); fetchReports() }, 500)
-    return () => clearTimeout(timer)
-  }, [search])
+    if (page !== 1) setPage(1)
+  }, [debouncedSearch, statusFilter])
 
   const viewDetail = (reportId: string) => {
     setDetailLoading(true)
     setDetailReport(null)
     fetch(`/api/reports/${reportId}`)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) {
           setDetailReport(res.data)
@@ -114,7 +124,7 @@ export default function AdminReportsPage() {
   }
 
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.push('/admin/dashboard')}>
           <ArrowLeft className="h-5 w-5" />
@@ -130,8 +140,13 @@ export default function AdminReportsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Cari laporan..." className="pl-10" value={search} onChange={(e) => setSearch(e.target.value)} />
+          {debouncedSearch && search !== debouncedSearch && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          )}
         </div>
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter Status" />
           </SelectTrigger>
@@ -146,19 +161,23 @@ export default function AdminReportsPage() {
       </div>
 
       {/* Table */}
-      <Card>
+      <Card className="shadow-sm">
         <CardContent className="p-0">
           {loading ? (
             <div className="p-6 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
             </div>
           ) : reports.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground">Tidak ada laporan ditemukan</div>
+            <EmptyState
+              icon={AlertTriangle}
+              title={debouncedSearch || statusFilter !== 'ALL' ? 'Tidak Ada Hasil' : 'Belum Ada Laporan'}
+              description={debouncedSearch ? `Tidak ditemukan laporan untuk "${debouncedSearch}"` : 'Laporan kecurangan akan muncul di sini'}
+            />
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50">
                     <TableHead>Judul</TableHead>
                     <TableHead>Pelapor</TableHead>
                     <TableHead>Kategori</TableHead>
@@ -169,16 +188,14 @@ export default function AdminReportsPage() {
                 </TableHeader>
                 <TableBody>
                   {reports.map((r) => (
-                    <TableRow key={r.id}>
+                    <TableRow key={r.id} className="hover:bg-muted/50">
                       <TableCell className="font-medium">{r.title}</TableCell>
                       <TableCell className="text-sm">{r.user?.name || '-'}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{(r.category || '').replace(/_/g, ' ')}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className={STATUS_STYLES[r.status] || ''}>
-                          {r.status.replace(/_/g, ' ')}
-                        </Badge>
+                        <ReportStatusBadge status={r.status} />
                       </TableCell>
                       <TableCell className="text-sm">{new Date(r.createdAt).toLocaleDateString('id-ID')}</TableCell>
                       <TableCell className="text-right">
@@ -220,9 +237,7 @@ export default function AdminReportsPage() {
               <div>
                 <h3 className="font-semibold text-lg">{detailReport.title}</h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="secondary" className={STATUS_STYLES[detailReport.status] || ''}>
-                    {detailReport.status.replace(/_/g, ' ')}
-                  </Badge>
+                  <ReportStatusBadge status={detailReport.status} />
                   <Badge variant="outline">{(detailReport.category || '').replace(/_/g, ' ')}</Badge>
                 </div>
               </div>
@@ -234,20 +249,20 @@ export default function AdminReportsPage() {
 
               <div>
                 <p className="text-sm font-medium mb-1">Deskripsi:</p>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted p-3 rounded">{detailReport.description}</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted p-3 rounded-lg">{detailReport.description}</p>
               </div>
 
               {detailReport.videoPath && (
                 <div>
                   <p className="text-sm font-medium mb-1">Video Bukti:</p>
-                  <video src={detailReport.videoPath} controls className="w-full rounded border max-h-48" />
+                  <video src={detailReport.videoPath} controls className="w-full rounded-lg border max-h-48" />
                 </div>
               )}
 
               {detailReport.reviewNotes && (
                 <div>
                   <p className="text-sm font-medium mb-1">Catatan Review:</p>
-                  <p className="text-sm bg-muted p-3 rounded">{detailReport.reviewNotes}</p>
+                  <p className="text-sm bg-muted p-3 rounded-lg">{detailReport.reviewNotes}</p>
                 </div>
               )}
 
@@ -281,5 +296,15 @@ export default function AdminReportsPage() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+function ReportStatusBadge({ status }: { status: string }) {
+  const c = STATUS_CONFIG[status] || { color: 'bg-gray-100 text-gray-700', dot: 'bg-gray-500' }
+  return (
+    <Badge variant="secondary" className={`${c.color} gap-1.5`}>
+      <span className={`inline-flex h-1.5 w-1.5 rounded-full ${c.dot}`} />
+      {status.replace(/_/g, ' ')}
+    </Badge>
   )
 }

@@ -6,9 +6,10 @@ import { useAuthStore } from '@/store/authStore'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { MapPin, ClipboardCheck, Camera, FileText, Wallet, AlertTriangle, CheckCircle2, XCircle, Clock, ArrowRight } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { ErrorState } from '@/components/common/ErrorState'
 
 type DashboardData = {
   profile: any
@@ -31,48 +32,23 @@ export default function SaksiDashboardPage() {
 
   useEffect(() => {
     fetch('/api/dashboard/saksi')
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) setData(res.data)
         else setError(res.error)
       })
-      .catch((err) => setError(err.message))
+      .catch((err) => setError(err.statusText || 'Gagal memuat data'))
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) {
-    return (
-      <div className="p-4 max-w-4xl mx-auto space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-40 w-full" />
-        <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-        <Skeleton className="h-32 w-full" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 max-w-4xl mx-auto">
-        <Card className="border-destructive">
-          <CardContent className="p-6 text-center">
-            <AlertTriangle className="h-8 w-8 text-destructive mx-auto mb-2" />
-            <p className="text-destructive">{error}</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
+  if (loading) return <DashboardSkeleton variant="dashboard" />
+  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />
   if (!data) return null
 
   const hasAssignment = !!data.assignment
 
   return (
-    <div className="p-4 max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -85,7 +61,7 @@ export default function SaksiDashboardPage() {
       </div>
 
       {/* Assignment Status */}
-      <Card className={hasAssignment ? 'border-green-200 bg-green-50/50' : 'border-orange-200 bg-orange-50/50'}>
+      <Card className={hasAssignment ? 'border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50' : 'border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50 to-orange-50'}>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <MapPin className="h-5 w-5" />
@@ -96,7 +72,8 @@ export default function SaksiDashboardPage() {
           {hasAssignment ? (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Badge variant="default">Aktif</Badge>
+                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">Aktif</Badge>
                 <span className="font-medium">{data.assignment.tps.code} - {data.assignment.tps.name}</span>
               </div>
               <p className="text-sm text-muted-foreground">{data.assignment.tps.address}</p>
@@ -111,7 +88,7 @@ export default function SaksiDashboardPage() {
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-orange-600">
+            <div className="flex items-center gap-2 text-amber-600">
               <Clock className="h-5 w-5" />
               <span>Belum ditugaskan ke TPS. Menunggu plotting dari admin.</span>
             </div>
@@ -124,8 +101,8 @@ export default function SaksiDashboardPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Morning Check-in */}
-            <Card>
-              <CardHeader className="pb-3">
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3 bg-muted/50">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <ClipboardCheck className="h-5 w-5" />
                   Check-in Pagi
@@ -135,14 +112,14 @@ export default function SaksiDashboardPage() {
                 {data.checkInStatus.morning?.completed ? (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
-                      <span className="text-green-600 font-medium">Sudah Check-in</span>
+                      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="text-emerald-600 font-medium">Sudah Check-in</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       {data.checkInStatus.morning.gpsVerified ? (
-                        <Badge variant="secondary" className="bg-green-100 text-green-700">GPS Terverifikasi</Badge>
+                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">GPS Terverifikasi</Badge>
                       ) : (
-                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">GPS Belum Terverifikasi</Badge>
+                        <Badge variant="secondary" className="bg-amber-100 text-amber-700">GPS Belum Terverifikasi</Badge>
                       )}
                     </div>
                     {data.checkInStatus.morning.timestamp && (
@@ -163,8 +140,8 @@ export default function SaksiDashboardPage() {
             </Card>
 
             {/* Final Check-in */}
-            <Card>
-              <CardHeader className="pb-3">
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3 bg-muted/50">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <ClipboardCheck className="h-5 w-5" />
                   Check-in Akhir
@@ -174,8 +151,8 @@ export default function SaksiDashboardPage() {
                 {data.checkInStatus.final?.completed ? (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
-                      <span className="text-green-600 font-medium">Sudah Check-in</span>
+                      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="text-emerald-600 font-medium">Sudah Check-in</span>
                     </div>
                     {data.checkInStatus.final.timestamp && (
                       <p className="text-xs text-muted-foreground">
@@ -195,8 +172,8 @@ export default function SaksiDashboardPage() {
             </Card>
 
             {/* Vote Input */}
-            <Card>
-              <CardHeader className="pb-3">
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3 bg-muted/50">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Camera className="h-5 w-5" />
                   Input Suara
@@ -206,12 +183,12 @@ export default function SaksiDashboardPage() {
                 {data.voteInputStatus?.submitted ? (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
-                      <span className="text-green-600 font-medium">Sudah Diinput</span>
+                      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="text-emerald-600 font-medium">Sudah Diinput</span>
                     </div>
                     <p className="text-sm">Total: {data.voteInputStatus.totalVotes} suara</p>
                     {data.voteInputStatus.c1Uploaded && (
-                      <Badge variant="secondary" className="bg-green-100 text-green-700">Foto C1 Diupload</Badge>
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">Foto C1 Diupload</Badge>
                     )}
                   </div>
                 ) : (
@@ -226,8 +203,8 @@ export default function SaksiDashboardPage() {
             </Card>
 
             {/* Report */}
-            <Card>
-              <CardHeader className="pb-3">
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3 bg-muted/50">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <FileText className="h-5 w-5" />
                   Lapor Kecurangan
@@ -241,7 +218,8 @@ export default function SaksiDashboardPage() {
                       : 'Laporkan jika menemukan kecurangan'}
                   </p>
                   <Button size="sm" variant="destructive" onClick={() => router.push('/saksi/lapor')}>
-                    Buat Laporan <ArrowRight className="h-4 w-4 ml-1" />
+                    <AlertTriangle className="h-4 w-4 mr-1" />
+                    Buat Laporan
                   </Button>
                 </div>
               </CardContent>
@@ -249,8 +227,8 @@ export default function SaksiDashboardPage() {
           </div>
 
           {/* Payment Status */}
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="shadow-sm border-l-4 border-l-emerald-500">
+            <CardHeader className="pb-3 bg-muted/50">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Wallet className="h-5 w-5" />
                 Status Pembayaran
@@ -269,14 +247,14 @@ export default function SaksiDashboardPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Validasi</span>
-                    <span className="text-sm">{data.payment.validationScore}/3 checklist</span>
+                    <span className="text-sm font-medium">{data.payment.validationScore}/3 checklist</span>
                   </div>
 
                   {/* Validation Checklist */}
                   {data.payment.validationChecklist && (
-                    <div className="mt-3 pt-3 border-t space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">Checklist Validasi:</p>
-                      <div className="grid grid-cols-2 gap-2">
+                    <div className="mt-3 pt-3 border-t divide-y space-y-0">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase pb-2">Checklist Validasi:</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x sm:gap-0">
                         <CheckItem label="Check-in Pagi" done={data.payment.validationChecklist.morningCheckIn} />
                         <CheckItem label="Check-in Akhir" done={data.payment.validationChecklist.finalCheckIn} />
                         <CheckItem label="GPS Terverifikasi" done={data.payment.validationChecklist.gpsVerified} />
@@ -305,16 +283,18 @@ export default function SaksiDashboardPage() {
 }
 
 function PaymentStatusBadge({ status }: { status: string }) {
-  const variants: Record<string, string> = {
-    PENDING: 'bg-yellow-100 text-yellow-700',
-    READY_FOR_PAYMENT: 'bg-blue-100 text-blue-700',
-    APPROVED: 'bg-purple-100 text-purple-700',
-    DISBURSED: 'bg-green-100 text-green-700',
-    CANCELLED: 'bg-red-100 text-red-700',
-    FAILED: 'bg-red-100 text-red-700',
+  const config: Record<string, { color: string; dot: string }> = {
+    PENDING: { color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+    READY_FOR_PAYMENT: { color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+    APPROVED: { color: 'bg-teal-100 text-teal-700', dot: 'bg-teal-500' },
+    DISBURSED: { color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
+    CANCELLED: { color: 'bg-rose-100 text-rose-700', dot: 'bg-rose-500' },
+    FAILED: { color: 'bg-rose-100 text-rose-700', dot: 'bg-rose-500' },
   }
+  const c = config[status] || { color: 'bg-gray-100 text-gray-700', dot: 'bg-gray-500' }
   return (
-    <Badge variant="secondary" className={variants[status] || ''}>
+    <Badge variant="secondary" className={`${c.color} gap-1.5`}>
+      <span className={`inline-flex h-1.5 w-1.5 rounded-full ${c.dot}`} />
       {status.replace(/_/g, ' ')}
     </Badge>
   )
@@ -322,9 +302,9 @@ function PaymentStatusBadge({ status }: { status: string }) {
 
 function CheckItem({ label, done }: { label: string; done: boolean }) {
   return (
-    <div className="flex items-center gap-2 text-sm">
+    <div className="flex items-center gap-2 text-sm py-2 px-2">
       {done ? (
-        <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
       ) : (
         <XCircle className="h-4 w-4 text-gray-300 shrink-0" />
       )}

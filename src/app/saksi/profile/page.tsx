@@ -6,16 +6,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, User, CreditCard } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { DashboardSkeleton } from '@/components/common/LoadingSkeleton'
+import { ErrorState } from '@/components/common/ErrorState'
 
 export default function SaksiProfilePage() {
   const router = useRouter()
   const { user } = useAuthStore()
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<any>(null)
   const [form, setForm] = useState({
@@ -31,7 +33,7 @@ export default function SaksiProfilePage() {
 
   useEffect(() => {
     fetch('/api/auth/me')
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((res) => {
         if (res.success) {
           setProfile(res.data)
@@ -45,9 +47,11 @@ export default function SaksiProfilePage() {
             eWalletType: res.data.eWalletType || '',
             eWalletNumber: res.data.eWalletNumber || '',
           })
+        } else {
+          setError(res.error)
         }
       })
-      .catch(console.error)
+      .catch(() => setError('Gagal memuat profil'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -78,17 +82,11 @@ export default function SaksiProfilePage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-4 max-w-2xl mx-auto space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-96 w-full" />
-      </div>
-    )
-  }
+  if (loading) return <DashboardSkeleton variant="detail" />
+  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />
 
   return (
-    <div className="p-4 max-w-2xl mx-auto space-y-6">
+    <div className="space-y-6 max-w-2xl mx-auto">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
           <ArrowLeft className="h-5 w-5" />
@@ -99,15 +97,19 @@ export default function SaksiProfilePage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Informasi Akun</CardTitle>
+      {/* Account Info */}
+      <Card className="shadow-sm border-l-4 border-l-emerald-500">
+        <CardHeader className="bg-muted/50">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Informasi Akun
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-muted-foreground">Email:</span>
             <span className="text-sm font-medium">{profile?.email}</span>
-            <Badge variant="secondary">{profile?.role}</Badge>
+            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">{profile?.role}</Badge>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Terdaftar:</span>
@@ -118,9 +120,13 @@ export default function SaksiProfilePage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Data Diri</CardTitle>
+      {/* Personal Data */}
+      <Card className="shadow-sm">
+        <CardHeader className="bg-muted/50">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Data Diri
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -138,9 +144,13 @@ export default function SaksiProfilePage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Informasi Pembayaran</CardTitle>
+      {/* Payment Info */}
+      <Card className="shadow-sm">
+        <CardHeader className="bg-muted/50">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Informasi Pembayaran
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
